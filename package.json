@@ -1,0 +1,88 @@
+{
+  "author": {
+    "name": "Michael S. Mikowski",
+    "email": "mike.mikowski@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/mmikowski/xuu/issues"
+  },
+  "deprecated": false,
+  "description": "Extraction of utility library from https://github.com/mmikowski/hi_score. Version tracks hi_score.",
+  "dependencies": {
+    "eslint": "5.7.0",
+    "eslint-plugin-json": "1.2.1",
+    "nodeunit": "0.11.3"
+  },
+  "devDependencies": {},
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended"
+    ],
+    "globals": {
+      "__dirname": true,
+      "__filename": true,
+      "$": true,
+      "clearTimeout": true,
+      "console": true,
+      "document": true,
+      "global": true,
+      "Image": true,
+      "localStorage": true,
+      "jQuery": true,
+      "module": true,
+      "process": true,
+      "Promise": true,
+      "require": true,
+      "setTimeout": true,
+      "window": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 6
+    },
+    "plugins": [
+      "json"
+    ],
+    "rules": {
+      "continue": "off",
+      "indent": "off",
+      "no-console": "off",
+      "one-var": [
+        "error",
+        {
+          "var": "always",
+          "let": "always",
+          "const": "always"
+        }
+      ],
+      "no-plusplus": "off"
+    }
+  },
+  "homepage": "https://github.com/mmikowski/xuu",
+  "keywords": [
+    "spa",
+    "library",
+    "libraries",
+    "single",
+    "page",
+    "web",
+    "application",
+    "end-to-end"
+  ],
+  "license": "MIT",
+  "main": "xuu",
+  "maintainers": [
+    {
+      "name": "Michael S. Mikowski",
+      "email": "mike.mikowski@gmail.com"
+    }
+  ],
+  "name": "xuu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmikowski/xuu.git"
+  },
+  "scripts": {
+    "test": "nodeunit ./nodeunit_xuu.js"
+  },
+  "version": "1.4.27"
+}
