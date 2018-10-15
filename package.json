@@ -8,12 +8,12 @@
   },
   "deprecated": false,
   "description": "Extraction of utility library from https://github.com/mmikowski/hi_score. Version tracks hi_score.",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "eslint": "5.7.0",
     "eslint-plugin-json": "1.2.1",
     "nodeunit": "0.11.3"
   },
-  "devDependencies": {},
   "eslintConfig": {
     "extends": [
       "eslint:recommended"
@@ -84,5 +84,5 @@
   "scripts": {
     "test": "nodeunit ./nodeunit_xuu.js"
   },
-  "version": "1.4.27"
+  "version": "1.4.27.1"
 }
