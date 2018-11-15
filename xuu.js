@@ -1942,11 +1942,26 @@ var xuu = (function () {
     // . END Public method /makeReplaceFn/
 
   // BEGIN Public method /makeRekeyMap/
-  // Purpose : Change all key names in a map to the new keys provided
+  // Purpose   : Change all key names in a map to the new keys provided
   //   in the key_map
-  // Example :
-  //   makeRekeyMap( { a:1, b:2, c:[] }, { a:'_x_', b: '_y_', c:'_z_' } )
-  //   returns { _x_:1, _y_:2, _z_:[] }
+  // Arguments :
+  //   arg_struct - A complex structure to rekey or revalue
+  //   key_map    - A key map pointing to values
+  //   mode_str   - 'rekey' or 'reval'
+  // Examples  :
+  //   makeRekeyMap(
+  //     { a:1, b:2, c:[] },
+  //     { a:'_x_', b: '_y_', c:'_z_' },
+  //     '_rekey_'
+  //   );
+  //   makeRekeyMap(
+  //     { a:1, b:2, list:[ { c:[] } ] },
+  //     { a:'_x_', b: '_y_', c:22 },
+  //     '_reval_'
+  //   );
+  //   returns { a:'_x_', b:'_y_', [ { c:22 } ] }
+
+
   // A hard limit of 100 000 iterations are supported.
   //   Executes deep renaming through arrays and objects.
   //
@@ -1965,14 +1980,17 @@ var xuu = (function () {
         key_idx       : 0
       } : null;
   }
-  function makeRekeyMap( arg_struct, arg_key_map ) {
+  function makeRekeyMap( arg_struct, arg_key_map, arg_mode_str ) {
     var
       context_obj = makeContextObj( arg_struct ),
+      mode_str    = xuu.castStr( arg_mode_str, '_rekey_', {
+       _filter_regex_ : /^(_rekey_|_reval_)$/
+      }),
       stack_list  = [],
  
       key_count, key_list, key_idx,
       source_struct, solve_struct,
-      key, data, replace_key,
+      key, data, replace_data,
       check_obj, pop_solve_struct, i
       ;
  
@@ -1983,11 +2001,9 @@ var xuu = (function () {
       source_struct = context_obj.source_struct;
       solve_struct  = context_obj.solve_struct;
  
-      key         = key_list[ key_idx ];
-      data        = source_struct[ key ];
-      replace_key = arg_key_map[ key ];
- 
-        if ( ! replace_key ) { replace_key = key; }
+      key          = key_list[ key_idx ];
+      data         = source_struct[ key ];
+      replace_data = arg_key_map[ key ];
  
       if ( pop_solve_struct ) {
         data = pop_solve_struct;
@@ -2001,8 +2017,16 @@ var xuu = (function () {
           continue CONTEXT;
         }
       }
- 
-      solve_struct[ replace_key ] = data;
+
+      if ( mode_str === '_reval_' ) {
+        if ( ! replace_data ) { replace_data = data; }
+        solve_struct[ key ] = replace_data;
+      }
+      else {
+        if ( ! replace_data ) { replace_data = key; }
+        solve_struct[ replace_data ] = data;
+      }
+
       key_idx++;
       context_obj.key_idx = key_idx;
       if ( key_idx >= key_count ) {
@@ -2014,7 +2038,13 @@ var xuu = (function () {
           break CONTEXT;
         }
       }
-      solve_struct[ replace_key ] = data;
+
+      if ( mode_str === '_reval_' ) {
+        solve_struct[ key ] = replace_data;
+      }
+      else {
+        solve_struct[ replace_data ] = data;
+      }
     }
     return context_obj.solve_struct;
   }

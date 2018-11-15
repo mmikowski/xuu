@@ -1855,7 +1855,12 @@ function makeRekeyMap ( test_obj ) {
   var
     assert_table  = [
       // [ arg_list, expect_data ]
-      [ [ {a:1, b:2, c:3}, { a: 'x', b: 'y', c: 'z'} ], {x:1, y:2, z:3} ]
+      [ [ {a:1, b:2, c:3}, { a: 'x', b: 'y', c: 'z'} ], {x:1, y:2, z:3} ],
+      [ [ {a:1, b:2, c:3}, { a: 'x', b: 'y', c: 'z'}, '_reval_' ], {a:'x', b:'y', c:'z'} ],
+      [ [ {a:1, b:2, l:[{c:'foo'}]}, { a: 'x', b: 'y', c: 'z'}, '_reval_' ],
+        {a:'x', b:'y', l:[{c:'z'}]} ],
+      [ [ {a:1, b:2, l:[{c:'foo'}]}, { a: 'x', b: 'y', c: 'z'}, '_rekey_' ],
+        {x:1, y:2, l:[{z:'foo'}]} ]
     ],
 
     assert_count = assert_table.length,
@@ -1864,7 +1869,6 @@ function makeRekeyMap ( test_obj ) {
     idx,        expect_list, arg_list,
     expect_map, solve_map,   msg_str
     ;
-
 
   test_obj.expect( assert_count );
 
@@ -1928,7 +1932,6 @@ function makeScrubStr ( test_obj ) {
     expect_str, solve_str,   msg_str
     ;
 
-
   test_obj.expect( assert_count );
 
   for ( idx = __0; idx < assert_count; idx++ ) {
@@ -1969,7 +1972,6 @@ function makeSeenMap ( test_obj ) {
 
     idx, expect_list, arg_list, expect_map, solve_map, msg_str
     ;
-
 
   test_obj.expect( assert_count );
   for ( idx = __0; idx < assert_count; idx++ ) {
@@ -2913,6 +2915,7 @@ function trimStrList ( test_obj ) {
     idx, expect_list, arg_list,
     expect_data, solve_data, msg_str
     ;
+
   test_obj.expect( assert_count );
   for ( idx = __0; idx < assert_count; idx++ ) {
     expect_list = assert_table[ idx ];
