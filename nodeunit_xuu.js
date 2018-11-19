@@ -88,7 +88,7 @@ function setLogLevel ( test_obj ) {
       + JSON.stringify( arg_list ) + '\n solve_str: ' + solve_str
       + '\n expect_str: ' + expect_str;
     test_obj.ok( solve_str === expect_str, msg_str );
-    test_obj.ok( log_obj.getLogLevel() === expect_str, msg_str );
+    test_obj.ok( log_obj.getLevelName() === expect_str, msg_str );
   }
   log_obj.logMsg( 'bogus', '_this_should_default_to_error_' );
   test_obj.ok( log_obj.logMsg() === __true, 'log on 0 arg' );
@@ -295,15 +295,15 @@ function clearMap ( test_obj ) {
     complex_obj = Object.create( proto ),
     assert_table = [
       // arg_list, expect_data
-      [ [ __1,        ], __undef ],
-      [ [ -694567,    ], __undef ],
-      [ [ __blank,    ], __undef ],
-      [ [ __null,     ], __undef ],
-      [ [ __undef,    ], __undef ],
-      [ [ 5.062e12,   ], __undef ],
-      [ [ __0,        ], __undef ],
-      [ [ /regex/,    ], __undef ],
-      [ [ 'string',   ], __undef ],
+      [ [ __1        ], __undef ],
+      [ [ -694567    ], __undef ],
+      [ [ __blank    ], __undef ],
+      [ [ __null     ], __undef ],
+      [ [ __undef    ], __undef ],
+      [ [ 5.062e12   ], __undef ],
+      [ [ __0        ], __undef ],
+      [ [ /regex/    ], __undef ],
+      [ [ 'string'   ], __undef ],
       [ [ [ 1,2,3 ]   ], __undef ],
       [ [ complex_obj ], proto   ],
       [ [ new Date()  ], __undef ],
@@ -1370,8 +1370,8 @@ function makeErrorObj ( test_obj ) {
       [ [ '_bad_data_', '_the_list_is_missing_' ],
         [ '_bad_data_', '_the_list_is_missing_', __undef ]
       ],
-      [ [ '_bad_data_', '_the_list_is_missing_', { is : __true } ],
-        [ '_bad_data_', '_the_list_is_missing_', { is : __true } ]
+      [ [ '_bad_data_', '_the_list_is_missing_', __undef ],
+        [ '_bad_data_', '_the_list_is_missing_', __undef ]
       ]
     ],
 

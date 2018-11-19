@@ -893,12 +893,14 @@ var xuu = (function () {
   // == BEGIN UTILITY OBJECTS =========================================
   // BEGIN define logObj singleton
   // Summary   :
-  //   logObj._setLogLevel_('_warn_');
-  //   logObj._logMsg_('_warn_', 'This will show');
-  //   logObj._logMsg_('_info_', 'This will not');
-  //   logObj._getLogLevel_(); // '_warn_'
+  //   logObj.setLogLevel_('_warn_');
   // Purpose   : Provide a log4j-style logging singleton
-  // Example   : See summary
+  // Example   :
+  //   logObj.setLogLevel_('_warn_');
+  //   logObj.logMsg('_warn_', 'This will show');
+  //   logObj.logMsg('_info_', 'This will not');
+  //   logObj.getLevelName();  // '_warn_'
+  //   logObj.getLevelIdx();   // 4
   // Arguments :
   //   Log level is based on syslog values and is one of
   //   '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'
@@ -907,7 +909,11 @@ var xuu = (function () {
   //   * logMsg( <log_level>, <message_str> ) - Log message string with
   //     <log_level> urgency. Messages with urgency below the threshold are
   //     not presented to the log.
-  //   * getLogLevel() - Return log level, e.g. '_warn_'.
+  //   * getLevelName() - Return log level, e.g. '_warn_'.
+  //   * getLevelIdx returns log level index. 0=emerg, 4=warn, 7=debug
+  //     This is provided so developers can see if the set log level
+  //     is more permissive than _error_ for example:
+  //     if ( logObj._getLevelIdx_() > 3 ) { ... }
   // Returns   : Varies
   // Throws    : none
   //
@@ -960,7 +966,12 @@ var xuu = (function () {
       return levelKey;
     }
 
-    function getLogLevel () { return levelKey; }
+      function getLevelName () { return levelKey; }
+      function getLevelIdx  () { return levelIdx; }
+      function getIdxByName ( arg_name ) {
+        var key = castStr( arg_name, '' );
+        return levelXIdxMap[ key ];
+      }
 
     // This follows syslog level conventions
     function logMsg () {
@@ -987,6 +998,7 @@ var xuu = (function () {
       if ( level_idx > levelIdx ) { return __false; }
 
       // Get caller information
+      /* istanbul ignore next */
       try {
         caller_list = (new Error()).stack.split(/[ ]*\n/);
         caller_str  = (caller_list[2] || __blank ).replace(/^[ ]*/g, '');
@@ -1007,7 +1019,7 @@ var xuu = (function () {
       // command can not handle more than a single argument or will not
       // allow the apply method (think: IE). We try our best...
       //
-      catch ( e ) {
+      catch ( e0 ) {
         try  {
           consoleRef[ command_str ]( arg_list[ __1 ] );
         }
@@ -1018,9 +1030,11 @@ var xuu = (function () {
     }
 
     return {
-      setLogLevel : setLogLevel,
-      getLogLevel : getLogLevel,
-      logMsg      : logMsg
+        getIdxByName : getIdxByName,
+        getLevelIdx  : getLevelIdx,
+        getLevelName : getLevelName,
+        logMsg       : logMsg,
+        setLogLevel  : setLogLevel
     };
   }());
   // . END define logObj singleton
@@ -1271,13 +1285,13 @@ var xuu = (function () {
   function getListValCount ( arg_list, arg_data ) {
     var
       input_list  = castList( arg_list, [] ),
-      input_count = input_list[ __length ],
+      end_idx     = input_list[ __length ] - __1,
       match_count = __0,
       idx;
 
-    for ( idx = input_count; idx; __0 ) {
+    for ( idx = end_idx; idx > __n1; idx-- ) {
       //noinspection IncrementDecrementResultUsedJS
-      if ( input_list[ --idx ] === arg_data ) { match_count++; }
+      if ( input_list[ idx ] === arg_data ) { match_count++; }
     }
     return match_count;
   }
@@ -1724,20 +1738,17 @@ var xuu = (function () {
   // Arguments :
   //   * name_text - the error name
   //   * msg_text  - long error message
-  //   * data      - optional data attached to error object
   // Returns   : newly constructed error object
   // Throws    : none
   //
-  function makeErrorObj ( arg_name, arg_msg, arg_data ) {
+  function makeErrorObj ( arg_name, arg_msg ) {
     var
       name = ( arg_name && __Str( arg_name ) ) || 'error',
       msg  = ( arg_msg  && __Str( arg_msg  ) ) || __blank,
-      data = arg_data || __undef,
       error_obj = new Error();
 
     error_obj.name    = name;
     error_obj.message = msg;
-    error_obj.data    = data;
     return error_obj;
   }
   // . END Public method /makeErrorObj/
@@ -1992,7 +2003,7 @@ var xuu = (function () {
   function makeRekeyMap( arg_struct, arg_key_map, arg_mode_str ) {
     var
       context_obj = makeContextObj( arg_struct ),
-      mode_str    = xuu.castStr( arg_mode_str, '_rekey_', {
+      mode_str    = castStr( arg_mode_str, '_rekey_', {
        _filter_regex_ : /^(_rekey_|_reval_)$/
       }),
       stack_list  = [],
