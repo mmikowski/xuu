@@ -908,13 +908,13 @@ var xuu = (function () {
   //     <log_level> urgency. Messages with urgency below the threshold are
   //     not presented to the log.
   //   * getLogLevel() - Return log level, e.g. '_warn_'.
-  // Returns   : void
+  // Returns   : Varies
   // Throws    : none
   //
   logObj = (function () {
     var
       levelXCmdMap = {
-        _emerg_  : 'error',
+        _emerg_  : 'trace',
         _alert_  : 'error',
         _crit_   : 'error',
         _error_  : 'error',
@@ -965,44 +965,53 @@ var xuu = (function () {
     // This follows syslog level conventions
     function logMsg () {
       var
-        arg_list  = makeArgList( arguments ),
-        level_key = castStr( arg_list[ __0 ], __blank ),
-        level_idx = levelXIdxMap[ level_key ],
-        arg_count = arg_list[ __length ],
+        arg_list    = makeArgList( arguments ),
+        level_key   = castStr( arg_list.shift(), __blank ),
+        level_idx   = levelXIdxMap[ level_key ],
+        command_str = levelXCmdMap[ level_key ],
 
-        level_cmd
-      ;
+        caller_list, caller_str
+        ;
 
-      if ( arg_count < __2 ) { return __false; }
-      if ( level_idx === __undef ) {
+      // Handle bad log level
+      if ( ! command_str ) {
         arg_list.unshift(
-          '_log_level_not_supported_:|' + level_key + '|'
+          '_log_level_key_not_found_ (' + level_key + ').'
         );
-
-        arg_list.shift();
         level_key = '_error_';
         level_idx = levelXIdxMap[ level_key ];
-        arg_list.unshift( level_key );
+        command_str   = levelXCmdMap[ level_key ]
       }
 
+      // Ignore if level of this log is below cutoff
       if ( level_idx > levelIdx ) { return __false; }
-      level_cmd = levelXCmdMap[ level_key ];
 
-      // Try to log the best we know how
-      //noinspection UnusedCatchParameterJS
-      /* istanbul ignore next */
+      // Get caller information
       try {
-        consoleRef[ level_cmd ][ __apply ]( consoleRef, arg_list );
+        caller_list = (new Error()).stack.split(/[ ]*\n/);
+        caller_str  = (caller_list[2] || __blank ).replace(/^[ ]*/g, '');
+        arg_list.unshift( caller_str );
       }
-        // The only problem that may cause a failure is if the log
-        // command can not handle more than a single argument or will not
-        // allow the apply method (think: IE). We try our best...
-        //
-        catch ( ignore_error0 ) {
+      catch(e) {
+        caller_list = [];
+      }
+
+      // Unshift level into args
+      arg_list.unshift( level_key );
+
+      // Try to log to console
+      try {
+        consoleRef[ command_str ][ __apply ]( consoleRef, arg_list );
+      }
+      // The only problem that may cause a failure is if the log
+      // command can not handle more than a single argument or will not
+      // allow the apply method (think: IE). We try our best...
+      //
+      catch ( e ) {
         try  {
-          consoleRef[ level_cmd ]( arg_list[ __1 ] );
+          consoleRef[ command_str ]( arg_list[ __1 ] );
         }
-          // Everything failed. We give up.
+        // Everything failed. We give up.
         catch ( e1 ) { return __false; }
       }
       return __true;
@@ -1971,7 +1980,7 @@ var xuu = (function () {
       key_count = key_list.length,
       solve_struct = __Array.isArray( arg_struct ) ? [] : {}
       ;
- 
+
     return key_count > 0 ? {
         source_struct : arg_struct,
         solve_struct  : solve_struct,
@@ -1987,24 +1996,24 @@ var xuu = (function () {
        _filter_regex_ : /^(_rekey_|_reval_)$/
       }),
       stack_list  = [],
- 
+
       key_count, key_list, key_idx,
       source_struct, solve_struct,
       key, data, replace_data,
       check_obj, pop_solve_struct, i
       ;
- 
+
     CONTEXT: for ( i = __0; i < 100000; i++ ) {
       key_count  = context_obj.key_count;
       key_idx    = context_obj.key_idx;
       key_list   = context_obj.key_list;
       source_struct = context_obj.source_struct;
       solve_struct  = context_obj.solve_struct;
- 
+
       key          = key_list[ key_idx ];
       data         = source_struct[ key ];
       replace_data = arg_key_map[ key ];
- 
+
       if ( pop_solve_struct ) {
         data = pop_solve_struct;
         pop_solve_struct = null;

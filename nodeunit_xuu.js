@@ -91,8 +91,8 @@ function setLogLevel ( test_obj ) {
     test_obj.ok( log_obj.getLogLevel() === expect_str, msg_str );
   }
   log_obj.logMsg( 'bogus', '_this_should_default_to_error_' );
-  test_obj.ok( log_obj.logMsg( 'bogus' ) === __false, 'no log on 1 arg' );
-  test_obj.ok( log_obj.logMsg() === __false, 'no log on 0 arg' );
+  test_obj.ok( log_obj.logMsg() === __true, 'log on 0 arg' );
+  test_obj.ok( log_obj.logMsg( 'bogus' ) === __true, 'log on 1 arg' );
 
   test_obj.done();
 }
