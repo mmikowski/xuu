@@ -1,5 +1,5 @@
 /*
- * xhi_level_0.js
+ * nodeunit_xu.js
  * @author Michael S. Mikowski - mike.mikowski@gmail.com
  *
  * Node unit test suite xuu
@@ -10,6 +10,11 @@
 'use strict';
 var
   __util = require('./xuu.js'),
+  vMap   = {
+    _apply_  : 'apply',
+    _concat_ : 'concat',
+    _push_   : 'push'
+  },
 
   __blank = '',
   __false = false,
@@ -72,7 +77,7 @@ function setLogLevel ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    log_obj      = __util.getLogObj(),
+    log_obj      = __util._getLogObj_(),
 
     idx,        expect_list, arg_list,
     expect_str, solve_str,   msg_str
@@ -83,16 +88,16 @@ function setLogLevel ( test_obj ) {
     expect_list = assert_table[ idx ];
     arg_list   = expect_list[ __0 ];
     expect_str = expect_list[ __1 ];
-    solve_str  = log_obj.setLogLevel.apply( __undef, arg_list );
+    solve_str  = log_obj._setLogLevel_.apply( __undef, arg_list );
     msg_str    = __Str( idx ) + '. arg_list: '
       + JSON.stringify( arg_list ) + '\n solve_str: ' + solve_str
       + '\n expect_str: ' + expect_str;
     test_obj.ok( solve_str === expect_str, msg_str );
-    test_obj.ok( log_obj.getLevelName() === expect_str, msg_str );
+    test_obj.ok( log_obj._getLevelName_() === expect_str, msg_str );
   }
-  log_obj.logMsg( 'bogus', '_this_should_default_to_error_' );
-  test_obj.ok( log_obj.logMsg() === __true, 'log on 0 arg' );
-  test_obj.ok( log_obj.logMsg( 'bogus' ) === __true, 'log on 1 arg' );
+  log_obj._logMsg_( 'bogus', '_this_should_default_to_error_' );
+  test_obj.ok( log_obj._logMsg_() === __true, 'log on 0 arg' );
+  test_obj.ok( log_obj._logMsg_( 'bogus' ) === __true, 'log on 1 arg' );
 
   test_obj.done();
 }
@@ -142,7 +147,7 @@ function castInt ( test_obj ) {
       [ [ new Date(), 'jeani' ],    'jeani' ]
     ],
     assert_count = assert_table.length,
-    test_fn      = __util.castInt,
+    test_fn      = __util._castInt_,
 
     msg_str,  idx,         expect_list,
     arg_list, expect_str,  solve_str
@@ -153,7 +158,7 @@ function castInt ( test_obj ) {
     expect_list = assert_table[ idx ];
     arg_list    = expect_list[ __0 ];
     expect_str  = expect_list[ __1 ];
-    solve_str   = test_fn.apply( __undef, arg_list );
+    solve_str   = test_fn[ vMap._apply_ ]( __undef, arg_list );
     msg_str = __Str( idx ) + '. arg_list: '
       + JSON.stringify( arg_list ) + '\n solve_str: ' + solve_str
       + '\n expect_str: ' + expect_str;
@@ -163,7 +168,7 @@ function castInt ( test_obj ) {
 }
 
 function castJQ ( test_obj ) {
-  var cast_jq = __util.castJQ;
+  var cast_jq = __util._castJQ_;
 
   test_obj.expect( 5 );
 
@@ -194,7 +199,7 @@ function castStr ( test_obj ) {
       [ [ new Date() ],             __undef ]
     ],
     assert_count = assert_table.length,
-    test_fn      = __util.castStr,
+    test_fn      = __util._castStr_,
 
     msg_str,  idx,         expect_list,
     arg_list, expect_str,  solve_str
@@ -205,7 +210,7 @@ function castStr ( test_obj ) {
     expect_list = assert_table[ idx ];
     arg_list    = expect_list[ __0 ];
     expect_str  = expect_list[ __1 ];
-    solve_str   = test_fn.apply( __undef, arg_list );
+    solve_str   = test_fn[ vMap._apply_ ]( __undef, arg_list );
     msg_str = __Str( idx ) + '. arg_list: '
       + JSON.stringify( arg_list ) + '\n solve_str: ' + solve_str
       + '\n expect_str: ' + expect_str;
@@ -268,7 +273,7 @@ function checkDateStr ( test_obj ) {
       [ [ { _date_str_ : '01/40/2016', _order_str_ : '_us_' } ],  __false ]
     ],
     assert_count = assert_table.length,
-    test_fn      = __util.checkDateStr,
+    test_fn      = __util._checkDateStr_,
 
     msg_str,  idx,      expect_list,
     arg_list, is_valid, expect_bool
@@ -279,7 +284,7 @@ function checkDateStr ( test_obj ) {
     expect_list = assert_table[ idx ];
     arg_list    = expect_list[ __0 ];
     expect_bool = expect_list[ __1 ];
-    is_valid    = test_fn.apply( __undef, arg_list );
+    is_valid    = test_fn[ vMap._apply_ ]( __undef, arg_list );
     msg_str = __Str( idx ) + '. arg_list: '
       + JSON.stringify( arg_list ) + '\n is_valid: ' + is_valid
       + '\n expect_val: ' + expect_bool;
@@ -317,7 +322,7 @@ function clearMap ( test_obj ) {
         { map : { this : 'that' } } ]
     ],
     assert_count = assert_table.length,
-    test_fn      = __util.clearMap,
+    test_fn      = __util._clearMap_,
 
     msg_str,  idx,         expect_list,
     arg_list, expect_data, solve_data
@@ -357,7 +362,7 @@ function cloneData ( test_obj ) {
       { a : 'complex', name_list : [ 'tim', 'bob' ], map: { this : 'that' } }
     ],
     assert_count = assert_table.length,
-    clone_fn     = __util.cloneData,
+    clone_fn     = __util._cloneData_,
 
     msg_str, idx, assert_data, cloned_data
     ;
@@ -412,7 +417,7 @@ function encodeHtml ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    encode_fn    = __util.encodeHtml,
+    encode_fn    = __util._encodeHtml_,
 
     idx, expect_list, arg_list, expect_str, solve_str, msg_str
     ;
@@ -422,7 +427,7 @@ function encodeHtml ( test_obj ) {
     expect_list = assert_table[ idx ];
     arg_list    = expect_list[ __0 ];
     expect_str  = expect_list[ __1 ];
-    solve_str   = encode_fn.apply( __undef, arg_list );
+    solve_str   = encode_fn[ vMap._apply_ ]( __undef, arg_list );
     msg_str     = __Str( idx ) + '. ' + solve_str + ' === ' + expect_str;
     test_obj.ok( solve_str === expect_str, msg_str );
   }
@@ -446,8 +451,8 @@ function getBasename ( test_obj ) {
       [ [ ':colon:word',   ':' ], 'word', ':colon:' ]
     ],
     assert_count = assert_table.length,
-    basename_fn  = __util.getBasename,
-    dirname_fn   = __util.getDirname,
+    basename_fn  = __util._getBasename_,
+    dirname_fn   = __util._getDirname_,
 
     idx, expect_list, arg_list, expect_basename, expect_dirname,
     msg_str, solve_basename, solve_dirname
@@ -491,7 +496,7 @@ function extendList ( test_obj ) {
       [ [ [ {}, [] ], [ {}, 'alpha' ] ], [{},[],{},'alpha'] ]
     ],
     assert_count = assert_table.length,
-    extend_fn    = __util.extendList,
+    extend_fn    = __util._extendList_,
 
     idx, expect_list, arg_list, msg_str,
     solve_data, expect_data
@@ -540,7 +545,7 @@ function getStructData ( test_obj ) {
       [ [ deepest_map, deepest_list ], __undef ]
     ],
     assert_count = assert_table.length,
-    deep_fn      = __util.getStructData,
+    deep_fn      = __util._getStructData_,
 
     idx,         expect_list, arg_list,
     expect_data, solve_data,  msg_str,
@@ -551,7 +556,7 @@ function getStructData ( test_obj ) {
   walk_map = deepest_map;
   for ( idx = __0; idx < 102; idx++ ) {
     walk_key = 'foo' + __Str( idx );
-    deepest_list.push( walk_key );
+    deepest_list[ vMap._push_ ]( walk_key );
 
     walk_map[ walk_key ] = {};
     walk_map = walk_map[ walk_key ];
@@ -593,8 +598,8 @@ function getListAttrIdx ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    get_idx_fn   = __util.getListAttrIdx,
-    get_map_fn   = __util.getListAttrMap,
+    get_idx_fn   = __util._getListAttrIdx_,
+    get_map_fn   = __util._getListAttrMap_,
     check_count  = __0,
 
     idx,          expect_list,  arg_list,
@@ -657,7 +662,7 @@ function getListDiff ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    get_diff_fn   = __util.getListDiff,
+    get_diff_fn   = __util._getListDiff_,
 
     idx, expect_list, arg_list, expect_data, solve_data, msg_str
     ;
@@ -700,7 +705,7 @@ function getListValCount ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    get_count_fn = __util.getListValCount,
+    get_count_fn = __util._getListValCount_,
 
     idx,          expect_list,   arg_list,
     expect_data,  solve_data,    msg_str
@@ -723,7 +728,7 @@ function getListValCount ( test_obj ) {
 
 function getNowMs ( test_obj ) {
   var
-    now_ms = __util.getNowMs(),
+    now_ms = __util._getNowMs_(),
     rx     = /^[\d]{13}$/;
 
   test_obj.expect( __1 );
@@ -748,7 +753,7 @@ function getNumSign ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    get_sign_fn   = __util.getNumSign,
+    get_sign_fn   = __util._getNumSign_,
 
     idx,        expect_list,  arg_list,
     expect_int, solve_int,    msg_str
@@ -770,7 +775,7 @@ function getNumSign ( test_obj ) {
 }
 
 function getTzCode ( test_obj ) {
-  var tz_code = __util.getTzCode();
+  var tz_code = __util._getTzCode_();
   test_obj.expect( __1 );
 
   // eslint-disable-next-line no-useless-escape
@@ -802,7 +807,7 @@ function getVarType ( test_obj ) {
     str2  = new os(),
     d_obj = new Date(),
 
-    get_type_fn = __util.getVarType;
+    get_type_fn = __util._getVarType_;
 
   test_obj.expect( 12 );
 
@@ -894,7 +899,7 @@ function makeArgList ( test_obj ) {
 
     assert_count = assert_table.length,
     make_list_fn  = function () {
-      return __util.makeArgList( arguments );
+      return __util._makeArgList_( arguments );
     },
 
     idx, expect_list, solve_list, msg_str
@@ -943,7 +948,7 @@ function makeClockStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn   = __util.makeClockStr,
+    make_str_fn   = __util._makeClockStr_,
 
     idx, expect_list, arg_list, expect_str, solve_str, msg_str
     ;
@@ -987,7 +992,7 @@ function makeCommaNumStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeCommaNumStr,
+    make_str_fn  = __util._makeCommaNumStr_,
 
     idx, expect_list, arg_map, expect_str, solve_str, msg_str
     ;
@@ -1110,7 +1115,7 @@ function makeDateStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn   = __util.makeDateStr,
+    make_str_fn   = __util._makeDateStr_,
 
     idx, expect_list, arg_map, tmp_obj,
     expect_str, solve_str, msg_str
@@ -1148,11 +1153,11 @@ function makeDebounce01Fn ( test_obj ) {
     curry_fn;
 
   test_obj.expect( 2 );
-  curry_fn = __util.makeDebounceFn();
+  curry_fn = __util._makeDebounceFn_();
 
   test_obj.ok( curry_fn === __undef );
 
-  curry_fn = __util.makeDebounceFn({
+  curry_fn = __util._makeDebounceFn_({
     _fn_ : run_fn,
     _do_asap_  : __true,
     _delay_ms_ : 10
@@ -1170,7 +1175,7 @@ function makeDebounce02Fn ( test_obj ) {
     run_fn = function () { test_idx++; },
     curry_fn;
 
-  curry_fn = __util.makeDebounceFn({
+  curry_fn = __util._makeDebounceFn_({
     _fn_ : run_fn,
     _do_asap_  : __false,
     _delay_ms_ : 10
@@ -1194,7 +1199,7 @@ function makeDebounce03Fn ( test_obj ) {
     ctx_map = { str : 'hi there' },
     curry_fn;
 
-  curry_fn = __util.makeDebounceFn({
+  curry_fn = __util._makeDebounceFn_({
     _fn_       : __run03Fn,
     _ctx_data_ : ctx_map,
     _do_asap_  : __true,
@@ -1210,13 +1215,13 @@ function makeDebounce03Fn ( test_obj ) {
 }
 
 function __run04Fn () {
-  this._list_ = __util.makeArgList( arguments );
+  this._list_ = __util._makeArgList_( arguments );
 }
 
 function makeDebounce04Fn ( test_obj ) {
   var ctx_map = {}, curry_fn;
 
-  curry_fn = __util.makeDebounceFn({
+  curry_fn = __util._makeDebounceFn_({
     _fn_       : __run04Fn,
     _ctx_data_ : ctx_map,
     _do_asap_  : __false,
@@ -1329,7 +1334,7 @@ function makeEllipsisStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn   = __util.makeEllipsisStr,
+    make_str_fn   = __util._makeEllipsisStr_,
 
     idx, expect_list, arg_map, expect_str, solve_str, msg_str
     ;
@@ -1377,7 +1382,7 @@ function makeErrorObj ( test_obj ) {
 
     key_count    = key_list.length,
     assert_count = assert_table.length,
-    make_fn      = __util.makeErrorObj,
+    make_fn      = __util._makeErrorObj_,
     test_count   = __0,
 
     idx, expect_list, arg_list, expect_obj, solve_obj,
@@ -1421,7 +1426,7 @@ function makeEscRxStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeEscRxStr,
+    make_str_fn  = __util._makeEscRxStr_,
 
     idx, expect_list, arg_list, expect_str,
     solve_str, msg_str
@@ -1464,7 +1469,7 @@ function makeExtractMap ( test_obj ) {
         { a_str : 'hello', foo : __undef } ]
     ],
     assert_count = assert_table.length,
-    extract_fn    = __util.makeExtractMap,
+    extract_fn    = __util._makeExtractMap_,
 
     idx, expect_list, arg_list, msg_str,
     solve_data, expect_data
@@ -1487,7 +1492,7 @@ function makeGuidStr ( test_obj ) {
   var
     seen_map     = {},
     assert_count = 100,
-    make_str_fn  = __util.makeGuidStr,
+    make_str_fn  = __util._makeGuidStr_,
     guid_rx      = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/,
     idx, solve_str;
 
@@ -1504,10 +1509,10 @@ function makeGuidStr ( test_obj ) {
 }
 function makeMapUtilObj ( test_obj ) {
   var
-    map_util_obj = __util.makeMapUtilObj(),
+    map_util_obj = __util._makeMapUtilObj_(),
     arg_list   = [ [ 'cows', 'donkeys', 'sheep' ] ],
     field_list = [ 'moo', 'garaaah', 'bahbah' ],
-    clone_list = __util.cloneData( field_list ),
+    clone_list = __util._cloneData_( field_list ),
     map_fn   = function ( field_data, idx, list, arg_list ) {
       var
         name_list  = arg_list[  __0 ],
@@ -1523,18 +1528,18 @@ function makeMapUtilObj ( test_obj ) {
 
   test_obj.expect( 5 );
 
-  field_list.map( map_util_obj.invokeFn );
+  field_list.map( map_util_obj._invokeFn_ );
   test_obj.deepEqual( field_list, clone_list );
 
-  map_util_obj.setArgList(     arg_list );
-  map_util_obj.setMapFn(         map_fn );
-  map_util_obj.setResultMap( result_map );
+  map_util_obj._setArgList_(     arg_list );
+  map_util_obj._setMapFn_(         map_fn );
+  map_util_obj._setResultMap_( result_map );
 
-  test_obj.deepEqual( map_util_obj.getArgList(),   arg_list,   'check' );
-  test_obj.deepEqual( map_util_obj.getMapFn(),     map_fn,     'check' );
-  test_obj.deepEqual( map_util_obj.getResultMap(), result_map, 'check' );
+  test_obj.deepEqual( map_util_obj._getArgList_(),   arg_list,   'check' );
+  test_obj.deepEqual( map_util_obj._getMapFn_(),     map_fn,     'check' );
+  test_obj.deepEqual( map_util_obj._getResultMap_(), result_map, 'check' );
 
-  field_list.map( map_util_obj.invokeFn );
+  field_list.map( map_util_obj._invokeFn_ );
   test_obj.deepEqual( result_map,
     { cows : 'moo', donkeys : 'garaaah', sheep : 'bahbah'}
   );
@@ -1574,7 +1579,7 @@ function makeMetricStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeMetricStr,
+    make_str_fn  = __util._makeMetricStr_,
 
     idx,        expect_list, arg_list,
     expect_str, solve_str,   msg_str
@@ -1630,7 +1635,7 @@ function makeOptionHtml ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeOptionHtml,
+    make_str_fn  = __util._makeOptionHtml_,
 
     idx,        expect_list, arg_map,
     expect_str, solve_str,   msg_str
@@ -1681,7 +1686,7 @@ function makePadNumStr ( test_obj ) {
       [ [ '-025',   5  ], '-0025'  ]
     ],
     assert_count = assert_table.length,
-    make_str_fn  = __util.makePadNumStr,
+    make_str_fn  = __util._makePadNumStr_,
 
     idx, expect_list, arg_list, expect_str,
     solve_str, msg_str
@@ -1725,7 +1730,7 @@ function makePctStr ( test_obj ) {
       [ [ (2/3),   __0  ], '67%'      ]
     ],
     assert_count = assert_table.length,
-    make_str_fn  = __util.makePctStr,
+    make_str_fn  = __util._makePctStr_,
 
     idx, expect_list, arg_list, expect_str, solve_str, msg_str
     ;
@@ -1779,7 +1784,7 @@ function makeRadioHtml ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeRadioHtml,
+    make_str_fn  = __util._makeRadioHtml_,
 
     idx,        expect_list, arg_map,
     expect_str, solve_str,   msg_str
@@ -1835,7 +1840,7 @@ function makeReplaceFn ( test_obj ) {
     arg_list     = expect_list[ __0 ];
     expect1_str  = expect_list[ __1 ];
     expect2_str  = expect_list[ __2 ];
-    make_str_fn  = __util.makeReplaceFn.apply( __undef, arg_list );
+    make_str_fn  = __util._makeReplaceFn_.apply( __undef, arg_list );
 
     solve1_str = make_str_fn( tmplt1_str );
     msg_str    = __Str( test_count ) + '. '
@@ -1864,7 +1869,7 @@ function makeRekeyMap ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_map_fn  = __util.makeRekeyMap,
+    make_map_fn  = __util._makeRekeyMap_,
 
     idx,        expect_list, arg_list,
     expect_map, solve_map,   msg_str
@@ -1926,7 +1931,7 @@ function makeScrubStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn   = __util.makeScrubStr,
+    make_str_fn   = __util._makeScrubStr_,
 
     idx,        expect_list, arg_list,
     expect_str, solve_str,   msg_str
@@ -1968,7 +1973,7 @@ function makeSeenMap ( test_obj ) {
         {red:data_map,green:data_map,blue:data_map} ]
     ],
     assert_count = assert_table.length,
-    make_map_fn  = __util.makeSeenMap,
+    make_map_fn  = __util._makeSeenMap_,
 
     idx, expect_list, arg_list, expect_map, solve_map, msg_str
     ;
@@ -2229,7 +2234,7 @@ function makeSeriesMap ( test_obj ) {
     delta_count    = delta_list.length,
     expect_count   = __0,
     interval_count = interval_list.length,
-    make_map_fn    = __util.makeSeriesMap,
+    make_map_fn    = __util._makeSeriesMap_,
 
     delta_idx, delta_ms, interval_idx, interval_int,
     date_obj, tz_offset_ms,
@@ -2367,7 +2372,7 @@ function makeStrFromMap ( test_obj ) {
       }, 'fff === Wilma | isss === 48' ]
     ],
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeStrFromMap,
+    make_str_fn  = __util._makeStrFromMap_,
 
     idx, expect_list, arg_map, expect_str, solve_str, msg_str
     ;
@@ -2390,11 +2395,11 @@ function makeThrottle01Fn ( test_obj ) {
   var idx = __0, curry_fn;
 
   test_obj.expect( 3 );
-  curry_fn = __util.makeThrottleFn();
+  curry_fn = __util._makeThrottleFn_();
 
   test_obj.ok( curry_fn === __undef );
 
-  curry_fn = __util.makeThrottleFn({
+  curry_fn = __util._makeThrottleFn_({
     _fn_       : function () { idx++; },
     _do_asap_  : __false,
     _delay_ms_ : 10
@@ -2461,7 +2466,7 @@ function makeTmpltStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeTmpltStr,
+    make_str_fn  = __util._makeTmpltStr_,
 
     idx, expect_list, arg_map, expect_str, solve_str, msg_str
     ;
@@ -2493,7 +2498,7 @@ function makeUcFirstStr ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    make_str_fn  = __util.makeUcFirstStr,
+    make_str_fn  = __util._makeUcFirstStr_,
 
     idx, expect_list, arg_map, expect_str, solve_str, msg_str
     ;
@@ -2528,7 +2533,7 @@ function safeJsonParse ( test_obj ) {
       [ [ '<h4>', {} ],      {} ]
     ],
     assert_count = assert_table.length,
-    parse_fn     = __util.safeJsonParse,
+    parse_fn     = __util._safeJsonParse_,
 
     idx, expect_list, arg_list,
     expect_data, solve_data, msg_str
@@ -2538,7 +2543,7 @@ function safeJsonParse ( test_obj ) {
 
   for ( idx = __0; idx < assert_count; idx++ ) {
     expect_list  = assert_table[ idx ];
-    arg_list     = __util.cloneData( expect_list[ __0 ] );
+    arg_list     = __util._cloneData_( expect_list[ __0 ] );
     expect_data  = expect_list[ __1 ];
     solve_data   = parse_fn.apply( __undef, arg_list );
     msg_str      = __Str( idx ) + '. arg_list: '
@@ -2599,7 +2604,7 @@ function mergeMaps ( test_obj ) {
     ],
 
     assert_count  = assert_table.length,
-    merge_maps_fn = __util.mergeMaps,
+    merge_maps_fn = __util._mergeMaps_,
 
     idx, expect_list, arg_list,
     expect_map, solve_map, msg_str
@@ -2608,7 +2613,7 @@ function mergeMaps ( test_obj ) {
   test_obj.expect( assert_count );
   for ( idx = __0; idx < assert_count; idx++ ) {
     expect_list = assert_table[ idx ];
-    arg_list    = __util.cloneData( expect_list[ __0 ] );
+    arg_list    = __util._cloneData_( expect_list[ __0 ] );
     expect_map  = expect_list[ __1 ];
     solve_map   = merge_maps_fn.apply( __undef, arg_list );
     msg_str = __Str( idx ) + '. arg_list: '
@@ -2642,7 +2647,7 @@ function pushUniqListVal ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    push_uniq_fn = __util.pushUniqListVal,
+    push_uniq_fn = __util._pushUniqListVal_,
 
     idx, jdx,     val_list,     val_count,
     expect_list,  expect_data,  solve_list,
@@ -2702,7 +2707,7 @@ function rmListVal ( test_obj ) {
     ],
 
     assert_count = assert_table.length,
-    rm_val_fn    = __util.rmListVal,
+    rm_val_fn    = __util._rmListVal_,
 
     idx,          expect_list,  arg_list,
     expect_data,  expect_count, solve_list,
@@ -2740,9 +2745,9 @@ function pollFunction ( test_obj ) {
     };
 
   test_obj.expect( __3 );
-  test_obj.ok( ! __util.pollFunction ( __undef, __0, 29, finish_fn ),
+  test_obj.ok( ! __util._pollFunction_ ( __undef, __0, 29, finish_fn ),
     'no fn should fail ' );
-  test_obj.ok( __util.pollFunction( test_fn, __0, 4, finish_fn ),
+  test_obj.ok( __util._pollFunction_( test_fn, __0, 4, finish_fn ),
     'proper call should return true.' );
 }
 
@@ -2787,7 +2792,7 @@ function setStructData ( test_obj ) {
     ],
 
     assert_count  = assert_table.length,
-    set_deep_fn = __util.setStructData,
+    set_deep_fn = __util._setStructData_,
 
     idx, expect_list, arg_list,
     expect_data, solve_data, msg_str
@@ -2796,7 +2801,7 @@ function setStructData ( test_obj ) {
   test_obj.expect( assert_count );
   for ( idx = __0; idx < assert_count; idx++ ) {
     expect_list = assert_table[ idx ];
-    arg_list    = __util.cloneData( expect_list[ __0 ] );
+    arg_list    = __util._cloneData_( expect_list[ __0 ] );
     expect_data = expect_list[ __1 ];
     solve_data  = arg_list[ __0 ];
     set_deep_fn.apply( __undef, arg_list );
@@ -2831,7 +2836,7 @@ function shuffleList ( test_obj ) {
 
     assert_count  = assert_table.length,
     expect_count  = assert_count + 2,
-    shuffle_fn    = __util.shuffleList,
+    shuffle_fn    = __util._shuffleList_,
     test_idx      = __0,
 
     idx,         expect_list, arg_list,
@@ -2851,7 +2856,7 @@ function shuffleList ( test_obj ) {
     arg_list     = expect_list[ __0 ];
     expect_bool  = expect_list[ __1 ];
     orig_list    = arg_list[ __0 ];
-    clone_list   = __util.cloneData( orig_list );
+    clone_list   = __util._cloneData_( orig_list );
     solve_bool   = shuffle_fn.apply( __undef, arg_list );
 
     msg_str = __Str( test_idx ) + '. arg_list: '
@@ -2910,7 +2915,7 @@ function trimStrList ( test_obj ) {
     ],
 
     assert_count  = assert_table.length,
-    trim_fn       = __util.trimStrList,
+    trim_fn       = __util._trimStrList_,
 
     idx, expect_list, arg_list,
     expect_data, solve_data, msg_str

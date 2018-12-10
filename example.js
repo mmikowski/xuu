@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 const 
-  xuu      = require( './xuu' ),
-  logObj   = xuu.getLogObj(),
-  logMsgFn = logObj.logMsg
+  xuuObj   = require( './xuu' ),
+  logObj   = xuuObj._getLogObj_(),
+  logMsgFn = logObj._logMsg_
   ;
 
-//   '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'
-logObj.setLogLevel( '_warn_' );
+// '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'
+logObj._setLogLevel_( '_warn_' );
 
 function main () {
   logMsgFn( '_emerg_',  'Level 0 Emergency' );

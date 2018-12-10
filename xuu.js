@@ -14,11 +14,26 @@ var xuu = (function () {
   // == BEGIN MODULE SCOPE VARIABLES ==================================
   'use strict';
   var
+    vMap = {
+      _concat_ : 'concat',
+      _filter_ : 'filter',
+      _map_    : 'map',
+      _splice_ : 'splice',
+      _substr_ : 'substr',
+      _toFixed_: 'toFixed',
+      _trim_   : 'trim'
+    },
+    nMap = {
+      __5 : 5,
+      __6 : 6,
+      __7 : 7
+    },
     __data2strFn  = JSON.stringify,
     __str2DataFn  = JSON.parse,
 
     __Array   = Array,
     __Date    = Date,
+    __Math    = Math,
     __Num     = Number,
     __Str     = String,
 
@@ -180,7 +195,7 @@ var xuu = (function () {
     }
     else {
       if ( option_map._do_warn_ ) {
-        logObj.logMsg( '_warn_', 'Int fails constraints', log_list );
+        logObj._logMsg_( '_warn_', 'Int fails constraints', log_list );
       }
       solve_data = alt_data;
     }
@@ -229,13 +244,13 @@ var xuu = (function () {
 
   // BEGIN Public prereq method /castJQ/
   // Summary   : castJQ( <data>, <alt_data> )
-  // Purpose   : Cast a jQuery object
+  // Purpose   : Cast a jQuery (xhiJQ) object
   // Example   : castJQ( $top_box ); // returns $top_box
   // Arguments : (positional)
-  //   <data>     - data to cast as jQuery object
+  //   <data>     - data to cast as xhiJQ object
   //   <alt_data> - alternate value to return
   // Returns   :
-  //   <data> if it is a jQuery object, <alt_data> otherwise
+  //   <data> if it is a xhiJQ object, <alt_data> otherwise
   // Throws    : none
   //
   function castJQ ( data, alt_data ) {
@@ -292,7 +307,7 @@ var xuu = (function () {
       if ( option_map._min_length_
         && item_count < option_map._min_length_
       ) {
-        log_list.push(
+        log_list[ __push ](
           'List is below minimum length: ' + __Str( item_count )
           + ' < ' + __Str( log_list._min_length_ )
         );
@@ -300,7 +315,7 @@ var xuu = (function () {
 
       if ( log_list[ __length ] > __0 ) {
         if ( option_map._do_warn_ ) {
-          logObj.logMsg( '_warn_', 'List fails constraints', log_list );
+          logObj._logMsg_( '_warn_', 'List fails constraints', log_list );
         }
         return alt_data;
       }
@@ -443,7 +458,7 @@ var xuu = (function () {
       if ( option_map._filter_regex_
         && ! option_map._filter_regex_.test( solve_str )
       ) {
-        log_list.push(
+        log_list[ __push ](
           'String does not pass regex filter: '
           + option_map._filter_regex_[ __toString ]()
         );
@@ -451,7 +466,7 @@ var xuu = (function () {
 
       if ( log_list[ __length ] > __0 ) {
         if ( option_map._do_warn_ ) {
-          logObj.logMsg( '_warn_', 'List fails constraints', log_list );
+          logObj._logMsg_( '_warn_', 'List fails constraints', log_list );
         }
         return alt_data;
       }
@@ -874,7 +889,7 @@ var xuu = (function () {
         ? raw_str[ __replace ]( configMap._tag_end_rx_, ' ' )
         : raw_str;
 
-    interm_str = interm_str.trim();
+    interm_str = interm_str[ vMap._trim_ ]();
     return interm_str[ __replace ]( configMap._tag_rx_, __blank );
   }
   // . END Public prereq method /makeScrubStr/
@@ -885,7 +900,7 @@ var xuu = (function () {
       str    = castStr( arg_str, __blank ),
       uc_str = str.charAt( __0 ).toUpperCase()
     ;
-    return uc_str + str.substr( __1 );
+    return uc_str + str[ vMap._substr_ ]( __1 );
   }
   // . END Public prereq method /makeUcFirstStr/
   // == . END PREREQ METHODS ==========================================
@@ -935,9 +950,9 @@ var xuu = (function () {
         _crit_   : __2,
         _error_  : __3,
         _warn_   : __4,
-        _notice_ : 5,
-        _info_   : 6,
-        _debug_  : 7
+          _notice_ : nMap._5_,
+          _info_   : nMap._6_,
+          _debug_  : nMap._7_
       },
 
       levelKey = '_warn_',
@@ -1030,11 +1045,11 @@ var xuu = (function () {
     }
 
     return {
-        getIdxByName : getIdxByName,
-        getLevelIdx  : getLevelIdx,
-        getLevelName : getLevelName,
-        logMsg       : logMsg,
-        setLogLevel  : setLogLevel
+      _getIdxByName_ : getIdxByName,
+      _getLevelIdx_  : getLevelIdx,
+      _getLevelName_ : getLevelName,
+      _logMsg_       : logMsg,
+      _setLogLevel_  : setLogLevel
     };
   }());
   // . END define logObj singleton
@@ -1267,17 +1282,17 @@ var xuu = (function () {
       list_1, list_2
     ;
 
-    list_1 = first_list.filter(
+    list_1 = first_list[ vMap._filter_ ](
       function ( data ) {
         return second_list[ __indexOf ]( data ) === __n1;
       }
     );
-    list_2 = second_list.filter(
+    list_2 = second_list[ vMap._filter_ ](
       function ( data ) {
         return first_list[ __indexOf ]( data ) === __n1;
       }
     );
-    return list_1.concat( list_2 );
+    return list_1[ vMap._concat_ ]( list_2 );
   }
   // . END Public method /getListDiff/
 
@@ -1325,7 +1340,7 @@ var xuu = (function () {
     ;
 
     if ( key_count > __100 ) {
-      logObj.logMsg( '_warn_', '_maximum_recursion_limit_' );
+      logObj._logMsg_( '_warn_', '_maximum_recursion_limit_' );
       return __undef;
     }
 
@@ -1485,8 +1500,8 @@ var xuu = (function () {
       round_unit_str  = castStr( map._round_unit_str_,  'k' ),
       round_dec_count = castInt( map._round_dec_count_, __1 ),
 
-      round_limit_num = Math.pow( __10, round_limit_exp  ),
-      round_unit_num  = Math.pow( __10, round_unit_exp   ),
+      round_limit_num = __Math.pow( __10, round_limit_exp  ),
+      round_unit_num  = __Math.pow( __10, round_unit_exp   ),
 
       solve_suffix = __blank,
 
@@ -1496,7 +1511,7 @@ var xuu = (function () {
     if ( __makeAbsNumFn( input_num ) >= round_limit_num ) {
       solve_num    = input_num / round_unit_num;
       solve_suffix = round_unit_str;
-      solve_str    = solve_num.toFixed( round_dec_count );
+      solve_str    = solve_num[ vMap._toFixed_]( round_dec_count );
     }
     else {
       solve_str = __Str( input_num );
@@ -1759,7 +1774,7 @@ var xuu = (function () {
     function makePart () {
       //noinspection NonShortCircuitBooleanExpressionJS,MagicNumberJS
       return ((( __1+__makeRandomNumFn() ) * 0x10000 )|__0
-      )[ __toString ](16).substr( __1 );
+        )[ __toString ](16)[ vMap._substr_ ]( __1 );
     }
     /*jslint bitwise: false*/
 
@@ -1780,7 +1795,7 @@ var xuu = (function () {
   // 1. Create a map_util object:
   //    | var map_util_obj = makeMapUtilObj();
   // 2. (optional) Set any data your map function will use.
-  //    | map_util_obj.setArgList = [ name_list ];
+  //    | map_util_obj._setArgList_ = [ name_list ];
   // 3. Create a function that for element of the array.
   //    The arg_list provided is set in step 2:
   //    | function mapUtil_renameFn ( field_data, idx, list, arg_list ) {
@@ -1795,12 +1810,12 @@ var xuu = (function () {
   //    |   return [ field_key, field_str ];
   //    | }
   // 4. Set the function in the utility
-  //    | map_util_obj.setMapFn( mapUtil_renameFn );
+  //    | map_util_obj._setMapFn_( mapUtil_renameFn );
   // 5. Initialize the result map. You need this pointer.
   //    | result_map = {};
-  //    | map_util_obj.setResultMap( result_map );
+  //    | map_util_obj._setResultMap_( result_map );
   // 6. Invoke the map function:
-  //    | my_list.map( map_util_obj.invokeFn );
+  //    | my_list.map( map_util_obj._invokeFn_ );
   // 7. result_map will now contain the key value pairs return by
   //    mapUtil_renameFn for the provided list.
   //
@@ -1832,13 +1847,13 @@ var xuu = (function () {
     }
 
     return {
-      getArgList   : getArgList,
-      getMapFn     : getMapFn,
-      getResultMap : getResultMap,
-      invokeFn     : invokeFn,
-      setArgList   : setArgList,
-      setMapFn     : setMapFn,
-      setResultMap : setResultMap
+      _getArgList_   : getArgList,
+      _getMapFn_     : getMapFn,
+      _getResultMap_ : getResultMap,
+      _invokeFn_     : invokeFn,
+      _setArgList_   : setArgList,
+      _setMapFn_     : setMapFn,
+      _setResultMap_ : setResultMap
     };
   }
   // . END Public method /makeMapUtilObj/
@@ -1895,7 +1910,7 @@ var xuu = (function () {
     ;
 
     count = count < __0 ? __0 : __makeFloorNumFn( count );
-    return ( ratio * __100 ).toFixed( count ) + '%';
+      return ( ratio * __100 )[ vMap._toFixed_ ]( count ) + '%';
   }
   // . END Public method /makePctStr/
 
@@ -1980,8 +1995,7 @@ var xuu = (function () {
   //     '_reval_'
   //   );
   //   returns { a:'_x_', b:'_y_', [ { c:22 } ] }
-
-
+  //
   // A hard limit of 100 000 iterations are supported.
   //   Executes deep renaming through arrays and objects.
   //
@@ -2018,6 +2032,7 @@ var xuu = (function () {
       key_count  = context_obj.key_count;
       key_idx    = context_obj.key_idx;
       key_list   = context_obj.key_list;
+
       source_struct = context_obj.source_struct;
       solve_struct  = context_obj.solve_struct;
 
@@ -2032,7 +2047,7 @@ var xuu = (function () {
       else if ( typeof data === 'object' ) {
         check_obj = makeContextObj( data );
         if ( check_obj ) {
-          stack_list.push( context_obj );
+          stack_list[ __push ]( context_obj );
           context_obj = check_obj;
           continue CONTEXT;
         }
@@ -2382,7 +2397,7 @@ var xuu = (function () {
     _KEY_: for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
       if ( attr_list && attr_list[ __indexOf ]( key ) === __n1 ) {
-        logObj.logMsg(
+        logObj._logMsg_(
           '_warn_', '_key_not_supported_:|' + __Str( key ) + '|'
         );
         continue _KEY_;
@@ -2454,7 +2469,7 @@ var xuu = (function () {
 
     for ( idx = input_count; idx; __0 ) {
       if ( input_list[ --idx ] === arg_data ) {
-        input_list.splice( idx, __1 );
+        input_list[ vMap._splice_ ]( idx, __1 );
         rm_count++;
         idx++;
       }
@@ -2487,7 +2502,7 @@ var xuu = (function () {
       key_list, key_count, idx, key_name;
 
     if ( ! (  input_map && settable_map && config_map ) ) {
-      return logObj.logMsg( '_error_', '_bad_input_' );
+      return logObj._logMsg_( '_error_', '_bad_input_' );
     }
     key_list  = __makeKeyListFn( input_map );
     key_count = key_list.length;
@@ -2498,7 +2513,7 @@ var xuu = (function () {
         config_map[ key_name ] = input_map[ key_name ];
       }
       else {
-        logObj.logMsg( '_warn_', '_key_not_supported_', key_name )
+        logObj._logMsg_( '_warn_', '_key_not_supported_', key_name )
       }
     }
     return config_map;
@@ -2628,11 +2643,11 @@ var xuu = (function () {
 
     function mapFn ( data ) {
       return getVarType( data ) === '_String_'
-        ? data.trim() : data;
+        ? data[ vMap._trim_ ]() : data;
     }
 
     if ( ! list ) { return arg_list; }
-    return list.map( mapFn );
+    return list[ vMap._map_ ]( mapFn );
   }
   // . END utility /trimStrList/
 
@@ -2721,77 +2736,82 @@ var xuu = (function () {
   initModuleFn();
   // . END initialize module
 
-
+  // noinspection JSUnusedGlobalSymbols
   return {
-    getVarType      : getVarType,
+    _getVarType_      : getVarType,
 
-    castBool        : castBool,
-    castFn          : castFn,
-    castInt         : castInt,
-    castJQ          : castJQ,
-    castList        : castList,
-    castMap         : castMap,
-    castNum         : castNum,
-    castObj         : castObj,
-    castStr         : castStr,
+    _castBool_ : castBool,
+    _castFn_   : castFn,
+    _castInt_  : castInt,
+    _castJQ_   : castJQ,
+    _castList_ : castList,
+    _castMap_  : castMap,
+    _castNum_  : castNum,
+    _castObj_  : castObj,
+    _castStr_  : castStr,
 
-    safeJsonParse     : safeJsonParse,
-    safeJsonStringify : safeJsonStringify,
+    _safeJsonParse_     : safeJsonParse,
+    _safeJsonStringify_ : safeJsonStringify,
 
-    cloneData       : cloneData,
-    extendList      : extendList,
-    getNowMs        : getNowMs,
-    getNumSign      : getNumSign,
-    makeArgList     : makeArgList,
-    makePadNumStr   : makePadNumStr,
-    makeEscRxStr    : makeEscRxStr,
-    makeRxObj       : makeRxObj,
-    makeScrubStr    : makeScrubStr,
-    makeUcFirstStr  : makeUcFirstStr,
+    _cloneData_       : cloneData,
+    _extendList_      : extendList,
+    _getNowMs_        : getNowMs,
+    _getNumSign_      : getNumSign,
+    _makeArgList_     : makeArgList,
+    _makePadNumStr_   : makePadNumStr,
+    _makeEscRxStr_    : makeEscRxStr,
+    _makeRxObj_       : makeRxObj,
+    _makeScrubStr_    : makeScrubStr,
+    _makeUcFirstStr_  : makeUcFirstStr,
 
-    checkDateStr    : checkDateStr,
-    clearMap        : clearMap,
-    encodeHtml      : encodeHtml,
-    getBasename     : getBasename,
-    getDirname      : getDirname,
-    getListAttrIdx  : getListAttrIdx,
-    getListAttrMap  : getListAttrMap,
-    getListDiff     : getListDiff,
-    getListValCount : getListValCount,
-    getLogObj       : getLogObj,
-    getStructData   : getStructData,
-    getTzCode       : getTzCode,
-    makeClockStr    : makeClockStr,
-    makeCommaNumStr : makeCommaNumStr,
-    makeDateStr     : makeDateStr,
-    makeDebounceFn  : makeDebounceFn,
-    makeEllipsisStr : makeEllipsisStr,
-    makeErrorObj    : makeErrorObj,
-    makeExtractMap  : makeExtractMap,
-    makeGuidStr     : makeGuidStr,
-    makeKeyList     : __makeKeyListFn,
-    makeMapUtilObj  : makeMapUtilObj,
-    makeMetricStr   : makeMetricStr,
-    makeOptionHtml  : makeOptionHtml,
-    makePctStr      : makePctStr,
-    makeRadioHtml   : makeRadioHtml,
-    makeRekeyMap    : makeRekeyMap,
-    makeReplaceFn   : makeReplaceFn,
-    makeSeenMap     : makeSeenMap,
-    makeSeriesMap   : makeSeriesMap,
-    makeStrFromMap  : makeStrFromMap,
-    makeThrottleFn  : makeThrottleFn,
-    makeTmpltStr    : makeTmpltStr,
-    mergeMaps       : mergeMaps,
-    pollFunction    : pollFunction,
-    pushUniqListVal : pushUniqListVal,
-    rmListVal       : rmListVal,
-    setStructData   : setStructData,
-    setConfigMap    : setConfigMap,
-    shuffleList     : shuffleList,
-    trimStrList     : trimStrList
+    _checkDateStr_    : checkDateStr,
+    _clearMap_        : clearMap,
+    _encodeHtml_      : encodeHtml,
+    _getBasename_     : getBasename,
+    _getDirname_      : getDirname,
+    _getListAttrIdx_  : getListAttrIdx,
+    _getListAttrMap_  : getListAttrMap,
+    _getListDiff_     : getListDiff,
+    _getListValCount_ : getListValCount,
+    _getLogObj_       : getLogObj,
+    _getStructData_   : getStructData,
+    _getTzCode_       : getTzCode,
+    _makeClockStr_    : makeClockStr,
+    _makeCommaNumStr_ : makeCommaNumStr,
+    _makeDateStr_     : makeDateStr,
+    _makeDebounceFn_  : makeDebounceFn,
+    _makeEllipsisStr_ : makeEllipsisStr,
+    _makeErrorObj_    : makeErrorObj,
+    _makeExtractMap_  : makeExtractMap,
+    _makeGuidStr_     : makeGuidStr,
+    _makeKeyList_     : __makeKeyListFn,
+    _makeMapUtilObj_  : makeMapUtilObj,
+    _makeMetricStr_   : makeMetricStr,
+    _makeOptionHtml_  : makeOptionHtml,
+    _makePctStr_      : makePctStr,
+    _makeRadioHtml_   : makeRadioHtml,
+    _makeRekeyMap_    : makeRekeyMap,
+    _makeReplaceFn_   : makeReplaceFn,
+    _makeSeenMap_     : makeSeenMap,
+    _makeSeriesMap_   : makeSeriesMap,
+    _makeStrFromMap_  : makeStrFromMap,
+    _makeThrottleFn_  : makeThrottleFn,
+    _makeTmpltStr_    : makeTmpltStr,
+    _mergeMaps_       : mergeMaps,
+    _pollFunction_    : pollFunction,
+    _pushUniqListVal_ : pushUniqListVal,
+    _rmListVal_       : rmListVal,
+    _setStructData_   : setStructData,
+    _setConfigMap_    : setConfigMap,
+    _shuffleList_     : shuffleList,
+    _trimStrList_     : trimStrList
   };
 }());
 // == . END MODULE xuu ================================================
 try { module.exports = xuu }
-catch (e) { console.trace(e) }
+catch (e1) {
+  try { window.xuu = xuu }
+  catch (e2) {
+    console.trace( e2 );
+  }
+}
