@@ -2703,7 +2703,9 @@ function rmListVal ( test_obj ) {
       [ [ test0_list, 'string'   ], expect2_list, __2 ],
       [ [ test0_list, 'fetzer'   ], expect2_list, __0 ],
       [ [ test0_list, '0'        ], expect2_list, __0 ],
-      [ [ test0_list, __0        ], expect3_list, __1 ]
+      [ [ test0_list, __0        ], expect3_list, __1 ],
+      [ [ [ 1, 2, 3, 4, 99, 'boo' ], 'boo', 99 ], [ 1, 2, 3, 4 ], 2 ],
+      [ [ [ 1, 2, 3, 4, 99, 'boo' ], 1,2,3,4 ], [ 99, 'boo' ], 4 ]
     ],
 
     assert_count = assert_table.length,

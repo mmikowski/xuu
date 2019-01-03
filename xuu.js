@@ -2460,18 +2460,36 @@ var xuu = (function () {
   // . END Public method /pushUniqListVal/
 
   // BEGIN Public method /rmListVal/
-  function rmListVal ( arg_list, arg_data ) {
+  // Summary    : rmListVal( <base_list>, <val1>, ... <valN> );
+  // Purpose    : Remove one or more values from a base_list in-place
+  // Example    : rmListVal( base_list, 'a', 1, null );
+  //
+  // Arguments  : (positional)
+  //   0   - base_list
+  //   1-n - values to remove
+  // Returns    : Count of removed values
+  // Throws     : None
+  //
+  function rmListVal () {
     var
-      input_list   = castList( arg_list, [] ),
-      input_count  = input_list[ __length ],
-      rm_count     = __0,
-      idx;
+      arg_list   = makeArgList( arguments ),
+      item_list  = castList( arg_list.shift(), [] ),
+      item_count = item_list[ __length ],
+      test_list  = arg_list,
+      test_count = test_list[ __length ],
+      rm_count   = __0,
+      idx, item_data, jdx, test_data;
 
-    for ( idx = input_count; idx; __0 ) {
-      if ( input_list[ --idx ] === arg_data ) {
-        input_list[ vMap._splice_ ]( idx, __1 );
-        rm_count++;
-        idx++;
+    _LIST_ITEM_: for ( idx = item_count; idx; __0 ) {
+      item_data = item_list[ --idx ];
+      for ( jdx = 0; jdx < test_count; jdx++ ) {
+        test_data = arg_list[ jdx ];
+        if ( item_data === test_data ) {
+          item_list[ vMap._splice_ ]( idx, __1 );
+          rm_count++;
+          idx++;
+          continue _LIST_ITEM_;
+        }
       }
     }
     return rm_count;

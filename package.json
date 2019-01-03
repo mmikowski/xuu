@@ -84,5 +84,5 @@
   "scripts": {
     "test": "nodeunit ./nodeunit_xuu.js"
   },
-  "version": "1.4.27-6"
+  "version": "1.4.27-7"
 }
