@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-const 
+/*global require */
+'use strict';
+var
   xuuObj   = require( './xuu' ),
   logObj   = xuuObj._getLogObj_(),
   logMsgFn = logObj._logMsg_

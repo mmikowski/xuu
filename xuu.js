@@ -2,75 +2,82 @@
  * xuu.js
  * @author Michael S. Mikowski - mike.mikowski@gmail.com
  *
- * Use      : xuu.castBool(...)
+ * Use      : xuuObj = require( 'xuu' );
  * Synopsis : Stand-alone ES5.1 port of hi_score utilities
  * Provides : Utilities which do not require jQuery or a browser
  * Requires : No dependencies.
  *
 */
-/*global xuu:true */
+/*global xuu:true, global, module, jQuery */
 // == BEGIN MODULE xuu ================================================
 var xuu = (function () {
   // == BEGIN MODULE SCOPE VARIABLES ==================================
   'use strict';
   var
+    // Set object symbols
     vMap = {
       _concat_ : 'concat',
       _filter_ : 'filter',
       _map_    : 'map',
+      _object_ : 'object',
+      _slice_  : 'slice',
       _splice_ : 'splice',
       _substr_ : 'substr',
       _toFixed_: 'toFixed',
       _trim_   : 'trim'
     },
-    nMap = {
-      __5 : 5,
-      __6 : 6,
-      __7 : 7
-    },
-    __data2strFn  = JSON.stringify,
-    __str2DataFn  = JSON.parse,
-
     __Array   = Array,
     __Date    = Date,
     __Math    = Math,
     __Num     = Number,
+    __Object  = Object, 
     __Str     = String,
 
-    __apply           = 'apply',
-    __bind            = 'bind',
-    __blank           = '',
-    __clearTimeoutFn  = clearTimeout,
-    __false           = false,
-    __hasOwnProperty  = 'hasOwnProperty',
-    __indexOf         = 'indexOf',
-    __join            = 'join',
-    __length          = 'length',
-    __makeAbsNumFn    = Math.abs,
-    __makeFloorNumFn  = Math.floor,
-    __makeKeyListFn   = Object.keys,
-    __makeRandomNumFn = Math.random,
-    __makeRoundNumFn  = Math.round,
-    __match           = 'match',
-    __null            = null,
-    __push            = 'push',
-    __replace         = 'replace',
-    __setTimeoutFn    = setTimeout,
-    __split           = 'split',
-    __toString        = 'toString',
-    __true            = true,
-    __typeofFn        = function (data) { return typeof data; },
-    __undef           = void(0),
+    // Set function symbols
+    clearToFn       = clearTimeout,
+    data2strFn      = JSON.stringify,
+    makeAbsNumFn    = __Math.abs,
+    makeFloorNumFn  = __Math.floor,
+    makeKeyListFn   = __Object.keys,
+    makeRandomNumFn = Math.random,
+    makeRoundNumFn  = Math.round,
+    setToFn         = setTimeout,
+    str2dataFn      = JSON.parse,
+    typeofFn        = function (d) { return typeof d; },
 
+    // Set number symbols
     __0   = 0,
     __1   = 1,
     __2   = 2,
     __3   = 3,
     __4   = 4,
+    __5   = 5,
+    __6   = 6,
+    __7   = 7,
     __10  = 10,
     __100 = 100,
     __n1  = -1,
 
+    // Set string-like symbols
+    __apply      = 'apply',
+    __blank      = '',
+    __bind       = 'bind',
+    __false      = false,
+    __hasProp    = 'hasOwnProperty',
+    __indexOf    = 'indexOf',
+    __join       = 'join',
+    __length     = 'length',
+    __match      = 'match',
+    __null       = null,
+    __pop        = 'pop',
+    __push       = 'push',
+    __replace    = 'replace',
+    __split      = 'split',
+    __toString   = 'toString',
+    __true       = true,
+    __undef      = void(0),
+
+    // Set shared map
     typeofMap = {
       'boolean'   : '_Boolean_',
       'number'    : '_Number_',
@@ -89,22 +96,22 @@ var xuu = (function () {
       'Undefined' : '_Undefined_'
     },
 
-      configMap, stateMap,
-      logObj,    getBasename, getDirname,
-      instanceMap, optionMap
+      // Declare other module-scope vars
+      configMap,  getBasename, getDirname, 
+      logObj, stateMap
     ;
   // == . END MODULE SCOPE VARIABLES ==================================
 
   // == BEGIN PREREQ METHODS ==========================================
   // BEGIN Public prereq method /getVarType/
-  // Summary   : getVarType( <data> )
+  // Summary   : getVarType( <data> );
   // Purpose   : Determine the type of data provided.
   // Example   : getVarType( [] ); // '_Array_'
   // Arguments : (positional)
   //   <data> - value to examine
   // Returns   : '_Function_', '_Object_', '_Array_', '_String_',
   //             '_Number_', '_Null_', '_Boolean_', or '_Undefined_'
-  // Throws    : none
+  // Throws    : None
   //
   function getVarType ( data ) {
     var type_key, type_str;
@@ -113,19 +120,19 @@ var xuu = (function () {
     if ( data === __undef ) { return '_Undefined_'; }
     if ( __Array.isArray( data ) ) { return '_Array_'; }
 
-    type_key = __typeofFn( data );
+    type_key = typeofFn( data );
     type_str = typeofMap[ type_key ];
 
     if ( type_str && type_str !== '_Object_' ) { return type_str; }
 
-    type_key = {}[ __toString ].call( data ).slice( 8, __n1 );
+    type_key = {}[ __toString ].call( data )[ vMap._slice_ ]( 8, __n1 );
 
     return typeofMap[ type_key ] || type_key;
   }
   // . END Public prereq method /getVarType/
 
   // BEGIN Public prereq method /castBool/
-  // Summary   : castBool( <data>, <alt_data> )
+  // Summary   : castBool( <data>, <alt_data> );
   // Purpose   : Cast a boolean value
   // Example   : castBool( true ); // returns true
   // Arguments : (positional)
@@ -133,7 +140,7 @@ var xuu = (function () {
   //   <alt_data> - alternate value to return
   // Returns   :
   //   <data> if it is a boolean, <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castBool ( data, alt_data ) {
       if ( data === __true || data === __false ) { return data; }
@@ -142,7 +149,7 @@ var xuu = (function () {
   // . END Public prereq method /castBool/
 
   // BEGIN Public prereq method /castFn/
-  // Summary   : castFn( <data>, <alt_data> )
+  // Summary   : castFn( <data>, <alt_data> );
   // Purpose   : Cast a function
   // Example   : castFn( function() {} ); // returns function
   // Arguments : (positional)
@@ -150,7 +157,7 @@ var xuu = (function () {
   //   <alt_data> - alternate value to return
   // Returns   :
   //   <data> if it is a function, <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castFn ( data, alt_data ) {
     var var_type = getVarType( data );
@@ -159,10 +166,31 @@ var xuu = (function () {
   // . END Public prereq method /castFn/
 
   // BEGIN Private prereq method /checkNumFn/
-  function checkNumFn( num, alt_data, option_map ) {
-    var log_list = [], solve_data;
+  // Summary   : checkNumFn( <num>, <alt_data>, <option_map> );
+  // Purpose   : Adjust <num> per option_map
+  // Example   :
+  //   checkNumFn( 25, 0, { _max_num_: 20, _do_autobound_: true });
+  //   // Returns 20
+  // Arguments :
+  //   <num>        - Number to consider
+  //   <alt_data>   - Alternate to use if num is invalid
+  //   <option_map> - Map of directives
+  //     + _do_autobound_ - Auto bound input to min/max as appropriate
+  //     + _do_warn_      - Log warnings
+  //     + _max_num_      - Max allowed value
+  //     + _min_num_      - Min allowed value
+  //
+  // Returns   : Adjusted num
+  // Throws    : None
+  //
+  function checkNumFn( arg_num, alt_data, option_map ) {
+    var
+      num      = arg_num,
+      log_list = [],
 
-    if ( option_map[ __hasOwnProperty ]( '_max_num_' )
+      solve_data;
+
+    if ( option_map[ __hasProp ]( '_max_num_' )
       && num > option_map._max_num_
     ) {
       if ( option_map._do_autobound_ ) {
@@ -177,7 +205,7 @@ var xuu = (function () {
       }
     }
 
-    if ( option_map[ __hasOwnProperty ]( '_min_num_' )
+    if ( option_map[ __hasProp ]( '_min_num_' )
       && num < option_map._min_num_
     ) {
       if ( option_map._do_autobound_ ) {
@@ -204,22 +232,22 @@ var xuu = (function () {
   // . END Private prereq method /checkNumFn/
 
   // BEGIN Public prereq method /castInt/
-  // Summary   : castInt( <data>, <alt_data>, <option_map> )
+  // Summary   : castInt( <data>, <alt_data>, <option_map> );
   // Purpose   : Cast an integer
   // Example   : castInt( '25.425' ); // returns 25
   // Arguments : (positional)
   //   <data>       - data to cast as int
   //   <alt_data>   - alternate value to return
   //   <option_map> - Optional constraint map
-  //     + _do_autobound_ - auto bound input to min/max as appropriate
+  //     + _do_autobound_ - Auto bound input to min/max as appropriate
   //     + _do_warn_      - Log warnings
-  //     + _max_num_      - max allowed value
-  //     + _min_num_      - min allowed value
+  //     + _max_num_      - Max allowed value
+  //     + _min_num_      - Min allowed value
   // Returns   :
   //   If a number, returns the number rounded to nearest int.
   //   If a string, returns the number rep rounded to nearest int.
   //   Otherwise <alt_data>.
-  // Throws    : none
+  // Throws    : None
   //
   function castInt ( data, alt_data, option_map ) {
     var
@@ -231,10 +259,10 @@ var xuu = (function () {
     ;
 
     if ( isNaN( solve_num ) ) { return alt_data; }
-    solve_int = __makeRoundNumFn( solve_num );
+      solve_int = makeRoundNumFn( solve_num );
 
     // Begin process optional constraints
-    if ( __typeofFn( option_map ) === 'object' ) {
+      if ( typeofFn( option_map ) === 'object' ) {
       return checkNumFn( solve_int, alt_data, option_map );
     }
     // . End process optional constraints
@@ -243,15 +271,15 @@ var xuu = (function () {
   // . END Public prereq method /castInt/
 
   // BEGIN Public prereq method /castJQ/
-  // Summary   : castJQ( <data>, <alt_data> )
+  // Summary   : castJQ( <data>, <alt_data> );
   // Purpose   : Cast a jQuery (xhiJQ) object
   // Example   : castJQ( $top_box ); // returns $top_box
   // Arguments : (positional)
-  //   <data>     - data to cast as xhiJQ object
-  //   <alt_data> - alternate value to return
+  //   <data>     - Data to cast as jQuery object
+  //   <alt_data> - Alternate value to return
   // Returns   :
   //   <data> if it is a xhiJQ object, <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castJQ ( data, alt_data ) {
     if ( stateMap._has_jq_ ) {
@@ -263,7 +291,7 @@ var xuu = (function () {
   // . END Public preq method /castJQ/
 
   // BEGIN Public prereq method /castList/
-  // Summary   : castList( <data>, <alt_data>, <option_map> )
+  // Summary   : castList( <data>, <alt_data>, <option_map> );
   // Purpose   : Cast a list
   // Example   : castList( [] ); // returns the array
   // Arguments : (positional)
@@ -277,7 +305,7 @@ var xuu = (function () {
   // Returns   :
   //   <data> if it is an array and passes optional constraints,
   //   <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castList ( data, alt_data, option_map ) {
     var
@@ -288,7 +316,7 @@ var xuu = (function () {
     if ( var_type !== '_Array_' ) { return alt_data; }
 
     // Begin process optional constraints
-    if ( __typeofFn( option_map ) === 'object' ) {
+    if ( typeofFn( option_map ) === 'object' ) {
       log_list = [];
       item_count = data[ __length ];
       if ( item_count === 0 && option_map._is_empty_ok_ === __false ) {
@@ -327,7 +355,7 @@ var xuu = (function () {
   // . END Public prereq method /castList/
 
   // BEGIN Public prereq method /castMap/
-  // Summary   : castMap( <data>, <alt_data> )
+  // Summary   : castMap( <data>, <alt_data> );
   // Purpose   : Cast a map
   // Example   : castMap( {} ); // returns the object
   // Arguments : (positional)
@@ -335,7 +363,7 @@ var xuu = (function () {
   //   <alt_data> - alternate value to return
   // Returns   :
   //   <data> if it is a map, <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castMap ( data, alt_data ) {
     var var_type = getVarType( data );
@@ -344,7 +372,7 @@ var xuu = (function () {
   // . END Public prereq method /castMap/
 
   // BEGIN Public prereq method /castNum/
-  // Summary   : castNum( <data>, <alt_data>, <option_map> )
+  // Summary   : castNum( <data>, <alt_data>, <option_map> );
   // Purpose   : Cast an integer
   // Example   : castNum( '25.425' ); // returns 25
   // Arguments : (positional)
@@ -359,7 +387,7 @@ var xuu = (function () {
   //   If a number, returns the number rounded to nearest int.
   //   If a string, returns the number rep rounded to nearest int.
   //   Otherwise <alt_data>.
-  // Throws    : none
+  // Throws    : None
   //
   function castNum ( data, alt_data, option_map ) {
     var
@@ -372,7 +400,7 @@ var xuu = (function () {
     if ( isNaN( solve_num ) ) { return alt_data; }
 
     // Begin process optional constraints
-    if ( __typeofFn( option_map ) === 'object' ) {
+    if ( typeofFn( option_map ) === 'object' ) {
       return checkNumFn( solve_num, alt_data, option_map );
     }
     // . End process optional constraints
@@ -381,7 +409,7 @@ var xuu = (function () {
   // . END Public prereq method /castNum/
 
   // BEGIN Public prereq method /castObj/
-  // Summary   : castObj( <obj_type>, <data>, <alt_data> )
+  // Summary   : castObj( <obj_type>, <data>, <alt_data> );
   // Purpose   : Cast an object
   // Example   : castObj( 'styleSheetList',document.styleSheets  );
   // Arguments : (positional)
@@ -390,7 +418,7 @@ var xuu = (function () {
   //   <alt_data> - alternate value to return
   // Returns   :
   //   <data> if an <obj_type> object, <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castObj ( obj_type, data, alt_data ) {
     var var_type = getVarType( data );
@@ -399,7 +427,7 @@ var xuu = (function () {
   // . END Public prereq method /castObj/
 
   // BEGIN Public prereq method /castStr/
-  // Summary   : castStr( <data>, <alt_data> )
+  // Summary   : castStr( <data>, <alt_data> );
   // Purpose   : Cast a string
   // Example   : castStr( 25.425 ); // returns '25.425'
   // Arguments : (positional)
@@ -407,14 +435,14 @@ var xuu = (function () {
   //   <alt_data>   - Alternate value to return
   //   <option_map> - Optional constraints
   //     + _do_warn_     - Log warnings
-  //     + is_empty_ok  - Allow blank string (default is true)
-  //     + filter_regex - A regex filter that must be passed
-  //     + min_length   - Min allowed length
-  //     + max_length   - Max allowed length
+  //     + _filter_regex_ - A regex filter that must be passed
+  //     + _is_empty_ok_  - Allow blank string (default is true)
+  //     + _max_length_   - Max allowed length
+  //     + _min_length_   - Min allowed length
   // Returns   :
   //   <data> if a string, or a number converted to a string,
   //   <alt_data> otherwise
-  // Throws    : none
+  // Throws    : None
   //
   function castStr ( data, alt_data, option_map ) {
     var
@@ -428,7 +456,7 @@ var xuu = (function () {
     if ( solve_str === __undef ) { return alt_data; }
 
     // Begin process optional constraints
-    if ( __typeofFn( option_map ) === 'object' ) {
+    if ( typeofFn( option_map ) === 'object' ) {
       log_list = [];
       char_count = solve_str[ __length ];
       if ( option_map._is_empty_ok_ === __false
@@ -477,58 +505,58 @@ var xuu = (function () {
   // . END Public prereq method /castStr/
 
   // BEGIN Public prereq method /safeJsonParse/
-  // Summary   : safeJsonParse( json_str, alt_data )
+  // Summary   : safeJsonParse( <json_str>, <alt_data> );
   // Purpose   : Parses JSON safely, using alt_data if it cannot
   // Example   : my map = safeJsonParse( '{}', {} );
   // Arguments : (positional)
   //   <json_str> - JSON string to parse
-  //   <alt_data> - Alternate return if parsing failse
+  //   <alt_data> - Alternate return if parsing fails
   // Returns   : Parsed JSON or alt_data
-  // Throws    : none
+  // Throws    : None
   //
   function safeJsonParse ( json_str, alt_data ) {
     var solve_data;
     try {
-        solve_data = __str2DataFn( json_str );
+        solve_data = str2dataFn( json_str );
     }
-      catch ( e ) {
-        solve_data = alt_data;
+    catch ( e ) {
+      solve_data = alt_data;
+    }
+    return solve_data;
   }
-      return solve_data;
-    }
-    // . END Public prereq method /safeJsonParse/
+  // . END Public prereq method /safeJsonParse/
 
-    // BEGIN Public prereq method /safeJsonStringify/
-    // Summary   : safeJsonStringify( data, alt_data )
-    // Purpose   : Stringifies JSON safely
-    // Example   : my str = safeJsonStringify( {}, '{}' );
-    // Arguments : (positional)
-    //   <data>     - Data structure to stringify
-    //   <alt_data> - Alternate return if parsing failse
-    // Returns   : JSON string on success, alt_data on failure
-    // Throws    : none
-    //
-    function safeJsonStringify ( arg_data, alt_data ) {
-      var solve_str;
-      try {
-        solve_str = __data2strFn( arg_data );
-      }
-      catch (e) {
-        solve_str = alt_data;
-      }
-      return solve_str;
+  // BEGIN Public prereq method /safeJsonStringify/
+  // Summary   : safeJsonStringify( <data>, <alt_data> );
+  // Purpose   : Stringifies JSON safely
+  // Example   : my str = safeJsonStringify( {}, '{}' );
+  // Arguments : (positional)
+  //   <data>     - Data structure to stringify
+  //   <alt_data> - Alternate return if parsing fails
+  // Returns   : JSON string on success, alt_data on failure
+  // Throws    : None
+  //
+  function safeJsonStringify ( arg_data, alt_data ) {
+    var solve_str;
+    try {
+      solve_str = data2strFn( arg_data );
     }
-    // . END Public prereq method /safeJsonStringify/
+    catch (e) {
+      solve_str = alt_data;
+    }
+    return solve_str;
+  }
+  // . END Public prereq method /safeJsonStringify/
 
   // BEGIN Public prereq method /cloneData/
-  // Summary   : cloneData( <data> )
+  // Summary   : cloneData( <data> );
   // Purpose   : Deep clones non-recursive data structures fastest
   // Example   : cloneData( [] ); // return copy of list
   // Arguments : (positional)
   //   <data> - data to clone
   // Returns   : undefined if data is recursive; otherwise a deep
   //   copy is returned.
-  // Throws    : none
+  // Throws    : None
   //
   function cloneData ( data ) {
     if ( data === __undef ) { return data; }
@@ -537,14 +565,14 @@ var xuu = (function () {
   // . END Public prereq method /cloneData/
 
   // BEGIN Public prereq method /extendList/
-  // Summary   : extendList( base_list, extend_list )
-  // Purpose   : Extends base_list with contents of extend_list
+  // Summary   : extendList( <base_list>, <extend_list> );
+  // Purpose   : Extend <base_list> with contents of <extend_list>
   // Example   : extendList( [0], [1,2,3] ); // returns [0,1,2,3]
   // Arguments : (positional)
   //   <base_list>   - list to extend
   //   <extend_list> - list to append to base_list
   // Returns   : base_list after change
-  // Throws    : none
+  // Throws    : None
   //
   function extendList ( arg_base_list, arg_extend_list ) {
     var
@@ -558,37 +586,39 @@ var xuu = (function () {
   // . END Public prereq method /extendList/
 
   // BEGIN Public prereq method /getNowMs/
+  // Summary   : getNowMs( <do_local> );
   // Purpose   : Get timestamp
   // Example   : getNowMs(); // returns 1486283077968
-    // Arguments : do_local_time when true will subtract the TZ offset
+  // Arguments :
+  //   + <do_local> - Subtract local TZ offset if true
   // Returns   : The current timestamp in milliseconds
-  // Throws    : none
+  // Throws    : None
   //
-  // The Date.now() method is 3x faster than the +new Date()
-  //   in NodeJS, and I have confirmed this provides almost the
-  //   the same performance in that env as a raw Date.now() call.
+  // Note      : The __Date.now() method is 3x faster than the
+  //   +new __Date() in NodeJS and provides almost the
+  //   the same performance in that env as a raw __Date.now() call.
   //
-    function getNowMs ( do_local_time ) {
-      var date_obj;
-      if ( do_local_time ) {
-        date_obj = new Date();
-        return date_obj.getTime() - ( date_obj.getTimezoneOffset() * 60000);
-      }
+  function getNowMs ( do_local ) {
+    var date_obj;
+    if ( do_local ) {
+      date_obj = new __Date();
+      return date_obj.getTime() - ( date_obj.getTimezoneOffset() * 60000);
+    }
 
-      return configMap._get_now_fn_
-        ? configMap._get_now_fn_() : +new __Date();
+    return configMap._get_now_fn_
+      ? configMap._get_now_fn_() : +new __Date();
   }
   // . END Public prereq method /getNowMs/
 
   // BEGIN Public prereq method /getNumSign/
-  // Summary   : getNumSign( <data> )
+  // Summary   : getNumSign( <data> );
   // Purpose   : Convert number into -1 or 1
   // Example   : getNumSign( '-25' ); // returns -1
   // Arguments :
   //   <data> - number or string to convert to -1 or 1
   // Returns   : -1 if the processed number is less than 0,
   //   otherwise 1.
-  // Throws    : none
+  // Throws    : None
   //
   function getNumSign ( n ) {
     var num = __Num( n );
@@ -622,13 +652,11 @@ var xuu = (function () {
   //   string_regex  : /_(name|key|type|text|html)_?$/,
   //   svgelem_regex : /^_svg_?$/
   // }
-  // BEGIN public method /checkArgMap/
+  // BEGIN Public method /checkArgMap/
   // Purpose   : Provide an easy and efficient means to check named arguments
   // Example   :
-  //   <script src="" />
-  //   <script>
   //   argc.setMode( 'strict' );
-  //   foo = function ( arg_map ) {
+  //   function fooFn ( arg_map ) {
   //     try {
   //       argc.checkArgMap(
   //         { item_id          : { var_type : 'string' },
@@ -674,8 +702,7 @@ var xuu = (function () {
   //       throw error_obj;
   //     }
   //     ...
-  //   };
-  //   </script>
+  //   }
   //
   // Required Arguments :
   //   * rule_map - a map of rules used to check arguments
@@ -732,7 +759,7 @@ var xuu = (function () {
   //       if its value isNaN, Null, or other falsey value other than
   //       0 or undefined.
   //
-  // Optional Argument : none
+  // Optional Argument : None
   // Settings  : checkArgMap.configModule.setMode( '[strict|normal|off]' )
   //   affects the behavior of checkArgMap.
   //   IN 'strict' MODE, the special directive keys are processed as follows:
@@ -741,20 +768,20 @@ var xuu = (function () {
   //     * _skip_key_list   : []
   //   IN 'normal' MODE the utility works as above.
   //   IN 'off' MODE , the utility is a no-op and simply returns.
-  // Returns   : none
+  // Returns   : None
   // Throws    : an error object if validation fails
 
   // BEGIN Public prereq method /makeArgList/
-  // Summary   : makeArgList( <arg_obj> )
+  // Summary   : makeArgList( <arg_obj> );
   // Purpose   : Make a real array from data in argument object
   // Example   : makeArgList( arguments ); // returns [ ... ]
   // Arguments :
   //   <arg_obj> - an argument object ('arguments' in functions)
   // Returns   : An array of argument values
-  // Throws    : none
+  // Throws    : None
   //
   // The technique used is around 3x faster than
-  //   return Array.prototype.slice.call( arg_obj );
+  //   return Array.prototype[ vMap._slice_ ].call( arg_obj );
   // See https://github.com/petkaantonov/bluebird/wiki/\
   //   Optimization-killers#3-managing-arguments
   //
@@ -773,14 +800,14 @@ var xuu = (function () {
   // . END Public prereq method /makeArgList/
 
   // BEGIN Public prereq method /makePadNumStr/
-  // Summary   : makePadNumStr( <number>, <count> )
+  // Summary   : makePadNumStr( <number>, <count> );
   // Purpose   : Pad an int with 0s for <count> digits
   // Example   : makePadNumStr( 25, 3 ) return '025';
   // Arguments :
   //   <number> - the number to pad
   //   <count>  - the number of digits to fill
   // Returns   : A trimmed and padded string
-  // Throws    : none
+  // Throws    : None
   //
   function makePadNumStr( arg_num, arg_count ) {
     var
@@ -796,7 +823,7 @@ var xuu = (function () {
     }
 
     sign_int = getNumSign( num );
-    num_str  = __Str( __makeAbsNumFn( num ) );
+    num_str  = __Str( makeAbsNumFn( num ) );
     zero_count = count - num_str[ __length ]
       - ( sign_int === __n1 ? __1 : __0 );
 
@@ -811,15 +838,15 @@ var xuu = (function () {
   }
   // . END Public prereq method /makePadNumStr/
 
-  // BEGIN public prereq method /makeEscRxStr/
-  // Summary   : makeEscRxStr( <string> )
+  // BEGIN Public prereq method /makeEscRxStr/
+  // Summary   : makeEscRxStr( <string> );
   // Purpose   : Escapes a regular expression string
   // Example   : makeEscRxStr( '[]' ) // returns '\[\]\'
   // Arguments : <string> to escape
   // Returns   : Escaped regular expression string
-  // Throws    : none
+  // Throws    : None
   //
-  // JSLint capable str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  // JSLint capable str[ __replace ](/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   // See http://stackoverflow.com/questions/3115150
   //
   function makeEscRxStr( arg_str ) {
@@ -829,20 +856,20 @@ var xuu = (function () {
   // . END Public prereq method /makeEscRxStr/
 
   // BEGIN Public prereq method /makeExtractMap/
-  // Summary   : makeExtractMap( base_map, key_list )
-  // Purpose   : Makes and returns a new map using key_list
+  // Summary   : makeExtractMap( <base_map>, <key_list> );
+  // Purpose   : Makes and returns a new map using <key_list>
   // Example   : makeExtractMap( { a:1, b:2 }, ['a'] ); // returns { a:1 }
   // Arguments : (positional)
   //   <base_map> - Map to extract values from
   //   <key_list> - List of keys to copy (shallow)
   //                Default: all keys
   // Returns   : Newly created map
-  // Throws    : none
+  // Throws    : None
   //
   function makeExtractMap ( arg_base_map, arg_key_list ) {
     var
       base_map  = castMap(  arg_base_map, {} ),
-      key_list  = castList( arg_key_list, __makeKeyListFn( base_map ) ),
+      key_list  = castList( arg_key_list, makeKeyListFn( base_map ) ),
       key_count = key_list[ __length ],
       solve_map = {},
       idx, key
@@ -858,14 +885,14 @@ var xuu = (function () {
   // . END Public prereq method /makeExtractMap/
 
   // BEGIN Public prereq method /makeRxObj/
-  // Summary   : makeRxObj( <pattern>, <options> )
+  // Summary   : makeRxObj( <pattern>, <options> );
   // Purpose   : Create a regular expression object
   // Example   : makeRxObj( '\s*hello\s*', 'i' );
   // Arguments :
   //   <pattern> - a string to convert into a regexp
   //   <options> - an option string
   // Returns   : A regular expression object
-  // Throws    : none
+  // Throws    : None
   //
   function makeRxObj ( arg_pattern_str, arg_option_str ) {
     var
@@ -881,6 +908,16 @@ var xuu = (function () {
   // . END Public prereq method /makeRxObj/
 
   // BEGIN Public prereq method /makeScrubStr/
+  // Summary   : makeScrubStr( <string>, <do_space> );
+  // Purpose   : Remove HTML tags and trim string
+  // Example   : makeScrubStr( '<h1>Hello</h1><p>Hi</p>', true );
+  //             // returns 'Hello Hi'
+  // Arguments :
+  //   <string>   - A string to scrub
+  //   <do_space> - Add a space between groups
+  // Returns   : The scrubbed string
+  // Throws    : None
+  //
   function makeScrubStr ( arg_str, arg_do_space ) {
     var
       raw_str    = castStr(  arg_str, __blank ),
@@ -895,6 +932,15 @@ var xuu = (function () {
   // . END Public prereq method /makeScrubStr/
 
   // BEGIN Public prereq method /makeUcFirstStr/
+  // Summary   : makeUcFirstStr( <string> );
+  // Purpose   : Capitalize the first letter of a string
+  // Example   : makeUcFirstStr( 'hello' );
+  //             // returns 'Hello'
+  // Arguments :
+  //   <string> - A string to process
+  // Returns   : The string with the first character capitalized
+  // Throws    : None
+  //
   function makeUcFirstStr ( arg_str ) {
     var
       str    = castStr( arg_str, __blank ),
@@ -907,8 +953,7 @@ var xuu = (function () {
 
   // == BEGIN UTILITY OBJECTS =========================================
   // BEGIN define logObj singleton
-  // Summary   :
-  //   logObj.setLogLevel_('_warn_');
+  // Summary   : logObj._setLogLevel_( <log_level> );
   // Purpose   : Provide a log4j-style logging singleton
   // Example   :
   //   logObj.setLogLevel_('_warn_');
@@ -916,21 +961,19 @@ var xuu = (function () {
   //   logObj.logMsg('_info_', 'This will not');
   //   logObj.getLevelName();  // '_warn_'
   //   logObj.getLevelIdx();   // 4
-  // Arguments :
-  //   Log level is based on syslog values and is one of
+  // Methods   :
+  //   Log level is based on syslog values and is one of the following:
   //   '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'
-  //
-  //   * setLoglLevel(<log_level>) - Set threshold urgency.
-  //   * logMsg( <log_level>, <message_str> ) - Log message string with
-  //     <log_level> urgency. Messages with urgency below the threshold are
-  //     not presented to the log.
-  //   * getLevelName() - Return log level, e.g. '_warn_'.
-  //   * getLevelIdx returns log level index. 0=emerg, 4=warn, 7=debug
-  //     This is provided so developers can see if the set log level
-  //     is more permissive than _error_ for example:
-  //     if ( logObj._getLevelIdx_() > 3 ) { ... }
-  // Returns   : Varies
-  // Throws    : none
+  //     + _getLevelName_() - Return log level, e.g. '_warn_'.
+  //     + _getLevelIdx_()  - Return log level index. 0=emerg,4=warn,7=debug
+  //     + _logMsg_( <log_level>, <message_str> ) - Log message string with
+  //       <log_level> urgency. Messages with urgency below the threshold
+  //       are not presented to the log. This is provided so developers
+  //       can see if log level is more permissive than a threshold:
+  //       if ( logObj._getLevelIdx_() > 3 ) { ... }
+  //     + _setLoglLevel_(<log_level>) - Set threshold urgency.
+  // Returns   : Differs per method
+  // Throws    : None
   //
   logObj = (function () {
     var
@@ -950,9 +993,9 @@ var xuu = (function () {
         _crit_   : __2,
         _error_  : __3,
         _warn_   : __4,
-          _notice_ : nMap._5_,
-          _info_   : nMap._6_,
-          _debug_  : nMap._7_
+        _notice_ : __5,
+        _info_   : __6,
+        _debug_  : __7
       },
 
       levelKey = '_warn_',
@@ -964,7 +1007,7 @@ var xuu = (function () {
     // favor node console if available
     /* istanbul ignore next */
     try { consoleRef = global.console; }
-    catch ( ignore_error ) {
+    catch ( ignore ) {
       if ( window ) {
         consoleRef = window.console;
       }
@@ -1004,9 +1047,9 @@ var xuu = (function () {
         arg_list.unshift(
           '_log_level_key_not_found_ (' + level_key + ').'
         );
-        level_key = '_error_';
-        level_idx = levelXIdxMap[ level_key ];
-        command_str   = levelXCmdMap[ level_key ]
+        level_key   = '_error_';
+        level_idx   = levelXIdxMap[ level_key ];
+        command_str = levelXCmdMap[ level_key ];
       }
 
       // Ignore if level of this log is below cutoff
@@ -1015,12 +1058,12 @@ var xuu = (function () {
       // Get caller information
       /* istanbul ignore next */
       try {
-        caller_list = (new Error()).stack.split(/[ ]*\n/);
-        caller_str  = (caller_list[2] || __blank ).replace(/^[ ]*/g, '');
+        caller_list = (new Error()).stack[ __split ](/ *\n/);
+        caller_str  = (caller_list[__2] || __blank )[ __replace ](/^ */g, '');
         arg_list.unshift( caller_str );
       }
       catch(e) {
-        caller_list = [];
+        arg_list.unshift( '_no_stack_found_' );
       }
 
       // Unshift level into args
@@ -1057,17 +1100,19 @@ var xuu = (function () {
 
   // == BEGIN PUBLIC METHODS ==========================================
   // BEGIN Public method /checkDateStr/
+  // Summary   : checkDateStr( <arg_map> );
   // Purpose   : Check validity of a date string
-  // Example   : checkDateStr( '2017-02-29' ); // false
-  //             checkDateStr( '2016-02-29' ); // true  (leap year)
+  // Example   : checkDateStr( { _date_str_: '2017-02-29' } ); // false
+  //             checkDateStr( { _date_str_: '2016-02-29' } ); // true
+  // Argument  : <arg_map>
+  //   + _date_str_  - The date string to consider
+  //   + _order_str_ - The date form to check ('_us_' or ISO)
   // Returns   : boolean
-  // Throws    : none
+  // Throws    : None
   //
-  // This method works only of strings in the formats
-  // yyyy-mm-dd or yyyy/mm/dd and does not validate the time.
+  // Note      : This method works only of strings in the formats
+  //             yyyy-mm-dd or yyyy/mm/dd and does not validate the time.
   //
-  //
-
   function checkDateStr ( arg_map ) {
     var
       map         = castMap( arg_map, {} ),
@@ -1102,11 +1147,22 @@ var xuu = (function () {
   }
   // . END Public method /checkDateStr/
 
-  // BEGIN public method /makeMetricStr/
+  // BEGIN Public method /makeMetricStr/
+  // Summary   : makeMetricStr( <number> );
+  // Purpose   : Convert number to a 3 digit string with suffix
+  // Example   : makeMetricStr( 968125965968 ); // '968G'
+  //             makeMetricStr(    125965968 ); // '126M'
+  //             makeMetricStr(       965968 ); // '966K'
+  //             makeMetricStr(          968 ); //  '968'
+  // Arguments :
+  //   + <number> - The number to process
+  // Returns   : String
+  // Throws    : None
+  //
   function makeMetricStr( arg_num ) {
     var
       num     = castNum( arg_num, __0 ),
-      abs_num = __makeAbsNumFn( num ),
+      abs_num = makeAbsNumFn( num ),
       root_num, suffix
     ;
 
@@ -1131,22 +1187,37 @@ var xuu = (function () {
   // . END public method /makeMetricStr/
 
   // BEGIN Public method /clearMap/
-  // Purpose: Empty a map by deleting all keys
-  //   OR delete key provided by list
-  function clearMap ( arg_map, arg_key_list ) {
+  // Summary   : clearMap( <data_map>, <key_list>, <do_undef> );
+  // Purpose   : Process some or all map key values
+  // Example   :
+  //   clearMap( my_map ); // Delete all keys
+  //   clearMap( my_map, [ 'name', 'serial_number' ] ); // Delete 2 keys
+  //   clearMap( my_map, undef, true );  // Set all values to undefined
+  // Arguments :
+  //   + <data_map> - Map to modify. Required.
+  //   + <key_list> - List of keys to process. Default is all keys.
+  //     Provide any non-list value (like 0) to use default.
+  //   + <do_undef> - If true, will set the value of all processed keys to
+  //       undefined. Otherwise, all processed keys will be deleted from
+  //       the map. Default is false.
+  // Returns   : The modified map
+  // Throws    : None
+  //
+  function clearMap ( arg_map, arg_key_list, do_undef ) {
     var
       map       = castMap( arg_map ),
       key_list, key_count, idx, key;
 
     if ( ! map ) { return; }
 
-    key_list  = castList( arg_key_list, __makeKeyListFn( map ) );
+    key_list  = castList( arg_key_list, makeKeyListFn( map ) );
     key_count = key_list[ __length ];
 
     for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
-      if ( map[ __hasOwnProperty ]( key ) ) {
-        delete map[ key ];
+      if ( map[ __hasProp ]( key ) ) {
+        if ( do_undef ) { map[ key ] = __undef; }
+        else { delete map[ key ]; }
       }
     }
     return map;
@@ -1154,9 +1225,9 @@ var xuu = (function () {
   // . END Public method /clearMap/
 
   // BEGIN Public method /encodeHtml/
-  // Purpose : This is single pass encoder for html entities and handles
-  //   an arbitrary number of characters to encode.
-  // Examples:
+  // Summary   : encodeHtml( <string>, <do_exclude_amp> );
+  // Purpose   : Single-pass encode HTML entities from string
+  // Example   :
   //   | str = encodeHtml( "<h1>'Help me!'</h1> she said" );
   //   | __logMsg( 'info', str );
   //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; she said.'
@@ -1169,10 +1240,12 @@ var xuu = (function () {
   //   | __logMsg( 'info', str );
   //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; & fast!'
   //
-  // Arguments ( positional )
-  //   0 : arg_str (req) - The HTML string to encode
-  //   1 : arg_do_exclude_amp (opt, default = false ) : Exclude ampersands
-  //       from encoding.
+  // Arguments
+  //   + <string> - The HTML string to encode
+  //   + <do_exclude_amp> - Exclude ampersand from encoding. 
+  //      Default is false.
+  // Returns   : Modified string
+  // Throws    : None
   //
   function encodeHtml ( arg_str, arg_do_exclude_amp ) {
     var
@@ -1195,16 +1268,18 @@ var xuu = (function () {
   // . END Public method /encodeHtml/
 
   // BEGIN utility /getBaseDirname/
+  // Summary   : getBaseDirname.call( <type>, <path_str>, <delim_str> );
   // Purpose   : Returns the last filename of a path or the dirname.
   // Examples  : getBaseDirname.call( '_base_', /var/log/demo.log')
   //           :   returns 'demo.log'
   //           : getBaseDirname.call( null, '/var/log/demo.log' )
   //           :   returns '/var/log'
-  //
-  // Arguments : ( positional )
-  //   this - if '_base_' returns basename, otherwise dirname
-  //   0 - (required) Path string
-  //   1 - (optional) Delimeter string (default is /)
+  // Arguments :
+  //   <type>      - If '_base_' returns basename, otherwise dirname
+  //   <path_str>  - Path string
+  //   <delim_str> - Delimeter string (default === '/')
+  // Returns   : Modified string
+  // Throws    : None
   //
   function getBaseDirname( arg_path_str, arg_delim_str ) {
     var
@@ -1227,6 +1302,19 @@ var xuu = (function () {
   // . END utilities /getBasename/ and /getDirname/
 
   // BEGIN Public method /getListAttrIdx/
+  // Summary   : getListAttrIdx( <list>, <key>, <data> );
+  // Purpose   : Find the first map in <list> where the value of
+  //             <key> is <data>.
+  // Examples  : getListAttrIdx( [ { a: 1 } ], 'a', 1 ); // returns 0
+  //             getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns -1
+  //             getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns -1
+  // Arguments :
+  //   + <list> - List of maps
+  //   + <key>  - The key to match
+  //   + <data> - The data expected for key (default === undef)
+  // Returns   : Returns integer index or -1 if not found
+  // Throws    : None
+  //
   function getListAttrIdx ( arg_map_list, arg_key, data ) {
     var
       map_list = castList( arg_map_list, [] ),
@@ -1239,12 +1327,12 @@ var xuu = (function () {
 
     for ( idx = __0; idx < map_count; idx++ ) {
       row_map = map_list[ idx ];
-      if ( __typeofFn( row_map ) !== 'object' ) { continue; }
+      if ( typeofFn( row_map ) !== 'object' ) { continue; }
 
       // This is similar to but not the same as hasOwnProperty.
       // This prevents false positives when sparse maps do not have
-      // the requested key.
-      row_key_list = __makeKeyListFn( row_map );
+      //   the requested key.
+      row_key_list = makeKeyListFn( row_map );
       if ( row_key_list[ __indexOf ]( key ) === __n1 ) { continue; }
 
       if ( row_map[ key ] === data ) {
@@ -1256,7 +1344,20 @@ var xuu = (function () {
   }
   // . END Public method /getListAttrIdx/
 
-  // BEGIN Public methd /getListAttrMap/
+  // BEGIN Public method /getListAttrMap/
+  // Summary   : getListAttrMap( <list>, <key>, <data> );
+  // Purpose   : Find the first map in <list> where the value of
+  //             <key> is <data>.
+  // Examples  : getListAttrIdx( [ { a: 1 } ], 'a', 1 ); // returns map
+  //             getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns undef
+  //             getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns undef
+  // Arguments :
+  //   + <list> - List of maps
+  //   + <key>  - The key to match
+  //   + <data> - The data expected for key (default === undef)
+  // Returns   : Returns found map or undef if not found
+  // Throws    : None
+  //
   function getListAttrMap ( arg_list, key_name, key_val ) {
     var
       list     = castList( arg_list, [] ),
@@ -1265,15 +1366,56 @@ var xuu = (function () {
   }
   // . END Public method /getListAttrMap/
 
+  // BEGIN Public method /makeColumnList/
+  // Summary   : makeColumnList( <list>, <col_id>, [ filter_fn ] );
+  // Purpose   : Extract a column from a list-of-lists or list-of-maps table.
+  // Examples  : list = makeColumnList( enum_table, 'value' );
+  //             list = makeColumnList( grid_table, 5 );
+  //             list = makeColumnList( enum_table, 5, function ( row ) {...} )
+  // Arguments :
+  //   + <list> - List of maps or lists
+  //   + <key>  - The key to match. The default is index 0.
+  //   + <data> - The data expected for key (default === undef)
+  // Returns   : Returns found map or undef if not found
+  // Throws    : None
+  //
+  function makeColumnList ( arg_list, arg_key, arg_filter_fn ) {
+    var
+      list       = castList( arg_list, [] ),
+      col_key    = castStr(  arg_key, list[__0] && list[__0][__0] ),
+      filter_fn  = castFn(  arg_filter_fn ),
+
+      list_count = list[ __length ],
+      solve_list = [],
+
+      idx, row_data, col_data;
+
+    for ( idx = __0; idx < list_count; idx++ ) {
+      row_data = list[ idx ];
+      if ( typeofFn( row_data ) !== 'object' ) { continue; }
+      col_data = row_data[ col_key ];
+      if ( filter_fn && ! filter_fn( row_data ) ) { continue; }
+      solve_list[ __push ]( col_data );
+    }
+
+    return solve_list;
+  }
+  // . END Public method /getListAttrMap/
+
   // BEGIN Public method /getListDiff/
+  // Summary   : getListDiff( <list1>, <list2> );
   // Purpose : Find all elements common between two lists.
-  //   Do _not_ do a deep comparison; two similar lists or maps
+  //   This is _not_ a deep comparison; two similar lists or maps
   //   will be reported as different unless they point the the same
   //   data structure.
-  //
-  // Returns: A list of elements in the order of unique
-  //   elements found in the first list followed by unique
-  //   elements found in the second.
+  // Example   : getListDiff( [ 'a','b' ], [ 'b','c','d' ] );
+  //             // Returns [ 'a', 'c', 'd' ]
+  // Arguments :
+  //   + <list1> - The first list
+  //   + <list2> - The second list
+  // Returns   : A list of unique elements found in first list
+  //   followed by unique elements found in the second.
+  // Throws    : None
   //
   function getListDiff ( arg0_list, arg1_list ) {
     var
@@ -1297,6 +1439,15 @@ var xuu = (function () {
   // . END Public method /getListDiff/
 
   // BEGIN Public method /getListValCount/
+  // Summary   : getListValCount( <list>, <data> );
+  // Purpose   : Count the number of elements in <list> that === <data>
+  // Example   : getListValCount( [ 'a','b','a' ], 'a' ); // Returns 2
+  // Arguments :
+  //   + <list> - The list to examine
+  //   + <data> - The data value to match (default is undef)
+  // Returns   : Match count
+  // Throws    : None
+  //
   function getListValCount ( arg_list, arg_data ) {
     var
       input_list  = castList( arg_list, [] ),
@@ -1313,21 +1464,24 @@ var xuu = (function () {
   // . END Public method /getListValCount/
 
   // BEGIN Public method /getLogObj/
+  // See logObj above for details
   function getLogObj () { return logObj; }
   // . END Public method /getlogObj/
 
   // BEGIN Public method /getStructData/
-  // Purpose   : Get a deep structure attribute value
+  // Summary   : getStructData( <data>, <path_list> );
+  // Purpose   : Extract a value from <data> by <path_list>
   // Example   : _getStructData_({ foo : { bar : 'hi!' }}, ['foo','bar']);
-  //   Returns 'hi!'
+  //             // Returns 'hi!'
   // Arguments :
-  //   * base_struct - An array or map to add a value
-  //   * path_list   - A list of map or array keys in order of depth
+  //   + <data>      - An array or map
+  //   + <path_list> - A list of map or array keys in order of depth
   // Returns   :
-  //   * Success - Requested value
-  //   * Failure - undefined
-  // Cautions  : The key list limit is set to __100. If this
-  //   is met, a warning is logged and __undef returned.
+  //   + Success - Requested value
+  //   + Failure - undefined
+  // Throws    : None
+  // Note      : The key list limit is set to 100. If this
+  //   is met, a warning is logged and undef returned.
   //
   function getStructData ( base_struct, arg_path_list ) {
     var
@@ -1370,6 +1524,9 @@ var xuu = (function () {
   // . END Public method /getStructData/
 
   // BEGIN Public method /getTzCode/
+  // Summary: getTzCode();
+  // Purpose: Return the local timezone code
+  //
   function getTzCode () {
     var
       date_obj = getTzDateObj(),
@@ -1382,49 +1539,50 @@ var xuu = (function () {
   // . END Public method /getTzCode/
 
   // BEGIN Public method /makeClockStr/
+  // Summary   : makeClockStr( <time_ms>, <time_idx>, <do_am>, <do_local> );
   // Purpose   : Create HH:MM:SS time string from UTC time integer in ms
   // Example   : clock_str = makeClockStr( 1465621376000 ); // '05:02:56'
-  // Arguments : ( positional )
-  //   0 - int (required) time_ms UTC time in milliseconds
-  //   1 - int (default 3) time_idx Precision
+  // Arguments :
+  //   <time_ms>  - UTC time in milliseconds
+  //   <time_idx> - Date precision (default === 3)
   //     -3 === [DDd:]HHh:MMm:SSs
-  //     -3 === [DDd:]HHh:MMm
+  //     -2 === [DDd:]HHh:MMm
   //     -1 === [DDd:]HHh
   //      0 === ''
   //      1 === HH
   //      2 === HH:MM
   //      3 === HH:MM:SS
-    //   2 - do am/pm flag (default: false)
-    //   3 - use local time (default: false)
+  //   <do_am>    - Do am/pm flag  (default === false)
+  //   <do_local> - Use local time (default === false)
   // Returns   : String
-  // Cautions  :
+  // Note      :
   //   Remember to use your local timezone offset if you want to
   //   show local time. Example:
-    //     local_ms = getNowMs( true )
+  //     local_ms = getNowMs( true )
   //
-    function makeClockStr ( arg_time_ms, arg_time_idx, arg_do_ampm, arg_do_local ) {
+  function makeClockStr ( arg_time_ms, arg_time_idx, arg_do_ampm, arg_do_local ) {
     var
       do_local  = castBool( arg_do_local, __false ),
       time_ms   = castInt( arg_time_ms, getNowMs( do_local ) ),
       time_idx  = castInt( arg_time_idx, __3 ),
       do_ampm   = castBool( arg_do_ampm, __false ),
-      abs_idx   = __makeAbsNumFn( time_idx  ),
+      abs_idx   = makeAbsNumFn( time_idx  ),
 
       sec_ms    = configMap._sec_ms_,
       min_sec   = configMap._min_sec_,
       hrs_min   = configMap._hrs_min_,
       day_hrs   = configMap._day_hrs_,
 
-      raw_sec_int = __makeRoundNumFn( time_ms / sec_ms ),
+      raw_sec_int = makeRoundNumFn( time_ms / sec_ms ),
       sec_int     = raw_sec_int % min_sec,
 
-      raw_min_int = __makeFloorNumFn( raw_sec_int / min_sec ),
+      raw_min_int = makeFloorNumFn( raw_sec_int / min_sec ),
       min_int     = raw_min_int % hrs_min,
 
-      raw_hrs_int = __makeFloorNumFn( raw_min_int / hrs_min ),
+      raw_hrs_int = makeFloorNumFn( raw_min_int / hrs_min ),
       hrs_int     = raw_hrs_int % day_hrs,
 
-      day_int     = __makeFloorNumFn( raw_hrs_int / day_hrs ),
+      day_int     = makeFloorNumFn( raw_hrs_int / day_hrs ),
       mns         = makePadNumStr,
 
       time_list   = [],
@@ -1473,23 +1631,23 @@ var xuu = (function () {
   // . END Public method /makeClockStr/
 
   // BEGIN Public method /makeCommaNumStr/
+  // Summary   : makeCommaNumStr( <arg_map> );
   // Purpose   : Convert a number into a string optimized for readability
   // Example   : makeCommaNumStr({ _input_num_ : 1999 })
   //             Returns '2.0k'
-  // Arguments :
-  //   * _input_num_       - (req) The number to format, e.g. 123598
-  //   * _round_limit_exp_ - (opt) The size (10^exp) of number after which
-  //                         a rounded unit value will be returned.
-  //                         DEFAULT = 3 (1000's)
-  //   * _round_unit_exp_  - (opt) The size (10^exp) of number to group as
-  //                         a unit. DEFAULT = 3 (1000's)
-  //   * _round_unit_str_  - (opt) The unit name. DEFAULT = k
-  //   * _round_dec_count_ - (opt) Number of decimal places to keep
-  //                         in the mantisa when rounding to units.
-  //                         DEFAULT = 1.
+  // Arguments : <arg_map> with the following keys
+  //   + _input_num_       - The number to format, e.g. 123598
+  //   + _round_limit_exp_ - The size (10^exp) of number after which
+  //                         a rounded value is returned (default === 3)
+  //   + _round_unit_exp_  - The size (10^exp) of number to group as
+  //                         a unit (default === 3, e.g. 1,000's)
+  //   + _round_unit_str_  - The unit name (default === 'k').
+  //   + _round_dec_count_ - Number of decimal places to keep
+  //                         in the mantisa when rounding to units
   // Returns   :
-  //   * Success - Returns formated string
-  //   * Failure - Blank string
+  //   + Success - Returns formated string
+  //   + Failure - Blank string
+  // Throws    : None
   //
   function makeCommaNumStr ( arg_map ) {
     var
@@ -1508,7 +1666,7 @@ var xuu = (function () {
       solve_num, solve_str, solve_list, list_count, idx
     ;
 
-    if ( __makeAbsNumFn( input_num ) >= round_limit_num ) {
+    if ( makeAbsNumFn( input_num ) >= round_limit_num ) {
       solve_num    = input_num / round_unit_num;
       solve_suffix = round_unit_str;
       solve_str    = solve_num[ vMap._toFixed_]( round_dec_count );
@@ -1528,27 +1686,34 @@ var xuu = (function () {
   // . END Public method /makeCommaNumStr/
 
   // BEGIN Public method /makeDateStr/
+  // Summary   : makeDateStr( <arg_map> );
   // Purpose   : Create a string from a date object
   //   or a UTC time number (in milliseconds).
-  // Examples:
-  // 1. makeDateStr({ _date_obj_ : new Date() });
-  //    Returns a string like '2016-09-18'
-  // 2. makeDateStr({ _date_obj_ : new Date(), _time_idx_ : 3 });
-  //    Returns a string like '2016-09-18 12:45:52'
-  // 3. makeDateStr({ _date_ms_ : 1474311626050 })
-  //    Returns '2016-09-19'
-  // Arguments :
-  //   * _date_obj_ : A valid date object.
-  //   * _date_ms_  : A date time in ms.
+  // Example   :
+  //   makeDateStr({ _date_obj_ : new __Date() });
+  //   // Returns a string like '2016-09-18'
+  //
+  //   makeDateStr({ _date_obj_ : new __Date(), _time_idx_ : 3 });
+  //   // Returns a string like '2016-09-18 12:45:52'
+  //
+  //   makeDateStr({ _date_ms_ : 1474311626050 })
+  //   // Returns '2016-09-19'
+  // Arguments : <arg_map> with these keys
+  //   + _date_obj_ : A valid date object.
+  //   + _date_ms_  : A date time in ms.
   //     If neither date_obj or date_ms is provided, will use the
   //       current date.
   //     If BOTH are provided, _date_ms_ will be used in
   //       preference to date_obj.
-  //   * _time_idx_ (default 0): See _makeClockStr_ to determine
+  //   + _time_idx_ (default 0): See _makeClockStr_ to determine
   //       the clock string format
-  //   * _order_str_ (default ''):
+  //   + _order_str_ (default ''):
   //       Request '_us_' results in stupid-format: mm/dd/yyyy hh:mm:ss.
-  // Cautions  :
+  // Returns   :
+  //   + Success - Returns formated string
+  //   + Failure - Blank string
+  // Throws    : None
+  // Note      :
   //   Remember to use your local timezone offset if you want to
   //   show local time. Example:
   //       tz_offset_ms = date_obj.geteTimezoneOffset() * 60000;
@@ -1598,10 +1763,10 @@ var xuu = (function () {
       date_str = date_list[ __join ]( '-' );
     }
 
-    // no time requested
+    // Return if no time requested
     if ( time_idx === __0 ) { return date_str; }
 
-    // time requested
+    // Process time time requested
     time_ms = __Num( date_obj.getHours()   ) * configMap._hrs_ms_
       + __Num( date_obj.getMinutes() ) * configMap._min_ms_
       + __Num( date_obj.getSeconds() ) * configMap._sec_ms_
@@ -1614,28 +1779,46 @@ var xuu = (function () {
   // . END Public method /makeDateStr/
 
   // BEGIN Public method /makeDebounceFn/
-  // Purpose : Return a function that will fire after
-  //   delay_ms milliseconds of inactivity.
+  // Summary   : makeDebounceFn( <arg_map> );
+  // Purpose   : Create a function that will execute only after
+  //   <_delay_ms_> of inactivity.
+  // Example   : makeDebounceFn({ _fn_ : myRoutineFn, _delay_ms_: 2500 });
+  //             // Returns the debounced function
+  // Arguments : <arg_map> with the following keys
+  //   + _fn_       - The function to execute
+  //   + _delay_ms_ - Inactivity time
+  //   + _ctx_data_ - Function context (default === undef)
+  //   + _do_asap_  - Fire function at first call (default === undef)
+  // Returns   :
+  //   + Success - A function which will execute when called only after
+  //     <_delay_ms_> has elapsed since the last time it was called.
+  //   + Failure - undef
+  // Throws    : None
+  // Note      : The returned function will process arguments just like the
+  //             provided function.
   //
   function makeDebounceFn ( arg_map ) {
     var
       map      = castMap(  arg_map, {} ),
       fn       = castFn(   map._fn_ ),
-      delay_ms = castInt(  map._delay_ms_ ),
-      do_asap  = castBool( map._do_asap_, __false ),
-      ctx_data = map._ctx_data_ || this,
+        delay_ms = castInt(  map._delay_ms_, __0     ),
+      do_asap  = castBool( map._do_asap_,    __false ),
+        ctx_data = map._ctx_data_,
       delay_toid
     ;
 
-    if ( ! ( fn && delay_ms ) ) { return; }
+      if ( ! fn ) {
+        logObj._logMsg_( '_error_', '_debounce_bad_argument_', fn );
+        return __undef;
+      }
 
     return function () {
       var arg_list = makeArgList( arguments );
       if ( do_asap && ! delay_toid ) {
         fn[ __apply ]( ctx_data, arg_list );
       }
-      __clearTimeoutFn( delay_toid );
-      delay_toid = __setTimeoutFn( function() {
+      clearToFn( delay_toid );
+      delay_toid = setToFn( function() {
         if ( ! do_asap ) {
           fn[ __apply]( ctx_data, arg_list );
         }
@@ -1646,9 +1829,22 @@ var xuu = (function () {
   // . END Public method /makeDebounceFn/
 
   // BEGIN Public method /makeThrottleFn/
-  // Purpose : Return a function that will fire once per
-  //   delay_ms milliseconds. It fires immediately on first
-  //   call.
+  // Summary   : makeThrottleFn( <arg_map> );
+  // Purpose   : Create a function which will only execute when called
+  //   if <_delay_ms_> has elapsed since its last invocation.
+  // Example   : makeThrottleFn({ _fn_ : myRoutineFn, _delay_ms_: 2500 });
+  //             // Returns the throttled function
+  // Arguments : <arg_map> with the following keys
+  //   + _fn_       - The function to execute
+  //   + _delay_ms_ - The minimum time between calls
+  //   + _ctx_data_ - Function context (default === undef)
+  // Returns   :
+  //   + Success - A function which will execute when called only if
+  //     <_delay_ms_> has elapsed since its last invocation.
+  //   + Failure - undef
+  // Throws    : None
+  // Note      : The returned function will process arguments just like the
+  //             provided function.
   //
   function makeThrottleFn ( arg_map ) {
     var
@@ -1671,15 +1867,14 @@ var xuu = (function () {
       if ( delta_ms <= __0 ) {
         // A timeout id should never be defined except in race conditions
         /* istanbul ignore next */
-        if ( delay_toid ) { __clearTimeoutFn( delay_toid ); }
-        fn[ __apply ]( ctx_data, arg_list );
+        if ( delay_toid ) { clearToFn( delay_toid ); }
         delay_toid = __undef;
         last_ms    = now_ms;
-        return;
+        return fn[ __apply ]( ctx_data, arg_list );
       }
 
       if ( delay_toid ) { return; }
-      delay_toid = __setTimeoutFn(
+      delay_toid = setToFn(
         function () {
           fn[ __apply ]( ctx_data, arg_list );
           delay_toid = __undef;
@@ -1692,6 +1887,7 @@ var xuu = (function () {
   // . END Public method /makeThrottleFn/
 
   // BEGIN Public method /makeEllipsisStr/
+  // Summary   : makeEllipsisStr( <arg_map> );
   // Purpose : Shorten a string to a maximum length and append ellipsis
   //   if it is exceeded.
   // Example   :
@@ -1701,13 +1897,12 @@ var xuu = (function () {
   //     _do_word_break_  : true
   //   });
   //   // returns 'hee haw ...'
-  //
   // Arguments:
-  // _input_str_      : (req) The string to shorten if required
-  // _char_limit_int_ : (opt, default 0) the maxiumum allowed chars
-  // _do_word_break_  : (opt, default true) break at word boundries
-  //
+  //   + _char_limit_int_ : Maxiumum allowed chars (default === 0)
+  //   + _do_word_break_  : Break at word boundries (default === true)
+  //   + _input_str_      : The string to shorten
   // Returns: A string
+  // Throws    : None
   //
   function makeEllipsisStr( arg_map ) {
     var
@@ -1749,31 +1944,38 @@ var xuu = (function () {
   // . END Public method /makeEllipsisStr/
 
   // BEGIN Public method /makeErrorObj/
+  // Summary   : makeErrorObj( <name>, <msg> );
   // Purpose   : A convenient method to create an error object
+  // Example   : makeErrorObj( 'notCool', 'This is not cool' );
   // Arguments :
-  //   * name_text - the error name
-  //   * msg_text  - long error message
-  // Returns   : newly constructed error object
-  // Throws    : none
+  //   + <name> - the error name (default === 'error')
+  //   + <msg>  - long error message (default === '')
+  // Returns   : A newly constructed error object
+  // Throws    : None
   //
   function makeErrorObj ( arg_name, arg_msg ) {
-    var
-      name = ( arg_name && __Str( arg_name ) ) || 'error',
-      msg  = ( arg_msg  && __Str( arg_msg  ) ) || __blank,
-      error_obj = new Error();
+    var error_obj = new Error();
 
-    error_obj.name    = name;
-    error_obj.message = msg;
+    error_obj.name    = ( arg_name && __Str( arg_name ) ) || 'error';
+    error_obj.message = ( arg_msg  && __Str( arg_msg  ) ) || __blank;
+
     return error_obj;
   }
   // . END Public method /makeErrorObj/
 
   // BEGIN Public method /makeGuidStr/
+  // Summary   : makeGuidStr()
+  // Purpose   : Return a standard GUID
+  // Example   : makeGuidStr();
+  // Arguments : None
+  // Returns   : A GUID
+  // Throws    : None
+  //
   function makeGuidStr () {
     /*jslint bitwise: true*/
     function makePart () {
       //noinspection NonShortCircuitBooleanExpressionJS,MagicNumberJS
-      return ((( __1+__makeRandomNumFn() ) * 0x10000 )|__0
+      return ((( __1+makeRandomNumFn() ) * 0x10000 )|__0
         )[ __toString ](16)[ vMap._substr_ ]( __1 );
     }
     /*jslint bitwise: false*/
@@ -1788,9 +1990,9 @@ var xuu = (function () {
   // . END Public method /makeGuidStr/
 
   // BEGIN Public method /makeMapUtilObj/
-  // Purpose  : Creates a thread-safe map utility object
-  //   useful to streamlining list.map() functions and
-  //   avoiding nesting.
+  // Summary  : makeMapUtilObj()
+  // Purpose  : Creates a map utility object used to streamlining
+  //   list.map() functions and avoid nesting.
   // Example  :
   // 1. Create a map_util object:
   //    | var map_util_obj = makeMapUtilObj();
@@ -1819,9 +2021,10 @@ var xuu = (function () {
   // 7. result_map will now contain the key value pairs return by
   //    mapUtil_renameFn for the provided list.
   //
-  // This is an excellent example of how a closure creates
-  // unique private variables in each instance returned, such
-  // as the stored argList, resultMap, and mapFn.
+  // Returns  : A mapUtil object
+  // Throws   : None
+  // Note     : A closure creates unique private variables in each
+  //   instance returned. Examples include argList, resultMap, and mapFn.
   //
   //
   function makeMapUtilObj () {
@@ -1859,49 +2062,57 @@ var xuu = (function () {
   // . END Public method /makeMapUtilObj/
 
   // BEGIN Public method /makeOptionHtml/
-  // Arguments : ( named )
-  //    * _select_list_ : (opt) List of values to be of selected
-  //      This is useful for multi-select fields.
-  //    * _title_map_   : (opt) val_x_title map
-  //    * _val_list_    : (opt) List of values to process
-  // Output    :
-  //    * List of options as used in a select statement
+  // Summary   : makeOptionHtml( <arg_map> );
+  // Purpose   : Create an HTML string with option tags
+  // Example   : makeOptionHtml({ _val_list_ : [1,2,3,4] });
+  // Arguments : <arg_map> with the following keys
+  //    + _enum_list_  : A table of _name_ and _value_
+  //    + _match_list_ : List of values to be selected.
+  //      This is useful for multi-select fields (default = undef)
+  // Returns   : An HTML option select string
+  // Throws    : None
+  //
   function makeOptionHtml ( arg_map ) {
     var
       map         = castMap(  arg_map, {} ),
-      label_map   = castMap(  map._label_map_,   {} ),
-      select_list = castList( map._select_list_, [] ),
-      val_list    = castList( map._val_list_,    [] ),
-      val_count   = val_list[ __length ],
-      html_str    = __blank,
+      enum_table = castList( map._enum_table_,  [] ),
+      match_list = castList( map._match_list_,  [] ),
 
-      idx, val_data, val_str, label_str
+      enum_count = enum_table[ __length ],
+      solve_html = __blank,
+
+      idx, row_map, val_str, val_html, label_str, label_html
     ;
 
-    _OPTION_: for ( idx = __0; idx < val_count; idx++ ) {
-      val_data = val_list[ idx ];
-      val_str  = castStr( val_data, __blank );
-      if ( val_str === __blank ) { continue _OPTION_; }
-      label_str = label_map[ val_str ] || makeUcFirstStr( val_str );
+    _OPTION_: for ( idx = __0; idx < enum_count; idx++ ) {
+      row_map = enum_table[ idx ];
+      val_str = castStr( row_map._value_ );
 
-      html_str += '<option value="' + val_str + '"';
-      if ( select_list[ __indexOf ]( val_data ) !== __n1 ) {
-        html_str += ' selected="selected"';
+      if ( val_str === __undef ) { continue _OPTION_; }
+
+      val_html   = encodeHtml( val_str );
+      label_str  = row_map._label_ || makeUcFirstStr( val_str );
+      label_html = encodeHtml( label_str );
+
+      solve_html += '<option value="' + val_html + '"';
+      if ( match_list[ __indexOf ]( val_str ) > __n1 ) {
+        solve_html += ' selected="selected"';
       }
-      html_str += '>' + label_str + '</option>';
+      solve_html += '>' + label_html + '</option>';
     }
-    return html_str;
+    return solve_html;
   }
   // . END Public method /makeOptionHtml/
 
   // BEGIN Public method /makePctStr/
+  // Summary   : makePctStr( <ratio>, <precition_int> );
   // Purpose   : Convert a decimal ratio into a readable % string
-  // Example   :
-  //   my_pct = makePctStr( 0.529863, 1 );
-  // Arguments : ( positional )
-  //   0 : (required) ratio - Ratio to convert. 1 = 100%.
-  //   1 : (optional) count - Number of digits after decimal.
-  //       Default value is 0.
+  // Example   : makePctStr( 0.529863, 1 );
+  // Arguments :
+  //   <ratio>         - Ratio to convert. 1 = 100%.
+  //   <precision_int> - Number of digits after decimal (default === 0)
+  // Returns   : A percentage string
+  // Throws    : None
   //
   function makePctStr ( arg_ratio, arg_count ) {
     var
@@ -1909,7 +2120,7 @@ var xuu = (function () {
       count = castNum( arg_count, __0 )
     ;
 
-    count = count < __0 ? __0 : __makeFloorNumFn( count );
+    count = count < __0 ? __0 : makeFloorNumFn( count );
       return ( ratio * __100 )[ vMap._toFixed_ ]( count ) + '%';
   }
   // . END Public method /makePctStr/
@@ -1920,88 +2131,96 @@ var xuu = (function () {
   function makeRadioHtml ( arg_map ) {
     var
       map        = castMap(  arg_map, {} ),
-      group_name = castStr(  map._group_name_ ),    // name=...
-      match_str  = castStr(  map._match_str_  ),    // Selected val
-      val_list   = castList( map._val_list_,  [] ), // Vals in order
-      label_map  = castMap(  map._label_map_, {} ), // Labels
+      enum_table = castList( map._enum_table_, [] ),
+      match_str  = castStr(  map._match_str_   ),
+      group_name = castStr(  map._group_name_  ),
+      group_html = encodeHtml( group_name      ),
 
-      val_count  = val_list[ __length ],
-      html_str   = __blank,
+      enum_count = enum_table[ __length ],
+      solve_html = __blank,
 
-      idx, val_str, label_str
-    ;
-
-    _RADIO_: for ( idx = __0; idx < val_count; idx++ ) {
-      val_str   = castStr( val_list[ idx ], __blank );
-      if ( val_str === __blank ) { continue _RADIO_; }
-
-      label_str = label_map[ val_str ] || makeUcFirstStr( val_str );
-
-      html_str
-        += '<label>'
-        + '<input type="radio" name="' + group_name
-        + '" value="' + val_str + '"'
+      idx, row_map, val_str, val_html, label_str, label_html
       ;
-      if ( val_str === match_str ) { html_str += ' checked="checked"'; }
-      html_str += '/>' + label_str + '</label>';
+
+    _RADIO_: for ( idx = __0; idx < enum_count; idx++ ) {
+      row_map    = castMap( enum_table[ idx ], {} );
+      val_str    = castStr( row_map._value_ );
+      if ( val_str === __undef ) { continue _RADIO_; }
+      val_html   = encodeHtml( val_str );
+      label_str  = castStr( row_map._label_, makeUcFirstStr( val_html ) );
+      label_html = encodeHtml( label_str );
+
+      solve_html
+        += '<label>'
+        +  '<input type="radio" name="' + group_html
+        +  '" value="' + val_html + '"'
+        ;
+      if ( val_str === match_str ) { solve_html += ' checked="checked"'; }
+      solve_html += '>' + label_html + '</label>';
     }
-    return html_str;
+    return solve_html;
   }
   // . END Public method /makeRadioHtml/
 
-    // BEGIN Public method /makeReplaceFn/
-    // Purpose   : Return a high-performance function that
-    //   replaces a single symbol with a predefined value.
-    // Example   :
-    //   fn = makeReplaceFn( 'x', 'fred' );
-    //   __logMsg( 'info', fn('you do not know {x}.') );
-    //   // Prints 'you do not know fred.'
-    // Arguments : ( positional )
-    //  0 - search_str : A string to use to search. It is wrapped
-    //    in '{_<search_str>_}'
-    //  1 - value_str : Replacement value
-    //
-    function makeReplaceFn ( arg_search_str, arg_value_str ) {
-      var
-        search_str = castStr( arg_search_str, __blank ),
-        value_str  = castStr( arg_value_str,  __blank ),
-        escape_str = makeEscRxStr( '{' + search_str + '}' ),
-        search_rx  = makeRxObj( escape_str, 'g' )
+  // BEGIN Public method /makeReplaceFn/
+  // Summary   : makeReplaceFn( <search_str>, <replace_str> );
+  // Purpose   : Return a high-performance function that
+  //   replaces <search_str> with <value_str>.
+  // Example   :
+  //   fn = makeReplaceFn( '_x_', 'fred' );
+  //   __logMsg( 'info', fn('you do not know {_x_}.') );
+  //   // Prints 'you do not know fred.'
+  // Arguments : ( positional )
+  //   + <search_str>  - The symbol to replace.
+  //     It is be wrapped in braces.
+  //   + <replace_str> - The replacement string.
+  // Returns   : A replacement function
+  // Throws    : None
+  //
+  function makeReplaceFn ( arg_search_str, arg_value_str ) {
+    var
+      search_str = castStr( arg_search_str, __blank ),
+      value_str  = castStr( arg_value_str,  __blank ),
+      escape_str = makeEscRxStr( '{' + search_str + '}' ),
+      search_rx  = makeRxObj( escape_str, 'g' )
       ;
 
-      return function ( arg_tmplt ) {
-        var tmplt = castStr( arg_tmplt, __blank );
-        return tmplt[ __replace ]( search_rx, value_str );
-      };
-    }
-    // . END Public method /makeReplaceFn/
+    return function ( arg_tmplt ) {
+      var tmplt = castStr( arg_tmplt, __blank );
+      return tmplt[ __replace ]( search_rx, value_str );
+    };
+  }
+  // . END Public method /makeReplaceFn/
 
   // BEGIN Public method /makeRekeyMap/
-  // Purpose   : Change all key names in a map to the new keys provided
-  //   in the key_map
-  // Arguments :
-  //   arg_struct - A complex structure to rekey or revalue
-  //   key_map    - A key map pointing to values
-  //   mode_str   - 'rekey' or 'reval'
+  // Summary   : makeRekeyMap( <struct_data>, <key_map>, <mode_str> );
+  // Purpose   : Change all keys or values in a map to the new values provided
+  // Arguments : <arg_map> with the following keys:
+  //   + <struct_data> - A complex structure to rekey or revalue
+  //   + <key_map>     - A key map pointing to values
+  //   + <mode_str>    - '_rekey_' or '_reval_'
   // Examples  :
   //   makeRekeyMap(
   //     { a:1, b:2, c:[] },
   //     { a:'_x_', b: '_y_', c:'_z_' },
   //     '_rekey_'
   //   );
+  //   // Returns { _x_:1, _y_:2, _z_:[] }
+  //
   //   makeRekeyMap(
   //     { a:1, b:2, list:[ { c:[] } ] },
   //     { a:'_x_', b: '_y_', c:22 },
   //     '_reval_'
   //   );
-  //   returns { a:'_x_', b:'_y_', [ { c:22 } ] }
-  //
-  // A hard limit of 100 000 iterations are supported.
+  //   // Returns { a : '_x_', b : '_y_', list : [ { c : 22 } ] }
+  // Returns   : A new map or list or other data
+  // Throws    : None
+  // Note      : A hard limit of 100 000 iterations are supported.
   //   Executes deep renaming through arrays and objects.
   //
   function makeContextObj ( arg_struct ) {
     var
-      key_list  = __makeKeyListFn( arg_struct ),
+      key_list  = makeKeyListFn( arg_struct ),
       key_count = key_list.length,
       solve_struct = __Array.isArray( arg_struct ) ? [] : {}
       ;
@@ -2015,6 +2234,7 @@ var xuu = (function () {
       } : null;
   }
   function makeRekeyMap( arg_struct, arg_key_map, arg_mode_str ) {
+    // noinspection JSMismatchedCollectionQueryUpdate
     var
       context_obj = makeContextObj( arg_struct ),
       mode_str    = castStr( arg_mode_str, '_rekey_', {
@@ -2027,6 +2247,8 @@ var xuu = (function () {
       key, data, replace_data,
       check_obj, pop_solve_struct, i
       ;
+
+    if ( ! context_obj ) { return arg_struct; }
 
     CONTEXT: for ( i = __0; i < 100000; i++ ) {
       key_count  = context_obj.key_count;
@@ -2044,7 +2266,7 @@ var xuu = (function () {
         data = pop_solve_struct;
         pop_solve_struct = null;
       }
-      else if ( typeof data === 'object' ) {
+      else if ( data && typeofFn( data ) === 'object' ) {
         check_obj = makeContextObj( data );
         if ( check_obj ) {
           stack_list[ __push ]( context_obj );
@@ -2067,7 +2289,7 @@ var xuu = (function () {
       if ( key_idx >= key_count ) {
         if ( stack_list.length > 0 ) {
           pop_solve_struct = context_obj.solve_struct;
-          context_obj = stack_list.pop();
+          context_obj = stack_list[ __pop ]();
         }
         else {
           break CONTEXT;
@@ -2111,13 +2333,15 @@ var xuu = (function () {
   // Purpose : Concatenate a number of key-values
   // into a single string
   function makeStrFromMap ( arg_map ) {
+    // noinspection JSMismatchedCollectionQueryUpdate
     var
-      map       = castMap(  arg_map, {} ),
-      prop_map  = castMap(  map._prop_map_, {} ),
-      key_list  = castList( map._key_list_, [] ),
-      delim_str = castStr( map._delim_str_, ' ' ),
+      map       = castMap(  arg_map,          {} ),
+      prop_map  = castMap(  map._prop_map_,   {} ),
+      key_list  = castList( map._key_list_,   [] ),
+      delim_str = castStr(  map._delim_str_, ' ' ),
+
       label_delim_str = castStr( map._label_delim_str_, ': ' ),
-      label_map = castMap( map._label_map_, __undef ),
+      label_map       = castMap( map._label_map_,    __undef ),
 
       do_label   = !! ( label_map || map._do_label_ ),
       key_count  = key_list[ __length ],
@@ -2156,9 +2380,9 @@ var xuu = (function () {
   //     _tgt_count_    : 12
   //   });
   // Arguments :
-  //   _max_ms_       : (req) int start local-time milliseconds
-  //   _min_ms_       : (req) int end local-time in milliseconds
-  //   _tgt_count_    : (req) int desired number of divisions (+/- 50%)
+  //   _max_ms_       : Start local-time milliseconds
+  //   _min_ms_       : End local-time in milliseconds
+  //   _tgt_count_    : Desired number of divisions (+/- 50%)
   //
   //  Returns
   //   A map useful for plotting a quantized time series like so:
@@ -2238,9 +2462,9 @@ var xuu = (function () {
       _INTERPOLATE_: for ( idx = __0; idx < unit_count; idx++ ) {
         // Calculate ranges
         check_idx   = btm_idx
-          + __makeRoundNumFn( ( ( top_idx - btm_idx ) / __2 ) );
+          + makeRoundNumFn( ( ( top_idx - btm_idx ) / __2 ) );
         check_map   = unit_ms_list[ check_idx ];
-        check_count = __makeRoundNumFn( ( span_ms / check_map._ms_ ) );
+        check_count = makeRoundNumFn( ( span_ms / check_map._ms_ ) );
         if ( ( top_idx - btm_idx ) === __1 && last_btm_idx !== __undef ) {
           if ( btm_idx === last_btm_idx && top_idx === last_top_idx ) {
             break _INTERPOLATE_;
@@ -2309,7 +2533,7 @@ var xuu = (function () {
 
     solve_time_list = [];
     while ( left_ratio < __1 ) {
-      solve_ms  = __makeFloorNumFn( left_ratio * span_ms ) + min_ms;
+      solve_ms  = makeFloorNumFn( left_ratio * span_ms ) + min_ms;
       date_obj.setTime( solve_ms );
       time_ms = __Num( date_obj.getHours()   ) * configMap._hrs_ms_
         +       __Num( date_obj.getMinutes() ) * configMap._min_ms_
@@ -2332,7 +2556,8 @@ var xuu = (function () {
   // Example   :
   //  out_str = makeTmpltStr({
   //    _input_str_  : '{_name_} says "{_saying_}"',
-  //    _lookup_map_ : { _name_ : 'Fred', _saying_ : 'hello!' }
+  //    _lookup_map_ : { _name_ : 'Fred', _saying_ : 'hello!' },
+  //    _do_encode_html_ : true
   //  });
   //  // out_str is 'Fred says hello!'
   //
@@ -2341,32 +2566,36 @@ var xuu = (function () {
   //      'This person name {_p1_} said to the other person {_p2_}'
   //   _lookup_map_ : A map of values to replace, like so:
   //      { _p1_ : 'fred', _p2_ : 'barney' }
-  // Throws    : none
+  // Throws    : None
   // Returns
   //   The filled-out template string
   //
   function makeTmpltStr ( arg_map ) {
     var
       map        = castMap( arg_map, {} ),
-      input_str  = castStr( map._input_str_, __blank  ),
-      lookup_map = castMap( map._lookup_map_,      {} ),
-      tmplt_rx   = map._tmplt_rx_ || configMap._tmplt_rx_,
-      bound_fn;
 
+      do_encode_html = castBool( map._do_encode_html_, __false ),
+      input_str      = castStr(  map._input_str_,      __blank ),
+      lookup_map     = castMap(  map._lookup_map_,          {} ),
+      tmplt_rx       = map._tmplt_rx_ || configMap._tmplt_rx_,
+
+      bound_fn
+      ;
 
     function lookupFn ( ignore_match_str, lookup_name ) {
       var
         return_data  = this,
-        lookup_list  = lookup_name[ __split ]( '.' ),
-        lookup_count = lookup_list[ __length ],
-        idx, key_name
-      ;
+        path_list  = lookup_name[ __split ]( '.' ),
+        path_count = path_list[ __length ],
+        idx, key_name, return_str
+        ;
 
-      for ( idx = 0; idx < lookup_count; idx++ ) {
-        key_name = lookup_list[ idx ];
+      for ( idx = __0; idx < path_count; idx++ ) {
+        key_name = path_list[ idx ];
         return_data = ( return_data && return_data[ key_name ] );
       }
-      return castStr( return_data, __blank );
+      return_str = castStr( return_data, __blank );
+      return do_encode_html ? encodeHtml( return_str ) : return_str;
     }
 
     bound_fn   = lookupFn[ __bind ]( lookup_map );
@@ -2388,7 +2617,7 @@ var xuu = (function () {
       extend_map = castMap(  arg_extend_map, {} ),
       attr_list  = castList( arg_attr_list ),
 
-      key_list   = __makeKeyListFn( extend_map ),
+      key_list   = makeKeyListFn( extend_map ),
       key_count  = key_list[ __length ],
 
       idx, key
@@ -2434,7 +2663,7 @@ var xuu = (function () {
     if ( ! poll_fn ) { return __false; }
 
     main_fn = function () {
-      __setTimeoutFn( function() {
+      setToFn( function() {
         var do_next;
         if ( count && idx >= count ) {
           return finish_fn && finish_fn();
@@ -2522,21 +2751,87 @@ var xuu = (function () {
     if ( ! (  input_map && settable_map && config_map ) ) {
       return logObj._logMsg_( '_error_', '_bad_input_' );
     }
-    key_list  = __makeKeyListFn( input_map );
+    key_list  = makeKeyListFn( input_map );
     key_count = key_list.length;
 
     for ( idx = __0; idx < key_count; idx++ ) {
       key_name = key_list[ idx ];
-      if ( settable_map[ __hasOwnProperty ]( key_name ) ) {
+      if ( settable_map[ __hasProp ]( key_name ) ) {
         config_map[ key_name ] = input_map[ key_name ];
       }
       else {
-        logObj._logMsg_( '_warn_', '_key_not_supported_', key_name )
+        logObj._logMsg_( '_warn_', '_key_not_supported_', key_name );
       }
     }
     return config_map;
   }
   // . END Public method /setConfigMap/
+
+  // BEGIN Public method /makeDeepKeyList/
+  // Purpose   : Get all unique keys in a data structure
+  // Example   : _getObjKeyList_({ foo:{ bar:1 }, bar:2})
+  //             Returns [ 'foo', 'bar' ]
+  // Arguments : ( positional )
+  //   0 : base_struct - An array or map
+  // Returns   :
+  //   * Success - A list of a unique keys sorted
+  //   * Failure - An empty list
+  // Cautions  : The key list limit is set to __100. If this
+  //   is met, a warning is logged and __undef returned
+  //
+  function makeDeepKeyList ( arg_base_data ) {
+    // noinspection JSMismatchedCollectionQueryUpdate
+    var
+      base_obj   = typeofFn( arg_base_data ) === 'object' ? arg_base_data : {},
+      walk_obj   = base_obj,
+      solve_list = [],
+      stack_list = [],
+      key_list   = makeKeyListFn( walk_obj ),
+      key_count  = key_list[ __length ],
+      idx        = __0,
+
+      key, loop_obj,
+      ctx_key_list, stack_map
+      ;
+
+    _OUTER_: while ( walk_obj ) {
+      while ( idx < key_count ) {
+        key = key_list[ idx ];
+        loop_obj = walk_obj[ key ];
+        if ( solve_list[ __indexOf ]( key ) === __n1 ) {
+          solve_list[ __push ]( key );
+        }
+
+        if ( typeofFn( loop_obj ) === vMap._object_ ) {
+          ctx_key_list = makeKeyListFn( loop_obj );
+          if ( ctx_key_list[ __length ] > __0 ) {
+            stack_list[ __push ]( {
+              _idx_       : idx,
+              _key_count_ : key_count,
+              _key_list_  : key_list,
+              _walk_obj_  : walk_obj
+            } );
+
+            idx = __n1;
+            walk_obj = loop_obj;
+            key_list = makeKeyListFn( walk_obj );
+            key_count = key_list[ __length ];
+          }
+        }
+        idx++;
+      }
+
+      stack_map = stack_list[ __pop ]();
+      if ( ! stack_map ) { break _OUTER_; }
+
+      walk_obj = stack_map._walk_obj_;
+      key_count = stack_map._key_count_;
+      key_list = stack_map._key_list_;
+      idx = stack_map._idx_ + __1;
+    }
+    return solve_list;
+  }
+  // . END Public method /makeDeepKeyList/
 
   // BEGIN Public method /setStructData/
   // Purpose   : Set a deep structure attribute value
@@ -2608,7 +2903,7 @@ var xuu = (function () {
         break _SET_KEY_;
       }
 
-      if ( ! walk_struct[ __hasOwnProperty ]( solve_key ) ) {
+      if ( ! walk_struct[ __hasProp ]( solve_key ) ) {
         int_next_key = castInt( raw_next_key );
         if ( raw_next_key === __null || int_next_key !== __undef ) {
           walk_struct[ solve_key ] = [];
@@ -2624,13 +2919,14 @@ var xuu = (function () {
   }
   // . END Public method /setStructData/
 
-  // BEGIN public method /shuffleList/
+  // BEGIN Public method /shuffleList/
+  // Summary   : SuffleList( <list>
   // Purpose   : Shuffle elements in a list
   // Example   : shuffleList( [1,2,3,4] ) returns [ 3,1,4,2 ]
-  // Arguments : ( positional )
-  //   0. arg_list - The list to shuffle
-  // Returns   : boolean true on success
-  // Throws    : none
+  // Arguments :
+  //   <list> - The list to shuffle
+  // Returns   : Boolean true on success
+  // Throws    : None
   // Technique :
   //   1. Count down from end of array with last_idx
   //   2. Randomly pick element from between 0 and last_idx
@@ -2646,7 +2942,7 @@ var xuu = (function () {
     count = list[ __length ];
     for ( idj = count; idj > __0; idj-- ) {
       last_idx         = idj - __1;
-      pick_idx         = __makeFloorNumFn( __makeRandomNumFn() * idj );
+      pick_idx         = makeFloorNumFn( makeRandomNumFn() * idj );
       swap_data        = list[ last_idx ];
       list[ last_idx ] = list[ pick_idx ];
       list[ pick_idx ] = swap_data;
@@ -2655,7 +2951,7 @@ var xuu = (function () {
   }
   // . END public method /shuffleList/
 
-  // BEGIN public method /trimStrList/
+  // BEGIN Public method /trimStrList/
   function trimStrList ( arg_list ) {
     var list = castList( arg_list );
 
@@ -2670,7 +2966,6 @@ var xuu = (function () {
   // . END utility /trimStrList/
 
   // == . END PUBLIC METHODS ==========================================
-
   // BEGIN initialize module
   function initModuleFn ()  {
     stateMap = {
@@ -2795,14 +3090,16 @@ var xuu = (function () {
     _getStructData_   : getStructData,
     _getTzCode_       : getTzCode,
     _makeClockStr_    : makeClockStr,
+    _makeColumnList_  : makeColumnList,
     _makeCommaNumStr_ : makeCommaNumStr,
     _makeDateStr_     : makeDateStr,
     _makeDebounceFn_  : makeDebounceFn,
+    _makeDeepKeyList_ : makeDeepKeyList,
     _makeEllipsisStr_ : makeEllipsisStr,
     _makeErrorObj_    : makeErrorObj,
     _makeExtractMap_  : makeExtractMap,
     _makeGuidStr_     : makeGuidStr,
-    _makeKeyList_     : __makeKeyListFn,
+    _makeKeyList_     : makeKeyListFn,
     _makeMapUtilObj_  : makeMapUtilObj,
     _makeMetricStr_   : makeMetricStr,
     _makeOptionHtml_  : makeOptionHtml,
@@ -2826,9 +3123,9 @@ var xuu = (function () {
   };
 }());
 // == . END MODULE xuu ================================================
-try { module.exports = xuu }
+try { module.exports = xuu; }
 catch (e1) {
-  try { window.xuu = xuu }
+  try { window.xuu = xuu; }
   catch (e2) {
     console.trace( e2 );
   }

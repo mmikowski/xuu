@@ -10,8 +10,8 @@
   "description": "Extraction of utility library from https://github.com/mmikowski/hi_score. Version tracks hi_score.",
   "dependencies": {},
   "devDependencies": {
-    "eslint": "5.7.0",
-    "eslint-plugin-json": "1.2.1",
+    "eslint": "5.16.0",
+    "eslint-plugin-json": "1.4.0",
     "nodeunit": "0.11.3"
   },
   "eslintConfig": {
@@ -46,15 +46,19 @@
       "continue": "off",
       "indent": "off",
       "no-console": "off",
+      "no-plusplus": "off",
       "one-var": [
         "error",
         {
           "var": "always",
-          "let": "always",
-          "const": "always"
+          "let": "consecutive",
+          "const": "consecutive"
         }
       ],
-      "no-plusplus": "off"
+      "semi": [
+        "error",
+        "always"
+      ]
     }
   },
   "homepage": "https://github.com/mmikowski/xuu",
@@ -84,5 +88,5 @@
   "scripts": {
     "test": "nodeunit ./nodeunit_xuu.js"
   },
-  "version": "1.4.27-7"
+  "version": "1.5.0a"
 }

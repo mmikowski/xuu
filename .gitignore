@@ -1,2 +1,5 @@
-package-lock.json
+*.swp
+.git
+.idea
 node_modules
+npm-debug.log
