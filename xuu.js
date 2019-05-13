@@ -46,6 +46,7 @@ var xuu = (function () {
     typeofFn        = function (d) { return typeof d; },
 
     // Set number symbols
+    __n1  = -1,
     __0   = 0,
     __1   = 1,
     __2   = 2,
@@ -54,9 +55,9 @@ var xuu = (function () {
     __5   = 5,
     __6   = 6,
     __7   = 7,
+    __8   = 8,
     __10  = 10,
     __100 = 100,
-    __n1  = -1,
 
     // Set string-like symbols
     __apply      = 'apply',
@@ -72,10 +73,14 @@ var xuu = (function () {
     __pop        = 'pop',
     __push       = 'push',
     __replace    = 'replace',
+    __shift      = 'shift',
+    __slice      = 'slice',
     __split      = 'split',
+    __substr     = 'substr',
     __toString   = 'toString',
     __true       = true,
     __undef      = void(0),
+    __unshift    = 'unshift',
 
     // Set shared map
     typeofMap = {
@@ -96,10 +101,89 @@ var xuu = (function () {
       'Undefined' : '_Undefined_'
     },
 
-      // Declare other module-scope vars
-      configMap,  getBasename, getDirname, 
-      logObj, stateMap
+    // Set configuration map
+    configMap = {
+      _sec_ms_    : 1000,
+      _min_sec_   : 60,
+      _hrs_min_   : 60,
+      _day_hrs_   : 24,
+
+      _min_ms_    : 60000,
+      _hrs_ms_    : 3600000,
+      _day_ms_    : 86400000,
+      _offset_yr_ : 1900,
+
+      _encode_html_map_ : {
+        '&' : '&#38;',
+        '"' : '&#34;',
+        "'" : '&#39;',
+        '>' : '&#62;',
+        '<' : '&#60;'
+      },
+
+      _get_now_fn_  : vMap._getNowMs_,
+      _date_us_rx_  : makeRxObj(
+        '^(0?[1-9]|1[012])[\\/-](0?[1-9]|[12][0-9]|3[01])[\\/-]([0-9]{4})\\b'
+      ),
+      _date_utc_rx_ : makeRxObj(
+        '^([0-9]{4})[\\/-](0?[1-9]|1[012])[\\/-](0?[1-9]|[12][0-9]|3[01])\\b'
+      ),
+
+      _comma_rx_        : makeRxObj( '(\\d)(?=(\\d\\d\\d)+(?!\\d))', 'g' ),
+      _encode_html_rx_  : /[&"'><]/g,
+      _encode_noamp_rx_ : /["'><]/g,
+
+      _tag_end_rx_: makeRxObj( '(</[^>]+>)+', 'g' ),
+      _tag_rx_    : makeRxObj( '</?[^>]+>', 'g' ),
+      _tmplt_rx_  : makeRxObj( '{([^{}]+[^\\\\])}','g' ),
+      _tzcode_rx_ : makeRxObj( '\\((.*)\\)$' ),
+
+      _unit_ms_list_ : [
+        { _str_ : '0.1s',  _ms_ :        100, _time_idx_ : __3 },
+        { _str_ : '0.25s', _ms_ :        250, _time_idx_ : __3 },
+        { _str_ : '0.5s',  _ms_ :        500, _time_idx_ : __3 },
+        { _str_ : '1s',    _ms_ :       1000, _time_idx_ : __3 },
+        { _str_ : '2.5s',  _ms_ :       2500, _time_idx_ : __3 },
+        { _str_ : '5s',    _ms_ :       5000, _time_idx_ : __3 },
+        { _str_ : '10s',   _ms_ :      10000, _time_idx_ : __3 },
+        { _str_ : '15s',   _ms_ :      15000, _time_idx_ : __3 },
+        { _str_ : '30s',   _ms_ :      30000, _time_idx_ : __3 },
+        { _str_ : '1m',    _ms_ :      60000, _time_idx_ : __2 },
+        { _str_ : '2.5m',  _ms_ :     150000, _time_idx_ : __3 },
+        { _str_ : '5m',    _ms_ :     300000, _time_idx_ : __2 },
+        { _str_ : '10m',   _ms_ :     600000, _time_idx_ : __2 },
+        { _str_ : '15m',   _ms_ :     900000, _time_idx_ : __2 },
+        { _str_ : '30m',   _ms_ :    1800000, _time_idx_ : __2 },
+        { _str_ : '1hr',   _ms_ :    3600000, _time_idx_ : __2 },
+        { _str_ : '2hr',   _ms_ :    7200000, _time_idx_ : __2 },
+        { _str_ : '4hr',   _ms_ :   14400000, _time_idx_ : __2 },
+        { _str_ : '6hr',   _ms_ :   21600000, _time_idx_ : __2 },
+        { _str_ : '8hr',   _ms_ :   28800000, _time_idx_ : __2 },
+        { _str_ : '12hr',  _ms_ :   43200000, _time_idx_ : __1 },
+        { _str_ : '1d',    _ms_ :   86400000, _time_idx_ : __1 },
+        { _str_ : '2d',    _ms_ : 86400000*2, _time_idx_ : __1 },
+        { _str_ : '4d',    _ms_ : 86400000*4, _time_idx_ : __1 },
+        { _str_ : '1wk',   _ms_ : 86400000*7, _time_idx_ : __1 }
+      ]
+    },
+
+    stateMap = {
+      _date_obj_     : __undef,
+      _tz_offset_ms_ : __undef
+    },
+
+    // Declare other module-scope vars
+    getBasename, getDirname,
+    logObj, logFn
     ;
+
+  /* istanbul ignore next */
+  try {
+    stateMap._has_jq_ = !! jQuery;
+  }
+  catch ( error ) {
+    stateMap._has_jq_ = __false;
+  }
   // == . END MODULE SCOPE VARIABLES ==================================
 
   // == BEGIN PREREQ METHODS ==========================================
@@ -125,7 +209,7 @@ var xuu = (function () {
 
     if ( type_str && type_str !== '_Object_' ) { return type_str; }
 
-    type_key = {}[ __toString ].call( data )[ vMap._slice_ ]( 8, __n1 );
+    type_key = {}[ __toString ].call( data )[ __slice ]( __8, __n1 );
 
     return typeofMap[ type_key ] || type_key;
   }
@@ -134,7 +218,7 @@ var xuu = (function () {
   // BEGIN Public prereq method /castBool/
   // Summary   : castBool( <data>, <alt_data> );
   // Purpose   : Cast a boolean value
-  // Example   : castBool( true ); // returns true
+  // Example   : castBool( __true ); // returns __true
   // Arguments : (positional)
   //   <data>     - data to cast as boolean
   //   <alt_data> - alternate value to return
@@ -143,8 +227,8 @@ var xuu = (function () {
   // Throws    : None
   //
   function castBool ( data, alt_data ) {
-      if ( data === __true || data === __false ) { return data; }
-      return alt_data;
+    if ( data === __true || data === __false ) { return data; }
+    return alt_data;
   }
   // . END Public prereq method /castBool/
 
@@ -169,16 +253,17 @@ var xuu = (function () {
   // Summary   : checkNumFn( <num>, <alt_data>, <option_map> );
   // Purpose   : Adjust <num> per option_map
   // Example   :
-  //   checkNumFn( 25, 0, { _max_num_: 20, _do_autobound_: true });
+  //   checkNumFn( 25, 0, { _max_num_: 20, _do_autobound_: __true });
   //   // Returns 20
   // Arguments :
   //   <num>        - Number to consider
   //   <alt_data>   - Alternate to use if num is invalid
   //   <option_map> - Map of directives
-  //     + _do_autobound_ - Auto bound input to min/max as appropriate
-  //     + _do_warn_      - Log warnings
-  //     + _max_num_      - Max allowed value
-  //     + _min_num_      - Min allowed value
+  //     + _do_autobound_ - Auto bound input to min/max as appropriate.
+  //       Default is __false.
+  //     + _do_warn_      - Log warnings.      Default is __false.
+  //     + _max_num_      - Max allowed value. Default is __undef.
+  //     + _min_num_      - Min allowed value. Default is __undef.
   //
   // Returns   : Adjusted num
   // Throws    : None
@@ -198,7 +283,7 @@ var xuu = (function () {
       }
       else {
         log_list[ __push ](
-          'Value exceeds allowed maximum. '
+          '_num_exceeds_max_ '
           + __Str( num ) + ' > '
           + __Str( option_map._max_num_ )
         );
@@ -213,7 +298,7 @@ var xuu = (function () {
       }
       else {
         log_list[ __push ](
-          'Number below allowed minimum of ' + option_map._min_num_
+          '_num_below_min_ ' + option_map._min_num_
         );
       }
     }
@@ -223,7 +308,7 @@ var xuu = (function () {
     }
     else {
       if ( option_map._do_warn_ ) {
-        logObj._logMsg_( '_warn_', 'Int fails constraints', log_list );
+        logFn( '_warn_', '_num_fails_constraints_', log_list );
       }
       solve_data = alt_data;
     }
@@ -259,10 +344,10 @@ var xuu = (function () {
     ;
 
     if ( isNaN( solve_num ) ) { return alt_data; }
-      solve_int = makeRoundNumFn( solve_num );
+    solve_int = makeRoundNumFn( solve_num );
 
     // Begin process optional constraints
-      if ( typeofFn( option_map ) === 'object' ) {
+    if ( typeofFn( option_map ) === 'object' ) {
       return checkNumFn( solve_int, alt_data, option_map );
     }
     // . End process optional constraints
@@ -296,12 +381,12 @@ var xuu = (function () {
   // Example   : castList( [] ); // returns the array
   // Arguments : (positional)
   //   <data>       - Data to cast as list
-  //   <alt_data>   - Optional alternate value to return (default __undef)
+  //   <alt_data>   - Optional alternate value to return. Default is __undef.
   //   <option_map> - Optional constraint map
-  //       + _do_warn_      - Log warnings
-  //       + _is_empty_ok_  - Allow empty list (default is true)
-  //       + _max_length_   - Max allowed length
-  //       + _min_length_   - Min allowed length
+  //       + _do_warn_      - Log warnings.       Default is __true.
+  //       + _is_empty_ok_  - Allow empty list.   Default is __true.
+  //       + _max_length_   - Max allowed length. Default is __undef.
+  //       + _min_length_   - Min allowed length. Default is __undef.
   // Returns   :
   //   <data> if it is an array and passes optional constraints,
   //   <alt_data> otherwise
@@ -319,15 +404,15 @@ var xuu = (function () {
     if ( typeofFn( option_map ) === 'object' ) {
       log_list = [];
       item_count = data[ __length ];
-      if ( item_count === 0 && option_map._is_empty_ok_ === __false ) {
-        log_list[ __push ]( 'List is empty' );
+      if ( item_count === __0 && option_map._is_empty_ok_ === __false ) {
+        log_list[ __push ]( '_list_is_empty_' );
       }
 
       if ( option_map._max_length_
         && item_count > option_map._max_length_
       ) {
         log_list[ __push ](
-          'List exceeds maxiumum length: ' + __Str( item_count )
+          '_list_exceed_max_length_ ' + __Str( item_count )
           + ' > ' + __Str( option_map._max_length_ )
         );
       }
@@ -336,14 +421,14 @@ var xuu = (function () {
         && item_count < option_map._min_length_
       ) {
         log_list[ __push ](
-          'List is below minimum length: ' + __Str( item_count )
+          '_list_is_low_min_length_  ' + __Str( item_count )
           + ' < ' + __Str( log_list._min_length_ )
         );
       }
 
       if ( log_list[ __length ] > __0 ) {
         if ( option_map._do_warn_ ) {
-          logObj._logMsg_( '_warn_', 'List fails constraints', log_list );
+          logFn( '_warn_', '_list_fails_constraints_', log_list );
         }
         return alt_data;
       }
@@ -377,12 +462,13 @@ var xuu = (function () {
   // Example   : castNum( '25.425' ); // returns 25
   // Arguments : (positional)
   //   <data>       - data to cast as int
-  //   <alt_data>   - alternate value to return
+  //   <alt_data>   - alternate value to return. Default is __undef.
   //   <option_map> - Optional constraint map
-  //     + _do_autobound_ - Auto bound input to min/max as appropriate
-  //     + _do_warn_      - Log warnings
-  //     + _max_num_      - Max allowed value
-  //     + _min_num_      - Min allowed value
+  //     + _do_autobound_ - Auto bound input to min/max as appropriate.
+  //       Default is __false.
+  //     + _do_warn_      - Log warnings.      Default is __false.
+  //     + _max_num_      - Max allowed value. Default is __undef.
+  //     + _min_num_      - Min allowed value. Default is __undef.
   // Returns   :
   //   If a number, returns the number rounded to nearest int.
   //   If a string, returns the number rep rounded to nearest int.
@@ -411,7 +497,7 @@ var xuu = (function () {
   // BEGIN Public prereq method /castObj/
   // Summary   : castObj( <obj_type>, <data>, <alt_data> );
   // Purpose   : Cast an object
-  // Example   : castObj( 'styleSheetList',document.styleSheets  );
+  // Example   : castObj( 'styleSheetList', document.styleSheets );
   // Arguments : (positional)
   //   <obj_type> - string of object type (see Example)
   //   <data>     - data to cast as <obj_type> object
@@ -426,6 +512,14 @@ var xuu = (function () {
   }
   // . END Public prereq method /castObj/
 
+  // BEGIN Public prereq method /castRx/
+  // Purpose this is a simple wrapper around castObj for RegExp
+  //
+  function castRx ( data, alt_data ) {
+    return castObj( 'RegExp', data, alt_data );
+  }
+  // . END Public prereq method /castObj/
+
   // BEGIN Public prereq method /castStr/
   // Summary   : castStr( <data>, <alt_data> );
   // Purpose   : Cast a string
@@ -434,11 +528,11 @@ var xuu = (function () {
   //   <data>       - Data to cast as string
   //   <alt_data>   - Alternate value to return
   //   <option_map> - Optional constraints
-  //     + _do_warn_     - Log warnings
+  //     + _do_warn_      - Log warnings. Default is __false.
   //     + _filter_regex_ - A regex filter that must be passed
-  //     + _is_empty_ok_  - Allow blank string (default is true)
-  //     + _max_length_   - Max allowed length
-  //     + _min_length_   - Min allowed length
+  //     + _is_empty_ok_  - Allow blank string. Default is yes (__undef).
+  //     + _max_length_   - Max allowed length. Default is __undef.
+  //     + _min_length_   - Min allowed length. Default is __undef.
   // Returns   :
   //   <data> if a string, or a number converted to a string,
   //   <alt_data> otherwise
@@ -462,14 +556,14 @@ var xuu = (function () {
       if ( option_map._is_empty_ok_ === __false
         && solve_str === __blank
       ) {
-        log_list[ __push ]( 'String is empty' );
+        log_list[ __push ]( '_str_is_empty_' );
       }
 
       if ( option_map._max_length_
         && char_count > option_map._max_length_
       ) {
         log_list[ __push ](
-          'String exceeds maxiumum length: ' + __Str( char_count )
+          '_str_exceeds_max_length_ ' + __Str( char_count )
           + ' > ' + __Str( option_map._max_length_ )
         );
       }
@@ -478,7 +572,7 @@ var xuu = (function () {
         && char_count < option_map._min_length_
       ) {
         log_list[ __push ](
-          'String is below minimum length: ' + __Str( char_count )
+          '_str_is_below_min_length_ ' + __Str( char_count )
           + ' < ' + __Str( log_list._min_length_ )
         );
       }
@@ -487,14 +581,14 @@ var xuu = (function () {
         && ! option_map._filter_regex_.test( solve_str )
       ) {
         log_list[ __push ](
-          'String does not pass regex filter: '
+          '_str_fails_regex_filter_ '
           + option_map._filter_regex_[ __toString ]()
         );
       }
 
       if ( log_list[ __length ] > __0 ) {
         if ( option_map._do_warn_ ) {
-          logObj._logMsg_( '_warn_', 'List fails constraints', log_list );
+          logFn( '_warn_', '_str_fails_constraints_', log_list );
         }
         return alt_data;
       }
@@ -517,7 +611,7 @@ var xuu = (function () {
   function safeJsonParse ( json_str, alt_data ) {
     var solve_data;
     try {
-        solve_data = str2dataFn( json_str );
+      solve_data = str2dataFn( json_str );
     }
     catch ( e ) {
       solve_data = alt_data;
@@ -560,7 +654,7 @@ var xuu = (function () {
   //
   function cloneData ( data ) {
     if ( data === __undef ) { return data; }
-      return safeJsonParse( safeJsonStringify( data ) );
+    return safeJsonParse( safeJsonStringify( data ) );
   }
   // . END Public prereq method /cloneData/
 
@@ -686,14 +780,14 @@ var xuu = (function () {
   //             max_int        : 50,
   //             is_optional    : true
   //           },
-  //           color_map   : { var_type : 'map',     is_empty_ok : false },
-  //           element_map : { var_type : 'map',     is_empty_ok : true,
+  //           color_map   : { var_type : 'map',     is_empty_ok : __false },
+  //           element_map : { var_type : 'map',     is_empty_ok : __true,
   //             data_default : {}   },
-  //           is_pinned   : { var_type : 'boolean', data_default : false },
-  //           is_seen     : { var_type : 'boolean', data_default : false },
+  //           is_pinned   : { var_type : 'boolean', data_default : __false },
+  //           is_seen     : { var_type : 'boolean', data_default : __false },
   //           mode_type   : { var_type : 'string',  data_default : 'view',
   //             filter_regex  : /^view$|^edit$/ },
-  //           form_map    : { var_type : 'map',     data_default : null  }
+  //           form_map    : { var_type : 'map',     data_default : __null  }
   //         }, arg_map
   //       );
   //     }
@@ -746,25 +840,25 @@ var xuu = (function () {
   //     * svgelem:
   //
   //   Special directive keys
-  //     * _do_check_names : When true, will
+  //     * _do_check_names : When __true, will
   //       compare key names against a naming convention
   //       (see nameCheckMap for configuration)
-  //       WARNING: checkArgMap in 'strict' mode always sets this to true.
-  //     * _allow_more_keys : When true, check ignores keys not defined
+  //       WARNING: checkArgMap in 'strict' mode always sets this to __true.
+  //     * _allow_more_keys : When __true, check ignores keys not defined
   //       in the check map.  Normal behavior is to throw an error.
   //       WARNING: checkArgMap in 'strict' mode ignores this flag.
   //     * _skip_key_list   : A list of key names to skip consideration.
   //       WARNING: checkArgMap in 'strict' mode ignores this list.
-  //     * _allow_falsey_value : When true, skips validation for an
-  //       if its value isNaN, Null, or other falsey value other than
+  //     * _allow_falsey_value : When __true, skips validation for an
+  //       if its value isNaN, Null, or other non-true value other than
   //       0 or undefined.
   //
   // Optional Argument : None
   // Settings  : checkArgMap.configModule.setMode( '[strict|normal|off]' )
   //   affects the behavior of checkArgMap.
   //   IN 'strict' MODE, the special directive keys are processed as follows:
-  //     * _do_check_names  : true
-  //     * _allow_more_keys : false
+  //     * _do_check_names  : __true
+  //     * _allow_more_keys : __false
   //     * _skip_key_list   : []
   //   IN 'normal' MODE the utility works as above.
   //   IN 'off' MODE , the utility is a no-op and simply returns.
@@ -781,7 +875,7 @@ var xuu = (function () {
   // Throws    : None
   //
   // The technique used is around 3x faster than
-  //   return Array.prototype[ vMap._slice_ ].call( arg_obj );
+  //   return Array.prototype[ __slice ].call( arg_obj );
   // See https://github.com/petkaantonov/bluebird/wiki/\
   //   Optimization-killers#3-managing-arguments
   //
@@ -845,13 +939,11 @@ var xuu = (function () {
   // Arguments : <string> to escape
   // Returns   : Escaped regular expression string
   // Throws    : None
-  //
-  // JSLint capable str[ __replace ](/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-  // See http://stackoverflow.com/questions/3115150
+  // Other     : See http://stackoverflow.com/questions/3115150
   //
   function makeEscRxStr( arg_str ) {
     var str = castStr( arg_str, __blank );
-      return str[ __replace ]( /[-[\]{}()*+?.,\\^$|#]/gm, "\\$&");
+    return str[ __replace ]( /[-[\]{}()*+?.,\\^$|#]/gm, "\\$&");
   }
   // . END Public prereq method /makeEscRxStr/
 
@@ -873,7 +965,7 @@ var xuu = (function () {
       key_count = key_list[ __length ],
       solve_map = {},
       idx, key
-    ;
+      ;
 
     for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
@@ -910,7 +1002,7 @@ var xuu = (function () {
   // BEGIN Public prereq method /makeScrubStr/
   // Summary   : makeScrubStr( <string>, <do_space> );
   // Purpose   : Remove HTML tags and trim string
-  // Example   : makeScrubStr( '<h1>Hello</h1><p>Hi</p>', true );
+  // Example   : makeScrubStr( '<h1>Hello</h1><p>Hi</p>', __true );
   //             // returns 'Hello Hi'
   // Arguments :
   //   <string>   - A string to scrub
@@ -956,11 +1048,11 @@ var xuu = (function () {
   // Summary   : logObj._setLogLevel_( <log_level> );
   // Purpose   : Provide a log4j-style logging singleton
   // Example   :
-  //   logObj.setLogLevel_('_warn_');
-  //   logObj.logMsg('_warn_', 'This will show');
-  //   logObj.logMsg('_info_', 'This will not');
-  //   logObj.getLevelName();  // '_warn_'
-  //   logObj.getLevelIdx();   // 4
+  //   logObj._setLogLevel_('_warn_');
+  //   logObj._logMsg_('_warn_', 'This will show');
+  //   logObj._logMsg_('_info_', 'This will not');
+  //   logObj._getLevelName_();  // '_warn_'
+  //   logObj._getLevelIdx_();   // 4
   // Methods   :
   //   Log level is based on syslog values and is one of the following:
   //   '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'
@@ -1024,18 +1116,18 @@ var xuu = (function () {
       return levelKey;
     }
 
-      function getLevelName () { return levelKey; }
-      function getLevelIdx  () { return levelIdx; }
-      function getIdxByName ( arg_name ) {
-        var key = castStr( arg_name, '' );
-        return levelXIdxMap[ key ];
-      }
+    function getLevelName () { return levelKey; }
+    function getLevelIdx  () { return levelIdx; }
+    function getIdxByName ( arg_name ) {
+      var key = castStr( arg_name, '' );
+      return levelXIdxMap[ key ];
+    }
 
     // This follows syslog level conventions
     function logMsg () {
       var
         arg_list    = makeArgList( arguments ),
-        level_key   = castStr( arg_list.shift(), __blank ),
+        level_key   = castStr( arg_list[ __shift ](), __blank ),
         level_idx   = levelXIdxMap[ level_key ],
         command_str = levelXCmdMap[ level_key ],
 
@@ -1044,7 +1136,7 @@ var xuu = (function () {
 
       // Handle bad log level
       if ( ! command_str ) {
-        arg_list.unshift(
+        arg_list[ __unshift ](
           '_log_level_key_not_found_ (' + level_key + ').'
         );
         level_key   = '_error_';
@@ -1060,14 +1152,14 @@ var xuu = (function () {
       try {
         caller_list = (new Error()).stack[ __split ](/ *\n/);
         caller_str  = (caller_list[__2] || __blank )[ __replace ](/^ */g, '');
-        arg_list.unshift( caller_str );
+        arg_list[ __unshift ]( caller_str );
       }
       catch(e) {
-        arg_list.unshift( '_no_stack_found_' );
+        arg_list[ __unshift ]( '_no_stack_found_' );
       }
 
       // Unshift level into args
-      arg_list.unshift( level_key );
+      arg_list[ __unshift ]( level_key );
 
       // Try to log to console
       try {
@@ -1096,14 +1188,15 @@ var xuu = (function () {
     };
   }());
   // . END define logObj singleton
+  logFn = logObj._logMsg_;
   // == . END UTILITY METHODS =========================================
 
   // == BEGIN PUBLIC METHODS ==========================================
   // BEGIN Public method /checkDateStr/
   // Summary   : checkDateStr( <arg_map> );
   // Purpose   : Check validity of a date string
-  // Example   : checkDateStr( { _date_str_: '2017-02-29' } ); // false
-  //             checkDateStr( { _date_str_: '2016-02-29' } ); // true
+  // Example   : checkDateStr( { _date_str_: '2017-02-29' } ); // __false
+  //             checkDateStr( { _date_str_: '2016-02-29' } ); // __true
   // Argument  : <arg_map>
   //   + _date_str_  - The date string to consider
   //   + _order_str_ - The date form to check ('_us_' or ISO)
@@ -1121,7 +1214,7 @@ var xuu = (function () {
       date_us_rx  = configMap._date_us_rx_,
       date_utc_rx = configMap._date_utc_rx_,
       match_list, yy_int, mm_int, dd_int, date_obj, check_int
-    ;
+      ;
 
     if ( order_str === '_us_' ) {
       match_list = date_str[ __match ]( date_us_rx );
@@ -1192,20 +1285,20 @@ var xuu = (function () {
   // Example   :
   //   clearMap( my_map ); // Delete all keys
   //   clearMap( my_map, [ 'name', 'serial_number' ] ); // Delete 2 keys
-  //   clearMap( my_map, undef, true );  // Set all values to undefined
+  //   clearMap( my_map, __undef, __true );  // Set all values to undefined
   // Arguments :
   //   + <data_map> - Map to modify. Required.
   //   + <key_list> - List of keys to process. Default is all keys.
   //     Provide any non-list value (like 0) to use default.
-  //   + <do_undef> - If true, will set the value of all processed keys to
-  //       undefined. Otherwise, all processed keys will be deleted from
-  //       the map. Default is false.
+  //   + <do_undef> - If __true, will set the value of all processed keys to
+  //       __undef. Otherwise, all processed keys will be deleted from
+  //       the map. Default is __false.
   // Returns   : The modified map
   // Throws    : None
   //
   function clearMap ( arg_map, arg_key_list, do_undef ) {
     var
-      map       = castMap( arg_map ),
+      map = castMap( arg_map ),
       key_list, key_count, idx, key;
 
     if ( ! map ) { return; }
@@ -1232,18 +1325,18 @@ var xuu = (function () {
   //   | __logMsg( 'info', str );
   //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; she said.'
   //
-  //   | str = encodeHtml( "<h1>'Help me!'</h1> & fast!", false );
+  //   | str = encodeHtml( "<h1>'Help me!'</h1> & fast!", __false );
   //   | __logMsg( 'info', str );
   //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; &amp; fast!'
   //
-  //   | str = encodeHtml( "<h1>'Help me!'</h1> & fast!", true );
+  //   | str = encodeHtml( "<h1>'Help me!'</h1> & fast!", __true );
   //   | __logMsg( 'info', str );
   //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; & fast!'
   //
   // Arguments
-  //   + <string> - The HTML string to encode
-  //   + <do_exclude_amp> - Exclude ampersand from encoding. 
-  //      Default is false.
+  //   + <string>         - The HTML string to encode
+  //   + <do_exclude_amp> - Exclude ampersand from encoding.
+  //      Default is __false.
   // Returns   : Modified string
   // Throws    : None
   //
@@ -1277,7 +1370,7 @@ var xuu = (function () {
   // Arguments :
   //   <type>      - If '_base_' returns basename, otherwise dirname
   //   <path_str>  - Path string
-  //   <delim_str> - Delimeter string (default === '/')
+  //   <delim_str> - Delimeter string. Default is '/'.
   // Returns   : Modified string
   // Throws    : None
   //
@@ -1297,8 +1390,8 @@ var xuu = (function () {
     match_list = path_str[ __match ]( rx_obj );
     return ( match_list && match_list[ __1 ] ) || __blank;
   }
-    getBasename = getBaseDirname[ __bind ]( '_base_' );
-    getDirname  = getBaseDirname[ __bind ]( '_dir_'  );
+  getBasename = getBaseDirname[ __bind ]( '_base_' );
+  getDirname  = getBaseDirname[ __bind ]( '_dir_'  );
   // . END utilities /getBasename/ and /getDirname/
 
   // BEGIN Public method /getListAttrIdx/
@@ -1309,18 +1402,18 @@ var xuu = (function () {
   //             getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns -1
   //             getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns -1
   // Arguments :
-  //   + <list> - List of maps
-  //   + <key>  - The key to match
-  //   + <data> - The data expected for key (default === undef)
+  //   + <list> - List of maps.              Default is [].
+  //   + <key>  - The key to match.          Default is __blank.
+  //   + <data> - The data expected for key. Default is __undef.
   // Returns   : Returns integer index or -1 if not found
   // Throws    : None
   //
   function getListAttrIdx ( arg_map_list, arg_key, data ) {
     var
-      map_list = castList( arg_map_list, [] ),
-      key      = castStr(  arg_key, __blank ),
+      map_list  = castList( arg_map_list, [] ),
+      key       = castStr(  arg_key, __blank ),
       map_count = map_list[ __length ],
-      found_idx  = __n1,
+      found_idx = __n1,
 
       idx, row_map, row_key_list
     ;
@@ -1330,7 +1423,7 @@ var xuu = (function () {
       if ( typeofFn( row_map ) !== 'object' ) { continue; }
 
       // This is similar to but not the same as hasOwnProperty.
-      // This prevents false positives when sparse maps do not have
+      // This prevents fake positives when sparse maps do not have
       //   the requested key.
       row_key_list = makeKeyListFn( row_map );
       if ( row_key_list[ __indexOf ]( key ) === __n1 ) { continue; }
@@ -1352,9 +1445,9 @@ var xuu = (function () {
   //             getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns undef
   //             getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns undef
   // Arguments :
-  //   + <list> - List of maps
-  //   + <key>  - The key to match
-  //   + <data> - The data expected for key (default === undef)
+  //   + <list> - List of maps.              Default is [].
+  //   + <key>  - The key to match.          Default is __blank.
+  //   + <data> - The data expected for key. Default is __undef.
   // Returns   : Returns found map or undef if not found
   // Throws    : None
   //
@@ -1373,9 +1466,10 @@ var xuu = (function () {
   //             list = makeColumnList( grid_table, 5 );
   //             list = makeColumnList( enum_table, 5, function ( row ) {...} )
   // Arguments :
-  //   + <list> - List of maps or lists
-  //   + <key>  - The key to match. The default is index 0.
-  //   + <data> - The data expected for key (default === undef)
+  //   + <list>      - List of maps or lists. Required.
+  //   + <col_id>    - The key or index of the column. Required.
+  //   + <filter_fn> - Optional filter. Recieves the table row as argument.
+  //       If it returns a non-true value the row is discarded.
   // Returns   : Returns found map or undef if not found
   // Throws    : None
   //
@@ -1404,7 +1498,7 @@ var xuu = (function () {
 
   // BEGIN Public method /getListDiff/
   // Summary   : getListDiff( <list1>, <list2> );
-  // Purpose : Find all elements common between two lists.
+  // Purpose   : Find all elements common between two lists.
   //   This is _not_ a deep comparison; two similar lists or maps
   //   will be reported as different unless they point the the same
   //   data structure.
@@ -1443,8 +1537,8 @@ var xuu = (function () {
   // Purpose   : Count the number of elements in <list> that === <data>
   // Example   : getListValCount( [ 'a','b','a' ], 'a' ); // Returns 2
   // Arguments :
-  //   + <list> - The list to examine
-  //   + <data> - The data value to match (default is undef)
+  //   + <list> - The list to examine.     Default is [].
+  //   + <data> - The data value to match. Default is __undef.
   // Returns   : Match count
   // Throws    : None
   //
@@ -1494,7 +1588,7 @@ var xuu = (function () {
     ;
 
     if ( key_count > __100 ) {
-      logObj._logMsg_( '_warn_', '_maximum_recursion_limit_' );
+      logFn( '_error_', '_exceeded_max_depth_' );
       return __undef;
     }
 
@@ -1532,7 +1626,7 @@ var xuu = (function () {
       date_obj = getTzDateObj(),
       date_str = date_obj[ __toString ](),
       match_list = date_str[ __match ]( configMap._tzcode_rx_ )
-    ;
+      ;
     return ( match_list && match_list[ __1 ] )
       ? match_list[ __1 ] : __blank;
   }
@@ -1544,7 +1638,7 @@ var xuu = (function () {
   // Example   : clock_str = makeClockStr( 1465621376000 ); // '05:02:56'
   // Arguments :
   //   <time_ms>  - UTC time in milliseconds
-  //   <time_idx> - Date precision (default === 3)
+  //   <time_idx> - Date precision. Default is __3.
   //     -3 === [DDd:]HHh:MMm:SSs
   //     -2 === [DDd:]HHh:MMm
   //     -1 === [DDd:]HHh
@@ -1552,13 +1646,13 @@ var xuu = (function () {
   //      1 === HH
   //      2 === HH:MM
   //      3 === HH:MM:SS
-  //   <do_am>    - Do am/pm flag  (default === false)
-  //   <do_local> - Use local time (default === false)
+  //   <do_am>    - Do am/pm flag.  Default is __false.
+  //   <do_local> - Use local time. Default is __false.
   // Returns   : String
   // Note      :
   //   Remember to use your local timezone offset if you want to
   //   show local time. Example:
-  //     local_ms = getNowMs( true )
+  //     local_ms = getNowMs( __true )
   //
   function makeClockStr ( arg_time_ms, arg_time_idx, arg_do_ampm, arg_do_local ) {
     var
@@ -1589,7 +1683,7 @@ var xuu = (function () {
       suffix_str  = __blank,
 
       scratch_str
-    ;
+      ;
 
     if ( abs_idx === 0 || abs_idx > 3 ) { return __blank; }
 
@@ -1614,19 +1708,19 @@ var xuu = (function () {
       time_list[ __push ]( scratch_str );
     }
 
-      if ( do_ampm ) {
-        if ( time_list[__0] >= 12 ) {
-          suffix_str = ' PM';
-          if ( time_list[__0] > 12 ) {
-            time_list[__0] -= 12;
-          }
-        }
-        else {
-          suffix_str = ' AM';
+    if ( do_ampm ) {
+      if ( time_list[__0] >= 12 ) {
+        suffix_str = ' PM';
+        if ( time_list[__0] > 12 ) {
+          time_list[__0] -= 12;
         }
       }
+      else {
+        suffix_str = ' AM';
+      }
+    }
 
-      return time_list[ __join ]( ':' ) + suffix_str;
+    return time_list[ __join ]( ':' ) + suffix_str;
   }
   // . END Public method /makeClockStr/
 
@@ -1638,10 +1732,10 @@ var xuu = (function () {
   // Arguments : <arg_map> with the following keys
   //   + _input_num_       - The number to format, e.g. 123598
   //   + _round_limit_exp_ - The size (10^exp) of number after which
-  //                         a rounded value is returned (default === 3)
+  //                         a rounded value is returned. Default is __3.
   //   + _round_unit_exp_  - The size (10^exp) of number to group as
-  //                         a unit (default === 3, e.g. 1,000's)
-  //   + _round_unit_str_  - The unit name (default === 'k').
+  //                         a unit. Default is __3, e.g. 1,000's.
+  //   + _round_unit_str_  - The unit name. Default is 'k'.
   //   + _round_dec_count_ - Number of decimal places to keep
   //                         in the mantisa when rounding to units
   // Returns   :
@@ -1705,10 +1799,11 @@ var xuu = (function () {
   //       current date.
   //     If BOTH are provided, _date_ms_ will be used in
   //       preference to date_obj.
-  //   + _time_idx_ (default 0): See _makeClockStr_ to determine
-  //       the clock string format
-  //   + _order_str_ (default ''):
+  //   + _time_idx_ : See _makeClockStr_ to determine
+  //       the clock string format. Default is __0.
+  //   + _order_str_ :
   //       Request '_us_' results in stupid-format: mm/dd/yyyy hh:mm:ss.
+  //       Default is __blank.
   // Returns   :
   //   + Success - Returns formated string
   //   + Failure - Blank string
@@ -1732,11 +1827,11 @@ var xuu = (function () {
       yrs_int,   mon_int,   day_int,
       date_list, date_str,  time_ms,
       time_str
-    ;
+      ;
 
-      if ( ! date_obj ) {
-        date_obj = new __Date();
-      }
+    if ( ! date_obj ) {
+      date_obj = new __Date();
+    }
 
     if ( date_ms ) {
       date_obj.setTime( date_ms );
@@ -1785,10 +1880,10 @@ var xuu = (function () {
   // Example   : makeDebounceFn({ _fn_ : myRoutineFn, _delay_ms_: 2500 });
   //             // Returns the debounced function
   // Arguments : <arg_map> with the following keys
-  //   + _fn_       - The function to execute
-  //   + _delay_ms_ - Inactivity time
-  //   + _ctx_data_ - Function context (default === undef)
-  //   + _do_asap_  - Fire function at first call (default === undef)
+  //   + _fn_       - The function to execute.     Required.
+  //   + _delay_ms_ - Inactivity time.             Default is __0.
+  //   + _ctx_data_ - Function context.            Default is __undef.
+  //   + _do_asap_  - Fire function at first call. Default is __false.
   // Returns   :
   //   + Success - A function which will execute when called only after
   //     <_delay_ms_> has elapsed since the last time it was called.
@@ -1799,18 +1894,18 @@ var xuu = (function () {
   //
   function makeDebounceFn ( arg_map ) {
     var
-      map      = castMap(  arg_map, {} ),
-      fn       = castFn(   map._fn_ ),
-        delay_ms = castInt(  map._delay_ms_, __0     ),
-      do_asap  = castBool( map._do_asap_,    __false ),
-        ctx_data = map._ctx_data_,
+      map      = castMap(  arg_map,             {} ),
+      fn       = castFn(   map._fn_                ),
+      delay_ms = castInt(  map._delay_ms_,     __0 ),
+      do_asap  = castBool( map._do_asap_,  __false ),
+      ctx_data = map._ctx_data_,
       delay_toid
     ;
 
-      if ( ! fn ) {
-        logObj._logMsg_( '_error_', '_debounce_bad_argument_', fn );
-        return __undef;
-      }
+    if ( ! fn ) {
+      logFn( '_error_', '_debounce_bad_argument_', fn );
+      return __undef;
+    }
 
     return function () {
       var arg_list = makeArgList( arguments );
@@ -1835,9 +1930,9 @@ var xuu = (function () {
   // Example   : makeThrottleFn({ _fn_ : myRoutineFn, _delay_ms_: 2500 });
   //             // Returns the throttled function
   // Arguments : <arg_map> with the following keys
-  //   + _fn_       - The function to execute
-  //   + _delay_ms_ - The minimum time between calls
-  //   + _ctx_data_ - Function context (default === undef)
+  //   + _fn_       - The function to execute         Required.
+  //   + _delay_ms_ - The minimum time between calls. Default is __0.
+  //   + _ctx_data_ - Function context.               Default is __undef.
   // Returns   :
   //   + Success - A function which will execute when called only if
   //     <_delay_ms_> has elapsed since its last invocation.
@@ -1888,20 +1983,20 @@ var xuu = (function () {
 
   // BEGIN Public method /makeEllipsisStr/
   // Summary   : makeEllipsisStr( <arg_map> );
-  // Purpose : Shorten a string to a maximum length and append ellipsis
+  // Purpose   : Shorten a string to a maximum length and append ellipsis
   //   if it is exceeded.
   // Example   :
   //   makeEllipsisStr({
   //     _input_str_      : 'hee haw and the boys',
   //     _char_limit_int_ : 10,
-  //     _do_word_break_  : true
+  //     _do_word_break_  : __true
   //   });
   //   // returns 'hee haw ...'
-  // Arguments:
-  //   + _char_limit_int_ : Maxiumum allowed chars (default === 0)
-  //   + _do_word_break_  : Break at word boundries (default === true)
+  // Arguments :
+  //   + _char_limit_int_ : Maxiumum allowed chars.  Default is 0.
+  //   + _do_word_break_  : Break at word boundries. Default is __true.
   //   + _input_str_      : The string to shorten
-  // Returns: A string
+  // Returns   : A string
   // Throws    : None
   //
   function makeEllipsisStr( arg_map ) {
@@ -1939,7 +2034,7 @@ var xuu = (function () {
       return __blank + solve_list[ __join ]( ' ' );
     }
 
-    return scrub_str.substr(__0, limit_int - __3 ) + '...';
+    return scrub_str[ __substr ](__0, limit_int - __3 ) + '...';
   }
   // . END Public method /makeEllipsisStr/
 
@@ -1948,17 +2043,19 @@ var xuu = (function () {
   // Purpose   : A convenient method to create an error object
   // Example   : makeErrorObj( 'notCool', 'This is not cool' );
   // Arguments :
-  //   + <name> - the error name (default === 'error')
-  //   + <msg>  - long error message (default === '')
+  //   + <name> - Error name.    Default is 'error'.
+  //   + <msg>  - Error message. Default is __blank.
   // Returns   : A newly constructed error object
   // Throws    : None
   //
   function makeErrorObj ( arg_name, arg_msg ) {
-    var error_obj = new Error();
+    var
+      name = ( arg_name && __Str( arg_name ) ) || 'error',
+      msg  = ( arg_msg  && __Str( arg_msg  ) ) || __blank,
+      error_obj = new Error();
 
-    error_obj.name    = ( arg_name && __Str( arg_name ) ) || 'error';
-    error_obj.message = ( arg_msg  && __Str( arg_msg  ) ) || __blank;
-
+    error_obj.name    = name;
+    error_obj.message = msg;
     return error_obj;
   }
   // . END Public method /makeErrorObj/
@@ -1972,13 +2069,11 @@ var xuu = (function () {
   // Throws    : None
   //
   function makeGuidStr () {
-    /*jslint bitwise: true*/
     function makePart () {
       //noinspection NonShortCircuitBooleanExpressionJS,MagicNumberJS
-      return ((( __1+makeRandomNumFn() ) * 0x10000 )|__0
+      return ((( __1 + makeRandomNumFn() ) * 0x10000 ) | __0
         )[ __toString ](16)[ vMap._substr_ ]( __1 );
     }
-    /*jslint bitwise: false*/
 
     return makePart() + makePart()
       + '-' + makePart()
@@ -2030,9 +2125,9 @@ var xuu = (function () {
   function makeMapUtilObj () {
     var resultMap, argList, mapFn;
 
-    function getArgList   (          ) { return argList;                  }
-    function getMapFn     (          ) { return mapFn;                    }
-    function getResultMap (          ) { return resultMap;                }
+    function getArgList   (          ) { return argList;                   }
+    function getMapFn     (          ) { return mapFn;                     }
+    function getResultMap (          ) { return resultMap;                 }
     function setArgList   ( arg_list ) { argList   = castList( arg_list ); }
     function setMapFn     ( map_fn   ) { mapFn     = castFn(   map_fn   ); }
     function setResultMap ( rmap     ) { resultMap = castMap(  rmap     ); }
@@ -2066,15 +2161,15 @@ var xuu = (function () {
   // Purpose   : Create an HTML string with option tags
   // Example   : makeOptionHtml({ _val_list_ : [1,2,3,4] });
   // Arguments : <arg_map> with the following keys
-  //    + _enum_list_  : A table of _name_ and _value_
+  //    + _enum_list_  : A table of _name_ and _value_. Required.
   //    + _match_list_ : List of values to be selected.
-  //      This is useful for multi-select fields (default = undef)
+  //      This is useful for multi-select fields. Default is __undef.
   // Returns   : An HTML option select string
   // Throws    : None
   //
   function makeOptionHtml ( arg_map ) {
     var
-      map         = castMap(  arg_map, {} ),
+      map        = castMap(  arg_map,           {} ),
       enum_table = castList( map._enum_table_,  [] ),
       match_list = castList( map._match_list_,  [] ),
 
@@ -2082,7 +2177,7 @@ var xuu = (function () {
       solve_html = __blank,
 
       idx, row_map, val_str, val_html, label_str, label_html
-    ;
+      ;
 
     _OPTION_: for ( idx = __0; idx < enum_count; idx++ ) {
       row_map = enum_table[ idx ];
@@ -2109,8 +2204,8 @@ var xuu = (function () {
   // Purpose   : Convert a decimal ratio into a readable % string
   // Example   : makePctStr( 0.529863, 1 );
   // Arguments :
-  //   <ratio>         - Ratio to convert. 1 = 100%.
-  //   <precision_int> - Number of digits after decimal (default === 0)
+  //   <ratio>         - Ratio to convert. 1 = 100%.    Default is __0.
+  //   <precision_int> - Count of digits after decimal. Default is __0.
   // Returns   : A percentage string
   // Throws    : None
   //
@@ -2121,7 +2216,7 @@ var xuu = (function () {
     ;
 
     count = count < __0 ? __0 : makeFloorNumFn( count );
-      return ( ratio * __100 )[ vMap._toFixed_ ]( count ) + '%';
+    return ( ratio * __100 )[ vMap._toFixed_ ]( count ) + '%';
   }
   // . END Public method /makePctStr/
 
@@ -2130,11 +2225,11 @@ var xuu = (function () {
   //
   function makeRadioHtml ( arg_map ) {
     var
-      map        = castMap(  arg_map, {} ),
+      map        = castMap(  arg_map,          {} ),
       enum_table = castList( map._enum_table_, [] ),
-      match_str  = castStr(  map._match_str_   ),
-      group_name = castStr(  map._group_name_  ),
-      group_html = encodeHtml( group_name      ),
+      match_str  = castStr(  map._match_str_      ),
+      group_name = castStr(  map._group_name_     ),
+      group_html = encodeHtml( group_name         ),
 
       enum_count = enum_table[ __length ],
       solve_html = __blank,
@@ -2201,15 +2296,15 @@ var xuu = (function () {
   //   + <mode_str>    - '_rekey_' or '_reval_'
   // Examples  :
   //   makeRekeyMap(
-  //     { a:1, b:2, c:[] },
-  //     { a:'_x_', b: '_y_', c:'_z_' },
+  //     { a : 1, b : 2, c : [] },
+  //     { a : '_x_', b : '_y_', c : '_z_' },
   //     '_rekey_'
   //   );
   //   // Returns { _x_:1, _y_:2, _z_:[] }
   //
   //   makeRekeyMap(
-  //     { a:1, b:2, list:[ { c:[] } ] },
-  //     { a:'_x_', b: '_y_', c:22 },
+  //     { a : 1, b : 2, list : [ { c : [] } ] },
+  //     { a : '_x_', b: '_y_', c : 22 },
   //     '_reval_'
   //   );
   //   // Returns { a : '_x_', b : '_y_', list : [ { c : 22 } ] }
@@ -2220,25 +2315,26 @@ var xuu = (function () {
   //
   function makeContextObj ( arg_struct ) {
     var
-      key_list  = makeKeyListFn( arg_struct ),
-      key_count = key_list.length,
+      key_list     = makeKeyListFn( arg_struct ),
+      key_count    = key_list[ __length ],
       solve_struct = __Array.isArray( arg_struct ) ? [] : {}
       ;
 
-    return key_count > 0 ? {
-        source_struct : arg_struct,
-        solve_struct  : solve_struct,
-        key_list      : key_list,
-        key_count     : key_list.length,
-        key_idx       : 0
-      } : null;
+    return key_count > __0 ? {
+      _source_struct_ : arg_struct,
+      _solve_struct_  : solve_struct,
+      _key_list_      : key_list,
+      _key_count_     : key_count,
+      _key_idx_       : __0
+    } : null;
   }
+
   function makeRekeyMap( arg_struct, arg_key_map, arg_mode_str ) {
     // noinspection JSMismatchedCollectionQueryUpdate
     var
       context_obj = makeContextObj( arg_struct ),
       mode_str    = castStr( arg_mode_str, '_rekey_', {
-       _filter_regex_ : /^(_rekey_|_reval_)$/
+        _filter_regex_ : /^(_rekey_|_reval_)$/
       }),
       stack_list  = [],
 
@@ -2250,13 +2346,13 @@ var xuu = (function () {
 
     if ( ! context_obj ) { return arg_struct; }
 
-    CONTEXT: for ( i = __0; i < 100000; i++ ) {
-      key_count  = context_obj.key_count;
-      key_idx    = context_obj.key_idx;
-      key_list   = context_obj.key_list;
+    _CONTEXT_: for ( i = __0; i < 100000; i++ ) {
+      key_count  = context_obj._key_count_;
+      key_idx    = context_obj._key_idx_;
+      key_list   = context_obj._key_list_;
 
-      source_struct = context_obj.source_struct;
-      solve_struct  = context_obj.solve_struct;
+      source_struct = context_obj._source_struct_;
+      solve_struct  = context_obj._solve_struct_;
 
       key          = key_list[ key_idx ];
       data         = source_struct[ key ];
@@ -2271,7 +2367,7 @@ var xuu = (function () {
         if ( check_obj ) {
           stack_list[ __push ]( context_obj );
           context_obj = check_obj;
-          continue CONTEXT;
+          continue _CONTEXT_;
         }
       }
 
@@ -2285,14 +2381,14 @@ var xuu = (function () {
       }
 
       key_idx++;
-      context_obj.key_idx = key_idx;
+      context_obj._key_idx_ = key_idx;
       if ( key_idx >= key_count ) {
-        if ( stack_list.length > 0 ) {
-          pop_solve_struct = context_obj.solve_struct;
+        if ( stack_list[ __length ] > __0 ) {
+          pop_solve_struct = context_obj._solve_struct_;
           context_obj = stack_list[ __pop ]();
         }
         else {
-          break CONTEXT;
+          break _CONTEXT_;
         }
       }
 
@@ -2303,13 +2399,13 @@ var xuu = (function () {
         solve_struct[ replace_data ] = data;
       }
     }
-    return context_obj.solve_struct;
+    return context_obj._solve_struct_;
   }
   // . END Public method /makeRekeyMap/
 
   // BEGIN Public method /makeSeenMap/
   // Purpose : Convert arg_key_list into a map with each key assigned
-  // the value of arg_seen_data. If not provided, arg_seen_data === true
+  // the value of arg_seen_data. Default is __true.
   //
   function makeSeenMap ( arg_key_list, arg_seen_data ) {
     var
@@ -2554,51 +2650,57 @@ var xuu = (function () {
   // Purpose   : Replace symbols in a template surrounded by braces
   //   '{}' with the symbol provided in the lookup map.
   // Example   :
-  //  out_str = makeTmpltStr({
+  //   makeTmpltStr({
   //    _input_str_  : '{_name_} says "{_saying_}"',
   //    _lookup_map_ : { _name_ : 'Fred', _saying_ : 'hello!' },
-  //    _do_encode_html_ : true
+  //    _do_encode_html_ : __true
   //  });
-  //  // out_str is 'Fred says hello!'
+  //  // Returns 'Fred says hello!'
   //
   // Arguments : ( named )
   //   _input_str_  : A string template like so:
-  //      'This person name {_p1_} said to the other person {_p2_}'
+  //      'This person name {_p1_} said to the other person {_p2_}'.
+  //      Default is __blank.
   //   _lookup_map_ : A map of values to replace, like so:
-  //      { _p1_ : 'fred', _p2_ : 'barney' }
+  //      { _p1_ : 'fred', _p2_ : 'barney' }. Default is {}.
+  //   _tmplt_rx_   : A regular expression object to define replace patterns.
+  //     Default is configMap._tmplt_rx_
+  //   _do_encode_html_ : When __true replaced values will be html encoded.
+  //     Default is __false.
   // Throws    : None
   // Returns
   //   The filled-out template string
   //
   function makeTmpltStr ( arg_map ) {
     var
-      map        = castMap( arg_map, {} ),
+      map = castMap(  arg_map, {} ),
 
-      do_encode_html = castBool( map._do_encode_html_, __false ),
-      input_str      = castStr(  map._input_str_,      __blank ),
-      lookup_map     = castMap(  map._lookup_map_,          {} ),
-      tmplt_rx       = map._tmplt_rx_ || configMap._tmplt_rx_,
+      do_encode_html = castBool( map._do_encode_html_,        __false ),
+      input_str      = castStr(  map._input_str_,             __blank ),
+      lookup_map     = castMap(  map._lookup_map_,                 {} ),
+      tmplt_rx       = castRx(   map._tmplt_rx_, configMap._tmplt_rx_ ),
 
       bound_fn
       ;
 
     function lookupFn ( ignore_match_str, lookup_name ) {
       var
-        return_data  = this,
+        solve_data = this,
         path_list  = lookup_name[ __split ]( '.' ),
         path_count = path_list[ __length ],
-        idx, key_name, return_str
+
+        idx, key_name, solve_str
         ;
 
       for ( idx = __0; idx < path_count; idx++ ) {
-        key_name = path_list[ idx ];
-        return_data = ( return_data && return_data[ key_name ] );
+        key_name   = path_list[ idx ];
+        solve_data = ( solve_data && solve_data[ key_name ] );
       }
-      return_str = castStr( return_data, __blank );
-      return do_encode_html ? encodeHtml( return_str ) : return_str;
+      solve_str = castStr( solve_data, __blank );
+      return do_encode_html ? encodeHtml( solve_str ) : solve_str;
     }
 
-    bound_fn   = lookupFn[ __bind ]( lookup_map );
+    bound_fn = lookupFn[ __bind ]( lookup_map );
     return input_str[ __replace ]( tmplt_rx, bound_fn );
   }
   // . END Public method /makeTmpltStr/
@@ -2606,10 +2708,10 @@ var xuu = (function () {
   // BEGIN Public method /mergeMaps/
   // Purpose : Merge properties of extend_map into base_map
   //
-    // Warning : This does not deep copy the extend map.
-    // This often provides the desired results.
-    //   deep_map  = cloneData( extend_map );
-    //   merge_map = mergeMaps( base_map, deep_map );
+  // Warning : This does not deep copy the extend map.
+  // This often provides the desired results.
+  //   deep_map  = cloneData( extend_map );
+  //   merge_map = mergeMaps( base_map, deep_map );
   //
   function mergeMaps( arg_base_map, arg_extend_map, arg_attr_list ) {
     var
@@ -2626,9 +2728,7 @@ var xuu = (function () {
     _KEY_: for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
       if ( attr_list && attr_list[ __indexOf ]( key ) === __n1 ) {
-        logObj._logMsg_(
-          '_warn_', '_key_not_supported_:|' + __Str( key ) + '|'
-        );
+        logFn( '_warn_', '_key_not_supported_ |' + __Str( key ) + '|');
         continue _KEY_;
       }
       base_map[ key ] = extend_map[ key ];
@@ -2642,10 +2742,10 @@ var xuu = (function () {
   //   either <arg_count> number of times or until the function
   //   returns __false, whichever comes first.
   // Arguments ( positional )
-  //   0 : fn        : function to poll, return false to stop polling
-  //   1 : ms        : time between function invocation
-  //   2 : count     : (optional) Maximum number of times to run the function.
-  //   3 : finish_fn : (optional) function to invoke at completion
+  //   0 : fn        : Fn to poll, return __false stop.  Required.
+  //   1 : ms        : Time between function invocation. Default is __0
+  //   2 : count     : Maximum count.                    Default is __null.
+  //   3 : finish_fn : Fn to run at completion.          Default is __undef.
   // Returns
   //   __true  : polling started
   //   __false : polling declined
@@ -2702,7 +2802,7 @@ var xuu = (function () {
   function rmListVal () {
     var
       arg_list   = makeArgList( arguments ),
-      item_list  = castList( arg_list.shift(), [] ),
+      item_list  = castList( arg_list[ __shift ](), [] ),
       item_count = item_list[ __length ],
       test_list  = arg_list,
       test_count = test_list[ __length ],
@@ -2711,7 +2811,7 @@ var xuu = (function () {
 
     _LIST_ITEM_: for ( idx = item_count; idx; __0 ) {
       item_data = item_list[ --idx ];
-      for ( jdx = 0; jdx < test_count; jdx++ ) {
+    for ( jdx = __0; jdx < test_count; jdx++ ) {
         test_data = arg_list[ jdx ];
         if ( item_data === test_data ) {
           item_list[ vMap._splice_ ]( idx, __1 );
@@ -2749,10 +2849,10 @@ var xuu = (function () {
       key_list, key_count, idx, key_name;
 
     if ( ! (  input_map && settable_map && config_map ) ) {
-      return logObj._logMsg_( '_error_', '_bad_input_' );
+      return logFn( '_error_', '_bad_input_' );
     }
     key_list  = makeKeyListFn( input_map );
-    key_count = key_list.length;
+    key_count = key_list[ __length ];
 
     for ( idx = __0; idx < key_count; idx++ ) {
       key_name = key_list[ idx ];
@@ -2760,7 +2860,7 @@ var xuu = (function () {
         config_map[ key_name ] = input_map[ key_name ];
       }
       else {
-        logObj._logMsg_( '_warn_', '_key_not_supported_', key_name );
+        logFn( '_warn_', '_key_not_supported_', key_name );
       }
     }
     return config_map;
@@ -2925,7 +3025,7 @@ var xuu = (function () {
   // Example   : shuffleList( [1,2,3,4] ) returns [ 3,1,4,2 ]
   // Arguments :
   //   <list> - The list to shuffle
-  // Returns   : Boolean true on success
+  // Returns   : Boolean __true on success
   // Throws    : None
   // Technique :
   //   1. Count down from end of array with last_idx
@@ -2964,94 +3064,10 @@ var xuu = (function () {
     return list[ vMap._map_ ]( mapFn );
   }
   // . END utility /trimStrList/
-
   // == . END PUBLIC METHODS ==========================================
-  // BEGIN initialize module
-  function initModuleFn ()  {
-    stateMap = {
-      _date_obj_     : __undef,
-      _tz_offset_ms_ : __undef
-    };
 
-    configMap = {
-      _sec_ms_    : 1000,
-      _min_sec_   : 60,
-      _hrs_min_   : 60,
-      _day_hrs_   : 24,
-
-      _min_ms_    : 60000,
-      _hrs_ms_    : 3600000,
-      _day_ms_    : 86400000,
-      _offset_yr_ : 1900,
-
-      _encode_html_map_ : {
-        '&' : '&#38;',
-        '"' : '&#34;',
-        "'" : '&#39;',
-        '>' : '&#62;',
-        '<' : '&#60;'
-      },
-
-      _get_now_fn_  : __Date.now,
-      _date_us_rx_  :
-      // eslint-disable-next-line no-useless-escape
-        /^(0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]([0-9]{4})\b/,
-      _date_utc_rx_ :
-      // eslint-disable-next-line no-useless-escape
-        /^([0-9]{4})[\/\-](0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])\b/,
-
-      _comma_rx_        : makeRxObj( '(\\d)(?=(\\d\\d\\d)+(?!\\d))', 'g' ),
-      _encode_html_rx_  : /[&"'><]/g,
-      _encode_noamp_rx_ : /["'><]/g,
-
-      _tag_end_rx_: makeRxObj( '(</[^>]+>)+', 'g' ),
-      _tag_rx_    : makeRxObj( '</?[^>]+>', 'g' ),
-      _tmplt_rx_  : makeRxObj( '{([^{}]+[^\\\\])}','g' ),
-      _tzcode_rx_ : makeRxObj( '\\((.*)\\)$' ),
-
-      _unit_ms_list_ : [
-        { _str_ : '0.1s',  _ms_ :        100, _time_idx_ : __3 },
-        { _str_ : '0.25s', _ms_ :        250, _time_idx_ : __3 },
-        { _str_ : '0.5s',  _ms_ :        500, _time_idx_ : __3 },
-        { _str_ : '1s',    _ms_ :       1000, _time_idx_ : __3 },
-        { _str_ : '2.5s',  _ms_ :       2500, _time_idx_ : __3 },
-        { _str_ : '5s',    _ms_ :       5000, _time_idx_ : __3 },
-        { _str_ : '10s',   _ms_ :      10000, _time_idx_ : __3 },
-        { _str_ : '15s',   _ms_ :      15000, _time_idx_ : __3 },
-        { _str_ : '30s',   _ms_ :      30000, _time_idx_ : __3 },
-        { _str_ : '1m',    _ms_ :      60000, _time_idx_ : __2 },
-        { _str_ : '2.5m',  _ms_ :     150000, _time_idx_ : __3 },
-        { _str_ : '5m',    _ms_ :     300000, _time_idx_ : __2 },
-        { _str_ : '10m',   _ms_ :     600000, _time_idx_ : __2 },
-        { _str_ : '15m',   _ms_ :     900000, _time_idx_ : __2 },
-        { _str_ : '30m',   _ms_ :    1800000, _time_idx_ : __2 },
-        { _str_ : '1hr',   _ms_ :    3600000, _time_idx_ : __2 },
-        { _str_ : '2hr',   _ms_ :    7200000, _time_idx_ : __2 },
-        { _str_ : '4hr',   _ms_ :   14400000, _time_idx_ : __2 },
-        { _str_ : '6hr',   _ms_ :   21600000, _time_idx_ : __2 },
-        { _str_ : '8hr',   _ms_ :   28800000, _time_idx_ : __2 },
-        { _str_ : '12hr',  _ms_ :   43200000, _time_idx_ : __1 },
-        { _str_ : '1d',    _ms_ :   86400000, _time_idx_ : __1 },
-        { _str_ : '2d',    _ms_ : 86400000*2, _time_idx_ : __1 },
-        { _str_ : '4d',    _ms_ : 86400000*4, _time_idx_ : __1 },
-        { _str_ : '1wk',   _ms_ : 86400000*7, _time_idx_ : __1 }
-      ]
-
-    };
-    /* istanbul ignore next */
-    try {
-      stateMap._has_jq_ = !! jQuery;
-    }
-    catch ( error ) {
-      stateMap._has_jq_ = __false;
-    }
-  }
-  initModuleFn();
-  // . END initialize module
-
-  // noinspection JSUnusedGlobalSymbols
   return {
-    _getVarType_      : getVarType,
+    _getVarType_ : getVarType,
 
     _castBool_ : castBool,
     _castFn_   : castFn,
@@ -3061,21 +3077,22 @@ var xuu = (function () {
     _castMap_  : castMap,
     _castNum_  : castNum,
     _castObj_  : castObj,
+    _castRx_   : castRx,
     _castStr_  : castStr,
 
     _safeJsonParse_     : safeJsonParse,
     _safeJsonStringify_ : safeJsonStringify,
 
-    _cloneData_       : cloneData,
-    _extendList_      : extendList,
-    _getNowMs_        : getNowMs,
-    _getNumSign_      : getNumSign,
-    _makeArgList_     : makeArgList,
-    _makePadNumStr_   : makePadNumStr,
-    _makeEscRxStr_    : makeEscRxStr,
-    _makeRxObj_       : makeRxObj,
-    _makeScrubStr_    : makeScrubStr,
-    _makeUcFirstStr_  : makeUcFirstStr,
+    _cloneData_      : cloneData,
+    _extendList_     : extendList,
+    _getNowMs_       : getNowMs,
+    _getNumSign_     : getNumSign,
+    _makeArgList_    : makeArgList,
+    _makePadNumStr_  : makePadNumStr,
+    _makeEscRxStr_   : makeEscRxStr,
+    _makeRxObj_      : makeRxObj,
+    _makeScrubStr_   : makeScrubStr,
+    _makeUcFirstStr_ : makeUcFirstStr,
 
     _checkDateStr_    : checkDateStr,
     _clearMap_        : clearMap,
