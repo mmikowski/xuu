@@ -400,7 +400,7 @@ function encodeHtml ( test_obj ) {
         '&#60;h1&#62;&#39;Help me!&#39;&#60;/h1&#62; & fast!'
       ],
       [ [ '<p>"And so began, ...",'
-      + " she 'said' with her eyes & mouth...</p>" ],
+          + " she 'said' with her eyes & mouth...</p>" ],
         '&#60;p&#62;&#34;And so began, ...&#34;,'
         + " she &#39;said&#39; with her eyes &#38; mouth..."
         + '&#60;/p&#62;'
@@ -786,44 +786,42 @@ function getTzCode ( test_obj ) {
 
 function getVarType ( test_obj ) {
   var
-    // this is a hack to get around jslint warnings
     ob = Boolean, oa = Array, os = String,
-    on = Number,  // oo = Object,
-
-    und1 = __undef,
-    msg_str,
+    on = Number,
 
     bool1 = __true,
     list1 = [ 'a','b','c' ],
     null1 = __null,
     num1  = 25,
-    str1  = 'cde',
     obj1  = { length : 12 },
+    str1  = 'cde',
+    undef1= __undef,
 
     bool2 = new ob(),
+    d_obj = new Date(),
     list2 = new oa(),
     num2  = new on(),
     str2  = new os(),
-    d_obj = new Date(),
 
-    get_type_fn = utilObj._getVarType_;
+    get_fn  = utilObj._getVarType_,
+    msg_str = 'Should match expected type'
+    ;
 
   test_obj.expect( 12 );
 
-  msg_str = 'Should match expected type';
 
-  test_obj.ok( get_type_fn( und1  ) === '_Undefined_', msg_str );
-  test_obj.ok( get_type_fn( null1 ) === '_Null_',      msg_str );
-  test_obj.ok( get_type_fn( bool1 ) === '_Boolean_',   msg_str );
-  test_obj.ok( get_type_fn( str1  ) === '_String_',    msg_str );
-  test_obj.ok( get_type_fn( num1  ) === '_Number_',    msg_str );
-  test_obj.ok( get_type_fn( list1 ) === '_Array_',     msg_str );
-  test_obj.ok( get_type_fn( obj1  ) === '_Object_',    msg_str );
-  test_obj.ok( get_type_fn( bool2 ) === '_Boolean_',   msg_str );
-  test_obj.ok( get_type_fn( str2  ) === '_String_',    msg_str );
-  test_obj.ok( get_type_fn( num2  ) === '_Number_',    msg_str );
-  test_obj.ok( get_type_fn( list2 ) === '_Array_',     msg_str );
-  test_obj.ok( get_type_fn( d_obj ) ===  'Date',       msg_str );
+  test_obj.ok( get_fn( bool1  ) === '_Boolean_',   msg_str );
+  test_obj.ok( get_fn( bool2  ) === '_Boolean_',   msg_str );
+  test_obj.ok( get_fn( d_obj  ) ===  'Date',       msg_str );
+  test_obj.ok( get_fn( list1  ) === '_Array_',     msg_str );
+  test_obj.ok( get_fn( list2  ) === '_Array_',     msg_str );
+  test_obj.ok( get_fn( null1  ) === '_Null_',      msg_str );
+  test_obj.ok( get_fn( num1   ) === '_Number_',    msg_str );
+  test_obj.ok( get_fn( num2   ) === '_Number_',    msg_str );
+  test_obj.ok( get_fn( obj1   ) === '_Object_',    msg_str );
+  test_obj.ok( get_fn( str1   ) === '_String_',    msg_str );
+  test_obj.ok( get_fn( str2   ) === '_String_',    msg_str );
+  test_obj.ok( get_fn( undef1 ) === '_Undefined_', msg_str );
 
   test_obj.done();
 }
@@ -1018,23 +1016,23 @@ function makeDateStr ( test_obj ) {
       // [ arg_map, expect_data ]
       [ { _date_ms_ : 1474323404498 }, '2016-09-19' ],
       [ { _date_ms_ : 1474323404498, _time_idx_ : 0 },
-        '2016-09-19' ],
+         '2016-09-19' ],
       [ { _date_ms_ : 1474323404498, _time_idx_ : 1 },
-        '2016-09-19 22' ],
+         '2016-09-19 22' ],
       [ { _date_ms_ : 1474323404498, _time_idx_ : 2 },
-        '2016-09-19 22:16' ],
+         '2016-09-19 22:16' ],
       [ { _date_ms_ : 1474323404498, _time_idx_ : 3 },
-        '2016-09-19 22:16:44' ],
+         '2016-09-19 22:16:44' ],
       [ { _date_ms_ : 1274323404500 },
-        '2010-05-20' ],
+         '2010-05-20' ],
       [ { _date_ms_ : 1274323404999, _time_idx_ : 0 },
-        '2010-05-20' ],
+         '2010-05-20' ],
       [ { _date_ms_ : 1274323404999, _time_idx_ : 1 },
-        '2010-05-20 02' ],
+         '2010-05-20 02' ],
       [ { _date_ms_ : 1274323404999, _time_idx_ : 2 },
-        '2010-05-20 02:43' ],
+         '2010-05-20 02:43' ],
       [ { _date_ms_ : 1274323405000, _time_idx_ : 3 },
-        '2010-05-20 02:43:25' ],
+         '2010-05-20 02:43:25' ],
 
       [ { _date_obj_ : date_obj }, '2013-07-20' ],
       [ { _date_obj_ : date_obj,     _time_idx_ : 0 }, '2013-07-20' ],
@@ -1044,23 +1042,23 @@ function makeDateStr ( test_obj ) {
       [ { _date_obj_ : date_obj,     _time_idx_ : 4 }, '2013-07-20' ],
 
       [ { _date_ms_ : 1374323405099, _time_idx_ : 0 },
-        '2013-07-20' ],
+         '2013-07-20' ],
       [ { _date_ms_ : 1374323405099, _time_idx_ : 1 },
-        '2013-07-20 12' ],
+         '2013-07-20 12' ],
       [ { _date_ms_ : 1374323405099, _time_idx_ : 2 },
-        '2013-07-20 12:30' ],
+         '2013-07-20 12:30' ],
       [ { _date_ms_ : 1374323405099, _time_idx_ : 3 },
-        '2013-07-20 12:30:05' ],
+         '2013-07-20 12:30:05' ],
       [ { _date_obj_ : date_obj,     _time_idx_ : 4 },
-        '2013-07-20' ],
+         '2013-07-20' ],
       [ { _date_obj_ : date_obj,     _time_idx_ : -1 },
-        '2013-07-20 12h' ],
+         '2013-07-20 12h' ],
       [ { _date_ms_ : 1374323405099, _time_idx_ : -2 },
-        '2013-07-20 12h:30m' ],
+         '2013-07-20 12h:30m' ],
       [ { _date_ms_ : 1374323405099, _time_idx_ : -3 },
-        '2013-07-20 12h:30m:05s' ],
+         '2013-07-20 12h:30m:05s' ],
       [ { _date_obj_ : date_obj,     _time_idx_ : -4 },
-        '2013-07-20' ],
+         '2013-07-20' ],
 
       // US format test
       [ { _date_ms_ : 1474323404010, _order_str_ : '_us_' }, '09/19/2016' ],
@@ -1110,7 +1108,7 @@ function makeDateStr ( test_obj ) {
       [ { _date_ms_ : 1374323405099, _order_str_ : '_us_', _time_idx_ : -3 },
         '07/20/2013 12h:30m:05s' ],
       [ { _date_obj_ : date_obj, _order_str_ : '_us_',     _time_idx_ : -4 },
-        '07/20/2013' ]
+      '07/20/2013' ]
     ],
 
     assert_count = assert_table.length,
@@ -1416,10 +1414,10 @@ function makeEscRxStr ( test_obj ) {
   var
     // [ arg_list, expect_list ]
     assert_table = [
-      [ [         ],           __blank ],
-      [ [ __null  ],           __blank ],
-      [ [ __undef ],           __blank ],
-      [ [ __0     ],               '0' ],
+      [ [         ],               __blank ],
+      [ [ __null  ],               __blank ],
+      [ [ __undef ],               __blank ],
+      [ [ __0     ],                   '0' ],
       [ [ 'Is [This]* correct?' ], 'Is \\[This\\]\\* correct\\?' ],
       [ [ 'multi-line\n now-then' ], 'multi\\-line\n now\\-then' ]
     ],
@@ -1472,7 +1470,7 @@ function makeExtractMap ( test_obj ) {
 
     idx, expect_list, arg_list, msg_str,
     solve_data, expect_data
-    ;
+  ;
 
   test_obj.expect( assert_count );
   for ( idx = __0; idx < assert_count; idx++ ) {
@@ -1517,7 +1515,7 @@ function makeMapUtilObj ( test_obj ) {
         name_list  = arg_list[  __0 ],
         field_key  = name_list[ idx ],
         field_str  = String( field_data )
-      ;
+        ;
       if ( field_key ) {
         return [ field_key, field_str ];
       }
@@ -1617,7 +1615,7 @@ function makeOptionHtml ( test_obj ) {
             { _value_ : 'betty' }
           ],
           _match_list_ : [ 'betty' ]
-      },
+        },
         '<option value="rosey">The Rose</option>'
         + '<option value="betty" selected="selected">Betty</option>'
       ],
@@ -1633,15 +1631,15 @@ function makeOptionHtml ( test_obj ) {
             { _value_ : 865 },
             { _value_ : -22 },
             { _value_ : __null }
-        ],
+          ],
           _match_list_ : [ 'debauch', '-22' ]
-      },
+        },
         '<option value="rosey">Rosey</option>'
-        + '<option value="betty">Betty</option>'
-        + '<option value="debauch" selected="selected">De Bauch Airy</option>'
-        + '<option value="99">99</option>'
-        + '<option value="865">865</option>'
-        + '<option value="-22" selected="selected">-22</option>'
+          + '<option value="betty">Betty</option>'
+          + '<option value="debauch" selected="selected">De Bauch Airy</option>'
+          + '<option value="99">99</option>'
+          + '<option value="865">865</option>'
+          + '<option value="-22" selected="selected">-22</option>'
       ]
     ],
 
@@ -1779,7 +1777,7 @@ function makeRadioHtml ( test_obj ) {
       [ { _group_name_ : 'bs', _match_str_: __null,
           _enum_table_: [ [ 'foolish' ], { some: 'map', count: 22 }, __null,
             { _value_: 6 }, { _value_ :'gal' }, { _value_ : 'pal' }, __undef ]
-      },
+          },
         '<label><input type="radio" name="bs" value="6">6</label>'
         + '<label><input type="radio" name="bs" value="gal">Gal</label>'
         + '<label><input type="radio" name="bs" value="pal">Pal</label>'
@@ -1790,7 +1788,7 @@ function makeRadioHtml ( test_obj ) {
             { _value_ : 'gal', _label_ : 'Girl' },
             { _value_ : 'pal', _label_ : 'Friend' }
           ]
-      },
+        },
         '<label><input type="radio" name="bs" value="6">Six</label>'
         + '<label><input type="radio" name="bs" value="gal" '
           + 'checked="checked">Girl</label>'
@@ -1919,7 +1917,7 @@ function makeScrubStr ( test_obj ) {
       [ [ '<h1>hello</h1>' ], 'hello' ],
       [ [ '<div>hello</div>' ], 'hello' ],
       [ [ '<div><h1>hello</h1><p>This is lc.</p></div>' ],
-        'helloThis is lc.' ],
+          'helloThis is lc.' ],
       [ [ '<div><h1>Hello! </h1><p>This is lc.</p></div>' ],
         'Hello! This is lc.' ],
       [ [ '<ul><li>Fred</li><li>Barney</li><li>Wilma</li><li>Betty</li>' ],
@@ -2166,7 +2164,7 @@ function makeSeriesMap ( test_obj ) {
 
       // begin 15.96hr expect list
       [ {"_time_idx_":2,"_unit_count_":2,"_unit_ms_":28800000,"_unit_name_":"8hr","_left_ratio_":0.36142061281337046,"_unit_ratio_":0.5013927576601671,"_date_list_":[{"_date_str_":"06/09/2016","_width_ratio_":1}],"_time_list_":["12:00","20:00"]},
-        {"_time_idx_":2,"_unit_count_":2,"_unit_ms_":28800000,"_unit_name_":"8hr","_left_ratio_":0.1733983286908078,"_unit_ratio_":0.5013927576601671,"_date_list_":[{"_date_str_":"06/09/2016","_width_ratio_":1}],"_time_list_":["09:00","17:00"]}
+      {"_time_idx_":2,"_unit_count_":2,"_unit_ms_":28800000,"_unit_name_":"8hr","_left_ratio_":0.1733983286908078,"_unit_ratio_":0.5013927576601671,"_date_list_":[{"_date_str_":"06/09/2016","_width_ratio_":1}],"_time_list_":["09:00","17:00"]}
       ],
       [
         {"_time_idx_":2,"_unit_count_":3,"_unit_ms_":21600000,"_unit_name_":"6hr","_left_ratio_":0.29874651810584957,"_unit_ratio_":0.37604456824512533,"_date_list_":[{"_date_str_":"06/09/2016","_width_ratio_":1}],"_time_list_":["11:00","17:00"]},
@@ -2454,12 +2452,12 @@ function makeTmpltStr ( test_obj ) {
       [ { _input_str_ : t2_str, _lookup_map_ : { _thing_: { _part_ : 'udder'} } },
         'I told  some s have udders' ],
       [ { _input_str_ : t2_str, _lookup_map_ : { _name_ : 'Frank',
-          _thing_: { _part_ : 'udder' } } }, 'I told Frank some s have udders' ],
+        _thing_: { _part_ : 'udder' } } }, 'I told Frank some s have udders' ],
       [ { _input_str_ : t2_str, _lookup_map_ : { _name_ : 'Frank',
-          _thing_: { _part_ : 'udder', _name_: 'cow' } } },
+        _thing_: { _part_ : 'udder', _name_: 'cow' } } },
         'I told Frank some cows have udders' ],
       [ { _input_str_ : t3_str, _lookup_map_ : { _thing_: {
-            _part_ : 'udder', _name_: 'cow' } } }, 'I wonder about s' ],
+        _part_ : 'udder', _name_: 'cow' } } }, 'I wonder about s' ],
       [ { _input_str_ : t3_str, _lookup_map_ : { _thing_: 'Big Foot' } },
         'I wonder about Big Foots' ],
       [ { _input_str_ : t4_str }, ' and  and  and  and  and .' ],
@@ -2471,12 +2469,12 @@ function makeTmpltStr ( test_obj ) {
       [ { _input_str_ : t4_str, _lookup_map_ : { _thing_ : { _name_ : 'testy' }}},
         ' and testy and  and  and  and .' ],
       [ { _input_str_ : t4_str, _lookup_map_ : { _thing_ : { _name_ : 'testy',
-            _part_ : 'part' }} }, ' and testy and part and  and  and .' ],
+        _part_ : 'part' }} }, ' and testy and part and  and  and .' ],
       [ { _input_str_ : t4_str, _lookup_map_ : { _thing_ : { _name_ : 'testy',
-            _part_ : 'part' }, _foo_ : 'Bobby' } },
+        _part_ : 'part' }, _foo_ : 'Bobby' } },
         ' and testy and part and  and Bobby and .' ],
       [ { _input_str_ : t4_str, _lookup_map_ : { _thing_ : { _name_ : 'testy',
-            _part_ : 'part' }, _foo_ : { _bar_: 'Bat' } } },
+        _part_ : 'part' }, _foo_ : { _bar_: 'Bat' } } },
         ' and testy and part and  and  and Bat.' ]
     ],
 
@@ -2576,7 +2574,6 @@ function safeJsonParse ( test_obj ) {
 }
 
 function mergeMaps ( test_obj ) {
-  // noinspection JSUnusedGlobalSymbols
   var
     base0_map = { attr1 : 'val1', attr2 : 'val2' },
     base1_map = { attr3 : 10,     attr4 : 20     },
@@ -2773,8 +2770,8 @@ function setStructData ( test_obj ) {
   var
     base0_map = { attr1 : 'val1', attr2 : 'val2', sub_map : {} },
     expect0_map = { attr1 : 'val1', attr2 : 'val2', sub_map : {
-        dakota : [ 'hello', 'world' ]
-      } },
+      dakota : [ 'hello', 'world' ]
+    } },
     assert_table = [
       [ [],                 __undef ],
       [ [ __null ],         __null  ],
@@ -2783,7 +2780,7 @@ function setStructData ( test_obj ) {
       [ [ { ad_lib: 'julie' }, []   ], { ad_lib:'julie'} ],
       [ [ base0_map, __undef ], base0_map ],
       [ [ base0_map, [ 'sub_map', 'dakota' ],
-        [ 'hello', 'world' ] ], expect0_map
+          [ 'hello', 'world' ] ], expect0_map
       ],
       [ [ [], [ __null, 'car', __null ], 'tyres' ],
         [ { car : [ 'tyres' ] } ]
@@ -2937,7 +2934,7 @@ function trimStrList ( test_obj ) {
 
     idx, expect_list, arg_list,
     expect_data, solve_data, msg_str
-    ;
+  ;
 
   test_obj.expect( assert_count );
   for ( idx = __0; idx < assert_count; idx++ ) {

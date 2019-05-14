@@ -79,7 +79,7 @@ var xuu = (function () {
     __substr     = 'substr',
     __toString   = 'toString',
     __true       = true,
-    __undef      = void(0),
+    __undef      = void 0,
     __unshift    = 'unshift',
 
     // Set shared map
@@ -103,6 +103,7 @@ var xuu = (function () {
 
     // Set configuration map
     configMap = {
+      // Used by various time and date function
       _sec_ms_    : 1000,
       _min_sec_   : 60,
       _hrs_min_   : 60,
@@ -112,14 +113,7 @@ var xuu = (function () {
       _hrs_ms_    : 3600000,
       _day_ms_    : 86400000,
       _offset_yr_ : 1900,
-
-      _encode_html_map_ : {
-        '&' : '&#38;',
-        '"' : '&#34;',
-        "'" : '&#39;',
-        '>' : '&#62;',
-        '<' : '&#60;'
-      },
+      _noon_hr_   : 12,
 
       _get_now_fn_  : vMap._getNowMs_,
       _date_us_rx_  : makeRxObj(
@@ -129,15 +123,41 @@ var xuu = (function () {
         '^([0-9]{4})[\\/-](0?[1-9]|1[012])[\\/-](0?[1-9]|[12][0-9]|3[01])\\b'
       ),
 
-      _comma_rx_        : makeRxObj( '(\\d)(?=(\\d\\d\\d)+(?!\\d))', 'g' ),
+      // encodeHtml
+      _encode_html_map_ : {
+        '&' : '&#38;',
+        '"' : '&#34;',
+        "'" : '&#39;',
+        '>' : '&#62;',
+        '<' : '&#60;'
+      },
       _encode_html_rx_  : /[&"'><]/g,
       _encode_noamp_rx_ : /["'><]/g,
 
+      // makeCommaNumStr
+      _comma_rx_ : makeRxObj( '(\\d)(?=(\\d\\d\\d)+(?!\\d))', 'g' ),
+
+      // makeScrubStr
       _tag_end_rx_: makeRxObj( '(</[^>]+>)+', 'g' ),
       _tag_rx_    : makeRxObj( '</?[^>]+>', 'g' ),
+
+      // makeTmpltStr
       _tmplt_rx_  : makeRxObj( '{([^{}]+[^\\\\])}','g' ),
+
+      // getTimeCode
       _tzcode_rx_ : makeRxObj( '\\((.*)\\)$' ),
 
+      // makeRekeyMap
+      _rekey_max_count_ : 10000,
+
+      // makeMetricStr
+      _metric_table_ : [
+        { _min_int_ : 1.0e+9, _suffix_ : 'G' },
+        { _min_int_ : 1.0e+6, _suffix_ : 'M' },
+        { _min_int_ : 1.0e+3, _suffix_ : 'K' }
+      ],
+
+      // makeSeriesMap
       _unit_ms_list_ : [
         { _str_ : '0.1s',  _ms_ :        100, _time_idx_ : __3 },
         { _str_ : '0.25s', _ms_ :        250, _time_idx_ : __3 },
@@ -181,7 +201,7 @@ var xuu = (function () {
   try {
     stateMap._has_jq_ = !! jQuery;
   }
-  catch ( error ) {
+  catch ( ignore ) {
     stateMap._has_jq_ = __false;
   }
   // == . END MODULE SCOPE VARIABLES ==================================
@@ -421,7 +441,7 @@ var xuu = (function () {
         && item_count < option_map._min_length_
       ) {
         log_list[ __push ](
-          '_list_is_low_min_length_  ' + __Str( item_count )
+          '_list_is_below_min_length_  ' + __Str( item_count )
           + ' < ' + __Str( log_list._min_length_ )
         );
       }
@@ -529,7 +549,7 @@ var xuu = (function () {
   //   <alt_data>   - Alternate value to return
   //   <option_map> - Optional constraints
   //     + _do_warn_      - Log warnings. Default is __false.
-  //     + _filter_regex_ - A regex filter that must be passed
+  //     + _filter_rx_    - A regex filter that must be passed
   //     + _is_empty_ok_  - Allow blank string. Default is yes (__undef).
   //     + _max_length_   - Max allowed length. Default is __undef.
   //     + _min_length_   - Min allowed length. Default is __undef.
@@ -577,12 +597,12 @@ var xuu = (function () {
         );
       }
 
-      if ( option_map._filter_regex_
-        && ! option_map._filter_regex_.test( solve_str )
+      if ( option_map._filter_rx_
+        && ! option_map._filter_rx_.test( solve_str )
       ) {
         log_list[ __push ](
-          '_str_fails_regex_filter_ '
-          + option_map._filter_regex_[ __toString ]()
+          '_str_fails_filter_rx_ '
+          + option_map._filter_rx_[ __toString ]()
         );
       }
 
@@ -613,7 +633,7 @@ var xuu = (function () {
     try {
       solve_data = str2dataFn( json_str );
     }
-    catch ( e ) {
+    catch ( ignore ) {
       solve_data = alt_data;
     }
     return solve_data;
@@ -635,7 +655,7 @@ var xuu = (function () {
     try {
       solve_str = data2strFn( arg_data );
     }
-    catch (e) {
+    catch ( ignore ) {
       solve_str = alt_data;
     }
     return solve_str;
@@ -696,7 +716,8 @@ var xuu = (function () {
     var date_obj;
     if ( do_local ) {
       date_obj = new __Date();
-      return date_obj.getTime() - ( date_obj.getTimezoneOffset() * 60000);
+      return date_obj.getTime()
+        - ( date_obj.getTimezoneOffset() * configMap._min_ms_ );
     }
 
     return configMap._get_now_fn_
@@ -734,17 +755,17 @@ var xuu = (function () {
   // TODO 2017-09-28 mmikowski info: Create checkArgMap from argc.js
   // This should wrap around castXX utilities.
   // nameCheckMap = {
-  //   any_regex     : /^_data_?$/,
-  //   array_regex   : /_list_?$/,
-  //   boolean_regex : /^(allow|is|do|has|have|be|if|dont)_/,
-  //   map_regex     : /_map_?$/,
-  //   integer_regex : /_(count|idx|idto|idint|ms|px)_?$/,
-  //   jquery_regex  : /^\$/,
-  //   number_regex  : /_(num|ratio)_?$/,
-  //   object_regex  : /^_obj_?$/,
-  //   regex_regex   : /^_(regex|rx)_?$/,
-  //   string_regex  : /_(name|key|type|text|html)_?$/,
-  //   svgelem_regex : /^_svg_?$/
+  //   any_rx     : /^_data_?$/,
+  //   array_rx   : /_list_?$/,
+  //   boolean_rx : /^(allow|is|do|has|have|be|if|dont)_/,
+  //   map_rx     : /_map_?$/,
+  //   integer_rx : /_(count|idx|idto|idint|ms|px)_?$/,
+  //   jquery_rx  : /^\$/,
+  //   number_rx  : /_(num|ratio)_?$/,
+  //   object_rx  : /^_obj_?$/,
+  //   regex_rx   : /^_(regex|rx)_?$/,
+  //   string_rx  : /_(name|key|type|text|html)_?$/,
+  //   svgelem_rx : /^_svg_?$/
   // }
   // BEGIN Public method /checkArgMap/
   // Purpose   : Provide an easy and efficient means to check named arguments
@@ -786,7 +807,7 @@ var xuu = (function () {
   //           is_pinned   : { var_type : 'boolean', data_default : __false },
   //           is_seen     : { var_type : 'boolean', data_default : __false },
   //           mode_type   : { var_type : 'string',  data_default : 'view',
-  //             filter_regex  : /^view$|^edit$/ },
+  //             filter_rx  : /^view$|^edit$/ },
   //           form_map    : { var_type : 'map',     data_default : __null  }
   //         }, arg_map
   //       );
@@ -834,7 +855,7 @@ var xuu = (function () {
   //       + do_autobound - auto bound input to min/max as appropriate
   //     * string:
   //       + is_empty_ok  - allow empty string
-  //       + filter_regex - a regex filter that must be passed
+  //       + filter_rx    - a regex filter that must be passed
   //       + min_length   - min allowed length
   //       + max_length   - max allowed length
   //     * svgelem:
@@ -913,7 +934,7 @@ var xuu = (function () {
 
     if ( num === __undef ) { return __blank; }
     if ( ! ( count && count >= __0 ) ) {
-      return __Str( num ).trim();
+      return __Str( num )[ vMap._trim_ ]();
     }
 
     sign_int = getNumSign( num );
@@ -1154,7 +1175,7 @@ var xuu = (function () {
         caller_str  = (caller_list[__2] || __blank )[ __replace ](/^ */g, '');
         arg_list[ __unshift ]( caller_str );
       }
-      catch(e) {
+      catch( ignore ) {
         arg_list[ __unshift ]( '_no_stack_found_' );
       }
 
@@ -1169,12 +1190,12 @@ var xuu = (function () {
       // command can not handle more than a single argument or will not
       // allow the apply method (think: IE). We try our best...
       //
-      catch ( e0 ) {
+      catch ( ignore ) {
         try  {
           consoleRef[ command_str ]( arg_list[ __1 ] );
         }
         // Everything failed. We give up.
-        catch ( e1 ) { return __false; }
+        catch ( ignore ) { return __false; }
       }
       return __true;
     }
@@ -1219,16 +1240,16 @@ var xuu = (function () {
     if ( order_str === '_us_' ) {
       match_list = date_str[ __match ]( date_us_rx );
       if ( ! match_list ) { return __false; }
-      yy_int = +match_list[ 3 ] - 1900;
-      mm_int = +match_list[ 1 ] - 1;
-      dd_int = +match_list[ 2 ];
+      yy_int = +match_list[ __3 ] - configMap._offset_yr_;
+      mm_int = +match_list[ __1 ] - __1;
+      dd_int = +match_list[ __2 ];
     }
     else {
       match_list = date_str[ __match ]( date_utc_rx );
       if ( ! match_list ) { return __false; }
-      yy_int = +match_list[ 1 ] - 1900;
-      mm_int = +match_list[ 2 ] - 1;
-      dd_int = +match_list[ 3 ];
+      yy_int = +match_list[ __1 ] - configMap._offset_yr_;
+      mm_int = +match_list[ __2 ] - __1;
+      dd_int = +match_list[ __3 ];
     }
 
     // Check that utc timestamps match
@@ -1247,33 +1268,36 @@ var xuu = (function () {
   //             makeMetricStr(    125965968 ); // '126M'
   //             makeMetricStr(       965968 ); // '966K'
   //             makeMetricStr(          968 ); //  '968'
+  //   configMap._metric_table_ can be expanded as needed.
+  //   Place largest numbers first.
   // Arguments :
   //   + <number> - The number to process
+  // Settings  : Uses configMap._metric_table_
   // Returns   : String
   // Throws    : None
   //
   function makeMetricStr( arg_num ) {
     var
-      num     = castNum( arg_num, __0 ),
-      abs_num = makeAbsNumFn( num ),
-      root_num, suffix
-    ;
+      num          = castNum( arg_num, __0 ),
+      abs_num      = makeAbsNumFn( num ),
+      metric_table = configMap._metric_table_,
+      metric_count = metric_table[ __length ],
 
-    if ( abs_num >= 1e+9 ) {
-      root_num = num / 1e+9;
-      suffix   = 'G';
+      root_num, suffix, idx, row_map
+      ;
+
+    _SUFFIX_: for ( idx = __0; idx < metric_count; idx++ ) {
+      row_map = metric_table[ idx ];
+      if ( abs_num >= row_map._min_int_ ) {
+        root_num = num / row_map._min_int_;
+        suffix   = row_map._suffix_;
+        break _SUFFIX_;
+      }
     }
-    else if ( abs_num >= 1e+6 ) {
-      root_num = num / 1e+6;
-      suffix   = 'M';
-    }
-    else if ( abs_num >= 1e+3 ) {
-      root_num = num / 1e+3;
-      suffix   = 'K';
-    }
-    else {
+
+    if ( ! root_num ) {
       root_num = num;
-      suffix  = __blank;
+      suffix   = __blank;
     }
     return root_num.toPrecision( __3 ) + suffix;
   }
@@ -1285,7 +1309,7 @@ var xuu = (function () {
   // Example   :
   //   clearMap( my_map ); // Delete all keys
   //   clearMap( my_map, [ 'name', 'serial_number' ] ); // Delete 2 keys
-  //   clearMap( my_map, __undef, __true );  // Set all values to undefined
+  //   clearMap( my_map, __undef, __true );  // Set all values to __undef
   // Arguments :
   //   + <data_map> - Map to modify. Required.
   //   + <key_list> - List of keys to process. Default is all keys.
@@ -1345,32 +1369,33 @@ var xuu = (function () {
       source_str     = castStr(  arg_str, __blank   ),
       do_exclude_amp = castBool( arg_do_exclude_amp ),
 
-      match_fn, match_rx, lookup_map
-    ;
+      match_rx, lookup_map
+      ;
 
-    match_fn = function ( key ) {
+    function matchFn ( key ) {
       return lookup_map[ key ] /* istanbul ignore next */ || __blank;
-    };
+    }
 
     lookup_map = configMap._encode_html_map_;
     match_rx   = do_exclude_amp
       ? configMap._encode_noamp_rx_ : configMap._encode_html_rx_;
 
-    return source_str[ __replace ]( match_rx, match_fn );
+    return source_str[ __replace ]( match_rx, matchFn );
   }
   // . END Public method /encodeHtml/
 
   // BEGIN utility /getBaseDirname/
-  // Summary   : getBaseDirname.call( <type>, <path_str>, <delim_str> );
+  // Summary   : getBaseDirname.call( <path_str>, <delim_str> );
   // Purpose   : Returns the last filename of a path or the dirname.
   // Examples  : getBaseDirname.call( '_base_', /var/log/demo.log')
   //           :   returns 'demo.log'
   //           : getBaseDirname.call( null, '/var/log/demo.log' )
   //           :   returns '/var/log'
   // Arguments :
-  //   <type>      - If '_base_' returns basename, otherwise dirname
-  //   <path_str>  - Path string
+  //   <path_str>  - Path string.      Default is __blank.
   //   <delim_str> - Delimeter string. Default is '/'.
+  // Settings  : If context_str is '_base_' returns basename, otherwise
+  //           : provides dirname.
   // Returns   : Modified string
   // Throws    : None
   //
@@ -1685,7 +1710,7 @@ var xuu = (function () {
       scratch_str
       ;
 
-    if ( abs_idx === 0 || abs_idx > 3 ) { return __blank; }
+    if ( abs_idx === __0 || abs_idx > __3 ) { return __blank; }
 
     if ( time_idx < __0 && day_int > __0 ) {
       scratch_str = day_int + 'd';
@@ -1709,10 +1734,10 @@ var xuu = (function () {
     }
 
     if ( do_ampm ) {
-      if ( time_list[__0] >= 12 ) {
+      if ( time_list[__0]  >= configMap._noon_hr_ ) {
         suffix_str = ' PM';
-        if ( time_list[__0] > 12 ) {
-          time_list[__0] -= 12;
+        if ( time_list[__0] > configMap._noon_hr_ ) {
+          time_list[__0]   -= configMap._noon_hr_;
         }
       }
       else {
@@ -1952,7 +1977,7 @@ var xuu = (function () {
 
     if ( ! ( fn && delay_ms ) ) { return; }
 
-    return function () {
+    function throttleFn () {
       var
         arg_list = makeArgList( arguments ),
         now_ms   = getNowMs(),
@@ -1977,7 +2002,9 @@ var xuu = (function () {
         },
         delta_ms
       );
-    };
+    }
+
+    return throttleFn;
   }
   // . END Public method /makeThrottleFn/
 
@@ -2161,9 +2188,9 @@ var xuu = (function () {
   // Purpose   : Create an HTML string with option tags
   // Example   : makeOptionHtml({ _val_list_ : [1,2,3,4] });
   // Arguments : <arg_map> with the following keys
-  //    + _enum_list_  : A table of _name_ and _value_. Required.
-  //    + _match_list_ : List of values to be selected.
-  //      This is useful for multi-select fields. Default is __undef.
+  //    + _enum_table_  : A table of _name_ and _value_. Default is [].
+  //    + _match_list_ : List of values to be selected.  Default is [].
+  //      This is useful for multi-select fields.
   // Returns   : An HTML option select string
   // Throws    : None
   //
@@ -2334,19 +2361,20 @@ var xuu = (function () {
     var
       context_obj = makeContextObj( arg_struct ),
       mode_str    = castStr( arg_mode_str, '_rekey_', {
-        _filter_regex_ : /^(_rekey_|_reval_)$/
+        _filter_rx_ : /^(_rekey_|_reval_)$/
       }),
       stack_list  = [],
+      max_count = configMap._rekey_max_count_,
 
       key_count, key_list, key_idx,
       source_struct, solve_struct,
       key, data, replace_data,
-      check_obj, pop_solve_struct, i
+      check_obj, pop_solve_struct, idx
       ;
 
     if ( ! context_obj ) { return arg_struct; }
 
-    _CONTEXT_: for ( i = __0; i < 100000; i++ ) {
+    _CONTEXT_: for ( idx = __0; idx < max_count; idx++ ) {
       key_count  = context_obj._key_count_;
       key_idx    = context_obj._key_idx_;
       key_list   = context_obj._key_list_;
@@ -2398,6 +2426,9 @@ var xuu = (function () {
       else {
         solve_struct[ replace_data ] = data;
       }
+    }
+    if ( idx === max_count ) {
+      logFn( '_error_', '_rekey_incomplete_max_count_exceeded_' );
     }
     return context_obj._solve_struct_;
   }
@@ -2606,7 +2637,7 @@ var xuu = (function () {
 
     // Create date list
     date_obj.setTime( min_ms   );
-    date_obj.setHours( 0, 0, 0 );
+    date_obj.setHours( __0, __0, __0 );
     date_ms     = date_obj.getTime();
     date_offset = min_ms - date_ms;
 
@@ -2616,7 +2647,7 @@ var xuu = (function () {
       width_ratio = ( configMap._day_ms_ - date_offset ) / span_ms;
       accum_ratio += width_ratio;
       if ( accum_ratio >= __1 ) {
-        width_ratio = width_ratio + ( __1 - accum_ratio );
+        width_ratio += ( __1 - accum_ratio );
       }
       solve_date_list[ __push ]({
         _date_str_    : makeDateStr({ _date_ms_ : date_ms, _order_str_ : '_us_' }),
@@ -2651,13 +2682,15 @@ var xuu = (function () {
   //   '{}' with the symbol provided in the lookup map.
   // Example   :
   //   makeTmpltStr({
-  //    _input_str_  : '{_name_} says "{_saying_}"',
-  //    _lookup_map_ : { _name_ : 'Fred', _saying_ : 'hello!' },
-  //    _do_encode_html_ : __true
-  //  });
-  //  // Returns 'Fred says hello!'
+  //     _do_encode_html_ : __true,
+  //     _input_str_      : '{_name_} says "{_saying_}"',
+  //     _lookup_map_     : { _name_ : 'Fred', _saying_ : 'hello!' }
+  //   });
+  //   // Returns 'Fred says hello!'
   //
   // Arguments : ( named )
+  //   _do_encode_html_ : When __true replaced values will be html encoded.
+  //     Default is __false.
   //   _input_str_  : A string template like so:
   //      'This person name {_p1_} said to the other person {_p2_}'.
   //      Default is __blank.
@@ -2665,8 +2698,6 @@ var xuu = (function () {
   //      { _p1_ : 'fred', _p2_ : 'barney' }. Default is {}.
   //   _tmplt_rx_   : A regular expression object to define replace patterns.
   //     Default is configMap._tmplt_rx_
-  //   _do_encode_html_ : When __true replaced values will be html encoded.
-  //     Default is __false.
   // Throws    : None
   // Returns
   //   The filled-out template string
@@ -2742,10 +2773,10 @@ var xuu = (function () {
   //   either <arg_count> number of times or until the function
   //   returns __false, whichever comes first.
   // Arguments ( positional )
-  //   0 : fn        : Fn to poll, return __false stop.  Required.
-  //   1 : ms        : Time between function invocation. Default is __0
-  //   2 : count     : Maximum count.                    Default is __null.
-  //   3 : finish_fn : Fn to run at completion.          Default is __undef.
+  //   0 : fn        : Fn to poll. Return __false to stop. Required.
+  //   1 : ms        : Milliseconds between calls. Default is __0.
+  //   2 : count     : Maximum count.              Default is __null.
+  //   3 : finish_fn : Fn to run on completion.    Default is __null.
   // Returns
   //   __true  : polling started
   //   __false : polling declined
@@ -2756,13 +2787,12 @@ var xuu = (function () {
       ms        = castInt( arg_ms,           __0 ),
       count     = castInt( arg_count,     __null ),
       finish_fn = castFn(  arg_finish_fn, __null ),
-      idx     = __0,
-      main_fn
-    ;
+      idx     = __0
+      ;
 
     if ( ! poll_fn ) { return __false; }
 
-    main_fn = function () {
+    function pollFn () {
       setToFn( function() {
         var do_next;
         if ( count && idx >= count ) {
@@ -2770,11 +2800,11 @@ var xuu = (function () {
         }
         do_next = poll_fn( idx );
         idx++;
-        if ( do_next !== __false ) { main_fn(); }
+        if ( do_next !== __false ) { pollFn(); }
       }, ms );
-    };
+    }
 
-    main_fn();
+    pollFn();
     return __true;
   }
   // . END Public method /pollFunction/
@@ -2809,9 +2839,9 @@ var xuu = (function () {
       rm_count   = __0,
       idx, item_data, jdx, test_data;
 
-    _LIST_ITEM_: for ( idx = item_count; idx; __0 ) {
-      item_data = item_list[ --idx ];
-    for ( jdx = __0; jdx < test_count; jdx++ ) {
+    _LIST_ITEM_: for ( idx = item_count - __1; idx > __n1; idx-- ) {
+      item_data = item_list[ idx ];
+      for ( jdx = __0; jdx < test_count; jdx++ ) {
         test_data = arg_list[ jdx ];
         if ( item_data === test_data ) {
           item_list[ vMap._splice_ ]( idx, __1 );
@@ -3020,12 +3050,12 @@ var xuu = (function () {
   // . END Public method /setStructData/
 
   // BEGIN Public method /shuffleList/
-  // Summary   : SuffleList( <list>
+  // Summary   : ShuffleList( <list>
   // Purpose   : Shuffle elements in a list
   // Example   : shuffleList( [1,2,3,4] ) returns [ 3,1,4,2 ]
   // Arguments :
   //   <list> - The list to shuffle
-  // Returns   : Boolean __true on success
+  // Returns   : __true on success
   // Throws    : None
   // Technique :
   //   1. Count down from end of array with last_idx
@@ -3052,6 +3082,14 @@ var xuu = (function () {
   // . END public method /shuffleList/
 
   // BEGIN Public method /trimStrList/
+  // Summary   : trimStrList( <list> )
+  // Purpose   : Trim all strings in a list
+  // Example   : shuffleList( [ '  padd string ', 'anudder '] );
+  // Arguments :
+  //   <list> - The list to trim leading and ending whitespace
+  // Returns   : A new list of trimmed strings
+  // Throws    : None
+  //
   function trimStrList ( arg_list ) {
     var list = castList( arg_list );
 
@@ -3063,9 +3101,17 @@ var xuu = (function () {
     if ( ! list ) { return arg_list; }
     return list[ vMap._map_ ]( mapFn );
   }
-  // . END utility /trimStrList/
+  // . END Public method /trimStrList/
   // == . END PUBLIC METHODS ==========================================
 
+  // == BEGIN EXPORT METHODS ==========================================
+  // To created a stripped library from xhi/01_utils, copy the library
+  // and retain the header and footer comments for the methods to strip
+  // but delete the function, and then comment-out the function below.
+  // This provides the easiest means to merge back upstream changes.
+  // To re-enable, method merge the function back from xhi/01_utils
+  // and uncomment the reference below.
+  //
   return {
     _getVarType_ : getVarType,
 
@@ -3133,8 +3179,8 @@ var xuu = (function () {
     _pollFunction_    : pollFunction,
     _pushUniqListVal_ : pushUniqListVal,
     _rmListVal_       : rmListVal,
-    _setStructData_   : setStructData,
     _setConfigMap_    : setConfigMap,
+    _setStructData_   : setStructData,
     _shuffleList_     : shuffleList,
     _trimStrList_     : trimStrList
   };
