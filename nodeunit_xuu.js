@@ -30,17 +30,7 @@ var
   __4  = 4
   ;
 
-// When debugging one can create a mock test object
-// function mockFn() {
-//    console.log( this, arguments );
-// };
-// mockTestObj = {
-//   deepEqual : mockFn.bind( 'deepEqual' ),
-//   done      : mockFn.bind( 'done'      ),
-//   expect    : mockFn.bind( 'expect'    ),
-//   ok        : mockFn.bind( 'ok'        ),
-//   test      : mockFn.bind( 'test'      )
-// };
+// See note on bottom running a single test
 // == . END MODULE SCOPE VARIABLES  ===================================
 
 // == BEGIN UTILITY METHODS  ==========================================
@@ -808,7 +798,6 @@ function getVarType ( test_obj ) {
     ;
 
   test_obj.expect( 12 );
-
 
   test_obj.ok( get_fn( bool1  ) === '_Boolean_',   msg_str );
   test_obj.ok( get_fn( bool2  ) === '_Boolean_',   msg_str );
@@ -2950,17 +2939,42 @@ function trimStrList ( test_obj ) {
   }
   test_obj.done();
 }
-// == . END NODEUNIT TEST FUNCTIONS  ==================================
 
-// Use mockTestObj for debugging tests using nodejs instead
-// of nodeunit, which obscures error messages. Use like so:
-// 1. Add the test you would like to run:
-// 2. Run node <this_file>
-// 3. Inspect the output
-// makeReplaceFn( mockTestObj );
-// makeMetricStr( mockTestObj );
-// checkDateStr( mockTestObj );
-// makeClockStr( mockTestObj );
+function makeDeepData ( test_obj ) {
+  var
+    assert_table = [
+      [ [],                                               [] ],
+      [ [ __undef ],                                      [] ],
+      [ [ __null  ],                                      [] ],
+      [ [ __undef, '_map_' ],                             {} ],
+      [ [ { foo:{ bar:1 }, bar:2} ],           ['foo','bar'] ],
+      [ [ { foo:{ bar:1 }, bar:2}, '_list_' ], ['foo','bar'] ],
+      [ [ { foo:{ bar:1 }, bar:2}, '_map_'  ],       {bar:2} ]
+    ],
+
+    assert_count  = assert_table.length,
+    make_deep_fn  = utilObj._makeDeepData_,
+
+    idx, expect_list, arg_list,
+    expect_data, solve_data, msg_str
+  ;
+
+  test_obj.expect( assert_count );
+  for ( idx = __0; idx < assert_count; idx++ ) {
+    expect_list = assert_table[ idx ];
+    arg_list    = expect_list[ __0 ];
+    expect_data = expect_list[ __1 ];
+    solve_data  = make_deep_fn.apply( __undef,  arg_list );
+    msg_str     = __Str( idx ) + '. arg_list: '
+      + JSON.stringify( arg_list ) + '\n solve_data: '
+      + JSON.stringify( solve_data )
+      + '\n expect_data: ' + JSON.stringify( expect_data );
+    test_obj.deepEqual( solve_data, expect_data, msg_str );
+  }
+  test_obj.done();
+}
+// == . END 01_util tests =============================================
+// == . END NODEUNIT TEST FUNCTIONS  ==================================
 
 module.exports = {
   _setLogLevel_     : setLogLevel,
@@ -3016,6 +3030,24 @@ module.exports = {
   _rmListVal_       : rmListVal,
   _setStructData_   : setStructData,
   _shuffleList_     : shuffleList,
-  _trimStrList_     : trimStrList
+  _trimStrList_     : trimStrList,
+  _makeDeepData_    : makeDeepData
 };
+
+// Use mockTestObj for debugging tests using nodejs instead
+// of nodeunit, which obscures error messages. 
+// function mockFn() {
+//    console.log( aKey + '.' + this, arguments );
+// };
+// var mockTestObj = {
+//   deepEqual : mockFn.bind( 'deepEqual' ),
+//   done      : mockFn.bind( 'done'      ),
+//   expect    : mockFn.bind( 'expect'    ),
+//   ok        : mockFn.bind( 'ok'        ),
+//   test      : mockFn.bind( 'test'      )
+// };
+// makeDeepData( mockTestObj );
+//
+// Now run node_modules/.bin/nodeunit nodeunit_xuu.js
+// to inspect the output.
 
