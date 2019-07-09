@@ -3037,6 +3037,7 @@ module.exports = {
 
 // Use mockTestObj for debugging tests using nodejs instead
 // of nodeunit, which obscures error messages. 
+//
 // function mockFn() {
 //    console.log( aKey + '.' + this, arguments );
 // };
@@ -3049,6 +3050,5 @@ module.exports = {
 // };
 // makeDeepData( mockTestObj );
 //
-// Now run node_modules/.bin/nodeunit nodeunit_xuu.js
-// to inspect the output.
+// Now run `node nodeunit_xuu.js` and inspect the output.
 
