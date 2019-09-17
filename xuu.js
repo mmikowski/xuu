@@ -59,7 +59,7 @@ var xuu = (function () {
     __10  = 10,
     __100 = 100,
 
-    // Set string-like symbols
+    // Set scalar symbols
     __apply      = 'apply',
     __blank      = '',
     __bind       = 'bind',
@@ -75,6 +75,7 @@ var xuu = (function () {
     __replace    = 'replace',
     __shift      = 'shift',
     __slice      = 'slice',
+    __space      = ' ',
     __split      = 'split',
     __substr     = 'substr',
     __toString   = 'toString',
@@ -211,7 +212,7 @@ var xuu = (function () {
   // Summary   : getVarType( <data> );
   // Purpose   : Determine the type of data provided.
   // Example   : getVarType( [] ); // '_Array_'
-  // Arguments : (positional)
+  // Arguments : ( positional )
   //   <data> - value to examine
   // Returns   : '_Function_', '_Object_', '_Array_', '_String_',
   //             '_Number_', '_Null_', '_Boolean_', or '_Undefined_'
@@ -239,7 +240,7 @@ var xuu = (function () {
   // Summary   : castBool( <data>, <alt_data> );
   // Purpose   : Cast a boolean value
   // Example   : castBool( __true ); // returns __true
-  // Arguments : (positional)
+  // Arguments : ( positional )
   //   <data>     - data to cast as boolean
   //   <alt_data> - alternate value to return
   // Returns   :
@@ -256,7 +257,7 @@ var xuu = (function () {
   // Summary   : castFn( <data>, <alt_data> );
   // Purpose   : Cast a function
   // Example   : castFn( function() {} ); // returns function
-  // Arguments : (positional)
+  // Arguments : ( positional )
   //   <data>     - data to cast as function
   //   <alt_data> - alternate value to return
   // Returns   :
@@ -923,44 +924,47 @@ var xuu = (function () {
   }
   // . END Public prereq method /makeArgList/
 
-  // BEGIN Public prereq method /makePadNumStr/
-  // Summary   : makePadNumStr( <number>, <count> );
-  // Purpose   : Pad an int with 0s for <count> digits
-  // Example   : makePadNumStr( 25, 3 ) return '025';
+  // BEGIN Public prereq method /makePadStr/
+  // Summary   : makePadStr( <str>, <count>, [ <char>, <do_left> ] );
+  // Purpose   : Pad an <str> with <char> for <count> digits
+  // Example   : makePadStr( 25, 3 );      //  return ' 25'
+  //           : makePadStr( 25, 3, '0' ); // returns '025'
   // Arguments :
-  //   <number> - the number to pad
-  //   <count>  - the number of digits to fill
+  //   <str>      - The string to pad
+  //   <count>    - The desired length
+  //   <char>     - The padding character (default is space)
+  //   <do_left>  - Pad left (default is true), otherwise right
   // Returns   : A trimmed and padded string
   // Throws    : None
   //
-  function makePadNumStr( arg_num, arg_count ) {
+  function makePadStr( arg_str, arg_count, arg_char, arg_do_left) {
     var
-      num   = castNum( arg_num,   __undef ),
-      count = castInt( arg_count, __undef ),
-      list  = [],
+      str      = castStr(  arg_str   ),
+      count    = castInt(  arg_count ),
+      char_str = castStr(  arg_char  ,  __space ),
+      do_left  = castBool( arg_do_left , __true  ),
+      list     = [],
 
-      sign_int, num_str, zero_count;
+      pad_str, pad_count;
 
-    if ( num === __undef ) { return __blank; }
-    if ( ! ( count && count >= __0 ) ) {
-      return __Str( num )[ vMap._trim_ ]();
-    }
+    if ( str === __undef ) { return __blank; }
 
-    sign_int = getNumSign( num );
-    num_str  = __Str( makeAbsNumFn( num ) );
-    zero_count = count - num_str[ __length ]
-      - ( sign_int === __n1 ? __1 : __0 );
+    str = str[ vMap._trim_ ]();
+    if ( ! ( count && count >= __0 ) ) { return str; }
+
+    // Consider: Preserve sign symbol (-/+)
+
+    pad_count = count - str[ __length ];
+    if ( pad_count < __0 ) { return str; }
 
     // See repeat funciton in ES6
-    list[ __length ] = zero_count > __0 ? zero_count + __1 : __0;
-    num_str = list[ __join ]( '0' ) + num_str;
+    list[ __length ] = pad_count > __0 ? pad_count + __1 : __0;
 
-    if ( sign_int === __n1 ) {
-      num_str = '-' + num_str;
-    }
-    return num_str;
+    pad_str =  list[ __join ]( char_str );
+
+    return do_left ?  pad_str + str : str + pad_str;
   }
-  // . END Public prereq method /makePadNumStr/
+  // . END Public prereq method /makePadStr/
 
   // BEGIN Public prereq method /makeEscRxStr/
   // Summary   : makeEscRxStr( <string> );
@@ -1045,7 +1049,7 @@ var xuu = (function () {
       raw_str    = castStr(  arg_str, __blank ),
       do_space   = castBool( arg_do_space ),
       interm_str = do_space
-        ? raw_str[ __replace ]( configMap._tag_end_rx_, ' ' )
+        ? raw_str[ __replace ]( configMap._tag_end_rx_, __space )
         : raw_str;
 
     interm_str = interm_str[ vMap._trim_ ]();
@@ -1158,10 +1162,12 @@ var xuu = (function () {
       var
         arg_list    = makeArgList( arguments ),
         level_key   = castStr( arg_list[ __shift ](), __blank ),
-        level_idx   = levelXIdxMap[ level_key ],
-        command_str = levelXCmdMap[ level_key ],
 
-        caller_list, caller_str
+        caller_str  = __blank,
+        command_str = levelXCmdMap[ level_key ],
+        level_idx   = levelXIdxMap[ level_key ],
+
+        caller_list, date_str, prefix_str, pad_key
         ;
 
       // Handle bad log level
@@ -1169,7 +1175,7 @@ var xuu = (function () {
         arg_list[ __unshift ](
           '_log_level_key_not_found_ (' + level_key + ').'
         );
-        level_key   = '_error_';
+        level_key   = '_crit_';
         level_idx   = levelXIdxMap[ level_key ];
         command_str = levelXCmdMap[ level_key ];
       }
@@ -1181,15 +1187,18 @@ var xuu = (function () {
       /* istanbul ignore next */
       try {
         caller_list = (new Error()).stack[ __split ](/ *\n/);
-        caller_str  = (caller_list[__2] || __blank )[ __replace ](/^ */g, '');
-        arg_list[ __unshift ]( caller_str );
+        caller_str
+          += (caller_list[__2] || __blank )[ __replace ](/^ */g, __blank);
       }
       catch( ignore ) {
-        arg_list[ __unshift ]( '_no_stack_found_' );
+        caller_str = '_no_stack_found_';
       }
 
-      // Unshift level into args
-      arg_list[ __unshift ]( level_key );
+      // Unshift level, date, caller
+      date_str  = makeDateStr({ _date_ms_ : getNowMs(), _time_idx_ : __3 });
+      pad_key = makePadStr( level_key, __8, ' ', __false );
+      prefix_str = [ pad_key, date_str, caller_str ][ __join ]( ' | ');
+      arg_list[ __unshift ]( prefix_str + '\n' );
 
       // Try to log to console
       try {
@@ -1637,6 +1646,13 @@ var xuu = (function () {
           key = castStr( raw_key );
           break;
         default :
+          // Handle named objects
+          if ( typeofFn( walk_struct ) === 'object'
+            && walk_struct !== __null
+          ) {
+            key = castStr( raw_key );
+            break;
+          }
           key = __undef;
           break;
       }
@@ -1680,7 +1696,7 @@ var xuu = (function () {
   //      1 === HH
   //      2 === HH:MM
   //      3 === HH:MM:SS
-  //   <do_am>    - Do am/pm flag.  Default is __false.
+  //   <do_ampm>  - Do am/pm flag.  Default is __false.
   //   <do_local> - Use local time. Default is __false.
   // Returns   : String
   // Note      :
@@ -1690,12 +1706,12 @@ var xuu = (function () {
   //
   function makeClockStr ( arg_time_ms, arg_time_idx, arg_do_ampm, arg_do_local ) {
     var
-      do_local  = castBool( arg_do_local, __false ),
-      time_ms   = castInt( arg_time_ms, getNowMs( do_local ) ),
-      time_idx  = castInt( arg_time_idx, __3 ),
-      do_ampm   = castBool( arg_do_ampm, __false ),
-      abs_idx   = makeAbsNumFn( time_idx  ),
+      do_ampm   = castBool( arg_do_ampm,              __false ),
+      do_local  = castBool( arg_do_local,             __false ),
+      time_idx  = castInt(  arg_time_idx,                 __3 ),
+      time_ms   = castInt(  arg_time_ms, getNowMs( do_local ) ),
 
+      abs_idx   = makeAbsNumFn( time_idx  ),
       sec_ms    = configMap._sec_ms_,
       min_sec   = configMap._min_sec_,
       hrs_min   = configMap._hrs_min_,
@@ -1711,7 +1727,6 @@ var xuu = (function () {
       hrs_int     = raw_hrs_int % day_hrs,
 
       day_int     = makeFloorNumFn( raw_hrs_int / day_hrs ),
-      mns         = makePadNumStr,
 
       time_list   = [],
       suffix_str  = __blank,
@@ -1726,18 +1741,18 @@ var xuu = (function () {
       time_list[ __push ]( scratch_str );
     }
 
-    scratch_str = mns( hrs_int, __2 );
+    scratch_str = makePadStr( hrs_int, __2, __0 );
     if ( time_idx < __0 ) { scratch_str += 'h'; }
     time_list[ __push ]( scratch_str );
 
     if ( abs_idx > __1 ) {
-      scratch_str = mns( min_int, __2 );
+      scratch_str = makePadStr( min_int, __2, __0 );
       if ( time_idx < __0 ) { scratch_str += 'm'; }
       time_list[ __push ]( scratch_str );
     }
 
     if ( abs_idx > __2 ) {
-      scratch_str = mns( sec_int, __2 );
+      scratch_str = makePadStr( sec_int, __2, __0 );
       if ( time_idx < __0 ) { scratch_str += 's'; }
       time_list[ __push ]( scratch_str );
     }
@@ -1856,8 +1871,6 @@ var xuu = (function () {
       time_idx  = castInt(  map._time_idx_, __0   ),
       order_str = castStr(  map._order_str_, __blank ),
 
-      mns       = makePadNumStr,
-
       yrs_int,   mon_int,   day_int,
       date_list, date_str,  time_ms,
       time_str
@@ -1877,17 +1890,17 @@ var xuu = (function () {
 
     if ( order_str === '_us_' ) {
       date_list = [
-        mns( mon_int, __2 ),
-        mns( day_int, __2 ),
-        mns( yrs_int, __4 )
+        makePadStr( mon_int, __2, __0 ),
+        makePadStr( day_int, __2, __0 ),
+        makePadStr( yrs_int, __4, __0 )
       ];
       date_str = date_list[ __join ]( '/' );
     }
     else {
       date_list = [
-        mns( yrs_int, __4 ),
-        mns( mon_int, __2 ),
-        mns( day_int, __2 )
+        makePadStr( yrs_int, __4, __0 ),
+        makePadStr( mon_int, __2, __0 ),
+        makePadStr( day_int, __2, __0 )
       ];
       date_str = date_list[ __join ]( '-' );
     }
@@ -1903,7 +1916,7 @@ var xuu = (function () {
 
     time_str = makeClockStr( time_ms, time_idx );
 
-    return time_str ?  date_str + ' ' + time_str : date_str;
+    return time_str ?  date_str + __space + time_str : date_str;
   }
   // . END Public method /makeDateStr/
 
@@ -2053,7 +2066,7 @@ var xuu = (function () {
     if ( scrub_count <= limit_int ) { return scrub_str; }
 
     if ( do_word_break ) {
-      word_list   = scrub_str[ __split ]( ' ' );
+      word_list   = scrub_str[ __split ]( __space );
       word_count  = word_list[ __length ];
       solve_count = __0;
       solve_list  = [];
@@ -2067,7 +2080,7 @@ var xuu = (function () {
         }
         solve_list[ __push ]( solve_word );
       }
-      return __blank + solve_list[ __join ]( ' ' );
+      return __blank + solve_list[ __join ]( __space );
     }
 
     return scrub_str[ __substr ](__0, limit_int - __3 ) + '...';
@@ -2469,10 +2482,10 @@ var xuu = (function () {
   function makeStrFromMap ( arg_map ) {
     // noinspection JSMismatchedCollectionQueryUpdate
     var
-      map       = castMap(  arg_map,          {} ),
-      prop_map  = castMap(  map._prop_map_,   {} ),
-      key_list  = castList( map._key_list_,   [] ),
-      delim_str = castStr(  map._delim_str_, ' ' ),
+      map       = castMap(  arg_map         ,      {} ),
+      prop_map  = castMap(  map._prop_map_  ,      {} ),
+      key_list  = castList( map._key_list_  ,      [] ),
+      delim_str = castStr(  map._delim_str_ , __space ),
 
       label_delim_str = castStr( map._label_delim_str_, ': ' ),
       label_map       = castMap( map._label_map_,    __undef ),
@@ -2920,7 +2933,6 @@ var xuu = (function () {
   //   is met, a warning is logged and __undef returned
   //
   function makeDeepData ( arg_base_data, arg_mode_str ) {
-    // noinspection JSMismatchedCollectionQueryUpdate
     var
       base_data  = castList( arg_base_data ) || castMap( arg_base_data, {} ),
       mode_str   = castStr(
@@ -3154,7 +3166,7 @@ var xuu = (function () {
     _getNowMs_       : getNowMs,
     _getNumSign_     : getNumSign,
     _makeArgList_    : makeArgList,
-    _makePadNumStr_  : makePadNumStr,
+    _makePadStr_     : makePadStr,
     _makeEscRxStr_   : makeEscRxStr,
     _makeRxObj_      : makeRxObj,
     _makeScrubStr_   : makeScrubStr,
