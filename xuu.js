@@ -80,7 +80,7 @@ var xuu = (function () {
     __substr     = 'substr',
     __toString   = 'toString',
     __true       = true,
-    __undef      = void 0,
+    __undef      = void __0,
     __unshift    = 'unshift',
 
     // Set shared map
@@ -1072,7 +1072,7 @@ var xuu = (function () {
       str    = castStr( arg_str, __blank ),
       uc_str = str.charAt( __0 ).toUpperCase()
     ;
-    return uc_str + str[ vMap._substr_ ]( __1 );
+    return uc_str + str[ __substr ]( __1 );
   }
   // . END Public prereq method /makeUcFirstStr/
   // == . END PREREQ METHODS ==========================================
@@ -1782,11 +1782,14 @@ var xuu = (function () {
   //   + _input_num_       - The number to format, e.g. 123598
   //   + _round_limit_exp_ - The size (10^exp) of number after which
   //                         a rounded value is returned. Default is __3.
+  //   + _round_limit_str  - The limit name. Default is 'k'.
+  //
   //   + _round_unit_exp_  - The size (10^exp) of number to group as
   //                         a unit. Default is __3, e.g. 1,000's.
-  //   + _round_unit_str_  - The unit name. Default is 'k'.
   //   + _round_dec_count_ - Number of decimal places to keep
   //                         in the mantisa when rounding to units
+  //   + _nrnd_dec_count_  - Number of decimal places to keep when
+  //                           NOT rounded to unitcs
   // Returns   :
   //   + Success - Returns formated string
   //   + Failure - Blank string
@@ -1795,36 +1798,54 @@ var xuu = (function () {
   function makeCommaNumStr ( arg_map ) {
     var
       map             = castMap( arg_map, {} ),
+
       input_num       = castNum( map._input_num_,       __0 ),
       round_limit_exp = castInt( map._round_limit_exp_, __3 ),
       round_unit_exp  = castInt( map._round_unit_exp_,  __3 ),
       round_unit_str  = castStr( map._round_unit_str_,  'k' ),
       round_dec_count = castInt( map._round_dec_count_, __1 ),
+      nornd_dec_count = castInt( map._nornd_dec_count_, __0 ),
 
-      round_limit_num = __Math.pow( __10, round_limit_exp  ),
-      round_unit_num  = __Math.pow( __10, round_unit_exp   ),
+      round_limit_num = __Math.pow( __10, round_limit_exp   ),
+      round_unit_num  = __Math.pow( __10, round_unit_exp    ),
 
-      solve_suffix = __blank,
+      floor_num  = makeFloorNumFn( input_num ),
+      dec_num    = ( input_num - floor_num ).toFixed( nornd_dec_count ),
+      do_units   = ( makeAbsNumFn( floor_num ) >= round_limit_num ),
 
-      solve_num, solve_str, solve_list, list_count, idx
-    ;
+      dec_str    = __blank,
+      suffix_str = __blank,
 
-    if ( makeAbsNumFn( input_num ) >= round_limit_num ) {
-      solve_num    = input_num / round_unit_num;
-      solve_suffix = round_unit_str;
-      solve_str    = solve_num[ vMap._toFixed_]( round_dec_count );
+      iterm_num, iterm_str,
+      join_list, join_str,
+      list_count, idx
+      ;
+
+    if ( nornd_dec_count > 0 ) {
+      console.warn( 'WTF?', do_units );
+    }
+    if ( do_units ) {
+      iterm_num   = floor_num / round_unit_num;
+      suffix_str  = round_unit_str;
+      iterm_str   = iterm_num[ vMap._toFixed_]( round_dec_count );
     }
     else {
-      solve_str = __Str( input_num );
+      iterm_str = __Str( floor_num );
+      if ( nornd_dec_count > 0 ) {
+        dec_str   = __Str( dec_num )[ __split]( '.' )[ __1 ] || '';
+        dec_str   = '.' + dec_str[ __substr ]( __0, nornd_dec_count );
+      }
     }
 
-    solve_list = solve_str[ __split ]( '.' );
-    list_count = solve_list[ __length ];
+    join_list  = iterm_str[ __split ]( '.' );
+    list_count = join_list[ __length ];
     for ( idx = __0; idx < list_count; idx++ ) {
-      solve_list[ idx ] = solve_list[ idx ][
+      join_list[ idx ] = join_list[ idx ][
         __replace ]( configMap._comma_rx_, "$1," );
     }
-    return solve_list[ __join]( '.' ) + solve_suffix;
+
+    join_str = join_list[ __join ]( '.' );
+    return do_units ? join_str + suffix_str : join_str + dec_str;
   }
   // . END Public method /makeCommaNumStr/
 
@@ -2042,7 +2063,7 @@ var xuu = (function () {
   //   });
   //   // returns 'hee haw ...'
   // Arguments :
-  //   + _char_limit_int_ : Maxiumum allowed chars.  Default is 0.
+  //   + _char_limit_int_ : Maxiumum allowed chars.  Default is __0.
   //   + _do_word_break_  : Break at word boundries. Default is __true.
   //   + _input_str_      : The string to shorten
   // Returns   : A string
@@ -2119,7 +2140,7 @@ var xuu = (function () {
     function makePart () {
       //noinspection NonShortCircuitBooleanExpressionJS,MagicNumberJS
       return ((( __1 + makeRandomNumFn() ) * 0x10000 ) | __0
-        )[ __toString ](16)[ vMap._substr_ ]( __1 );
+        )[ __toString ](16)[ __substr ]( __1 );
     }
 
     return makePart() + makePart()
@@ -2933,6 +2954,7 @@ var xuu = (function () {
   //   is met, a warning is logged and __undef returned
   //
   function makeDeepData ( arg_base_data, arg_mode_str ) {
+    // noinspection JSMismatchedCollectionQueryUpdate,JSMismatchedCollectionQueryUpdate
     var
       base_data  = castList( arg_base_data ) || castMap( arg_base_data, {} ),
       mode_str   = castStr(

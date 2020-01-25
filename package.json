@@ -1,4 +1,4 @@
-{
+ {
   "author": {
     "name": "Michael S. Mikowski",
     "email": "mike.mikowski@gmail.com"
@@ -88,5 +88,5 @@
   "scripts": {
     "test": "nodeunit ./nodeunit_xuu.js"
   },
-  "version": "1.7.3"
+  "version": "1.7.6"
 }

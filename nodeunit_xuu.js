@@ -1,4 +1,4 @@
-  /*
+/*
  * nodeunit_xu.js
  * @author Michael S. Mikowski - mike.mikowski@gmail.com
  *
@@ -963,6 +963,9 @@ function makeCommaNumStr ( test_obj ) {
       [ { _input_num_ :      1950 },      '1.9k' ],
       [ { _input_num_ :      1951 },      '2.0k' ],
       [ { _input_num_ :      1999 },      '2.0k' ],
+      [ { _input_num_ : 1999.92543,
+        _nornd_dec_count_ : 2, _round_limit_exp_: 6 },
+        '1,999.93' ],
       [ { _input_num_ :   1000000 },  '1,000.0k' ],
       [ { _input_num_ :       -10 },       '-10' ],
       [ { _input_num_ :      -100 },      '-100' ],
