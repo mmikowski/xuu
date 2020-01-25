@@ -1783,13 +1783,12 @@ var xuu = (function () {
   //   + _round_limit_exp_ - The size (10^exp) of number after which
   //                         a rounded value is returned. Default is __3.
   //   + _round_limit_str  - The limit name. Default is 'k'.
-  //
   //   + _round_unit_exp_  - The size (10^exp) of number to group as
   //                         a unit. Default is __3, e.g. 1,000's.
   //   + _round_dec_count_ - Number of decimal places to keep
   //                         in the mantisa when rounding to units
   //   + _nrnd_dec_count_  - Number of decimal places to keep when
-  //                           NOT rounded to unitcs
+  //                           NOT rounded to units
   // Returns   :
   //   + Success - Returns formated string
   //   + Failure - Blank string
@@ -1821,9 +1820,6 @@ var xuu = (function () {
       list_count, idx
       ;
 
-    if ( nornd_dec_count > 0 ) {
-      console.warn( 'WTF?', do_units );
-    }
     if ( do_units ) {
       iterm_num   = floor_num / round_unit_num;
       suffix_str  = round_unit_str;
@@ -2954,7 +2950,6 @@ var xuu = (function () {
   //   is met, a warning is logged and __undef returned
   //
   function makeDeepData ( arg_base_data, arg_mode_str ) {
-    // noinspection JSMismatchedCollectionQueryUpdate,JSMismatchedCollectionQueryUpdate
     var
       base_data  = castList( arg_base_data ) || castMap( arg_base_data, {} ),
       mode_str   = castStr(
