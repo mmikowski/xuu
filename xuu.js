@@ -195,8 +195,7 @@ var xuu = (function () {
 
     // Declare other module-scope vars
     getBasename, getDirname,
-    logObj, logFn
-    ;
+    logObj, logFn;
 
   /* istanbul ignore next */
   try {
@@ -361,8 +360,7 @@ var xuu = (function () {
       solve_num  = var_type === '_Number_'
         ? data : var_type === '_String_'
           ? parseFloat( data ) : __undef,
-      solve_int
-    ;
+      solve_int;
 
     if ( isNaN( solve_num ) ) { return alt_data; }
     solve_int = makeRoundNumFn( solve_num );
@@ -501,8 +499,7 @@ var xuu = (function () {
       var_type = getVarType( data ),
       solve_num  = var_type === '_Number_'
         ? data : var_type === '_String_'
-          ? parseFloat( data ) : __undef
-    ;
+          ? parseFloat( data ) : __undef;
 
     if ( isNaN( solve_num ) ) { return alt_data; }
 
@@ -565,8 +562,7 @@ var xuu = (function () {
       solve_str = ( var_type === '_String_' )
         ? data : var_type === '_Number_'
           ? __Str( data ) : __undef,
-      log_list, char_count
-    ;
+      log_list, char_count;
 
     if ( solve_str === __undef ) { return alt_data; }
 
@@ -701,8 +697,7 @@ var xuu = (function () {
   function extendList ( arg_base_list, arg_extend_list ) {
     var
       base_list   = castList( arg_base_list,   [] ),
-      extend_list = castList( arg_extend_list, [] )
-    ;
+      extend_list = castList( arg_extend_list, [] );
 
     __Array.prototype.push[ __apply ]( base_list, extend_list );
     return base_list;
@@ -998,8 +993,7 @@ var xuu = (function () {
       key_list  = castList( arg_key_list, makeKeyListFn( base_map ) ),
       key_count = key_list[ __length ],
       solve_map = {},
-      idx, key
-      ;
+      idx, key;
 
     for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
@@ -1023,8 +1017,7 @@ var xuu = (function () {
   function makeRxObj ( arg_pattern_str, arg_option_str ) {
     var
       pattern_str = castStr( arg_pattern_str, __blank ),
-      option_str  = castStr( arg_option_str )
-    ;
+      option_str  = castStr( arg_option_str );
 
     if ( option_str ) {
       return new RegExp( pattern_str, option_str );
@@ -1070,8 +1063,7 @@ var xuu = (function () {
   function makeUcFirstStr ( arg_str ) {
     var
       str    = castStr( arg_str, __blank ),
-      uc_str = str.charAt( __0 ).toUpperCase()
-    ;
+      uc_str = str.charAt( __0 ).toUpperCase();
     return uc_str + str[ __substr ]( __1 );
   }
   // . END Public prereq method /makeUcFirstStr/
@@ -1127,8 +1119,7 @@ var xuu = (function () {
       levelKey = '_warn_',
       levelIdx   = levelXIdxMap[ levelKey ],
 
-      consoleRef
-    ;
+      consoleRef;
 
     // favor node console if available
     /* istanbul ignore next */
@@ -1167,8 +1158,7 @@ var xuu = (function () {
         command_str = levelXCmdMap[ level_key ],
         level_idx   = levelXIdxMap[ level_key ],
 
-        caller_list, date_str, prefix_str, pad_key
-        ;
+        caller_list, date_str, prefix_str, pad_key;
 
       // Handle bad log level
       if ( ! command_str ) {
@@ -1252,8 +1242,7 @@ var xuu = (function () {
       order_str   = castStr( map._order_str_, __blank ),
       date_us_rx  = configMap._date_us_rx_,
       date_utc_rx = configMap._date_utc_rx_,
-      match_list, yy_int, mm_int, dd_int, date_obj, check_int
-      ;
+      match_list, yy_int, mm_int, dd_int, date_obj, check_int;
 
     if ( order_str === '_us_' ) {
       match_list = date_str[ __match ]( date_us_rx );
@@ -1301,8 +1290,7 @@ var xuu = (function () {
       metric_table = configMap._metric_table_,
       metric_count = metric_table[ __length ],
 
-      root_num, suffix, idx, row_map
-      ;
+      root_num, suffix, idx, row_map;
 
     _SUFFIX_: for ( idx = __0; idx < metric_count; idx++ ) {
       row_map = metric_table[ idx ];
@@ -1387,8 +1375,7 @@ var xuu = (function () {
       source_str     = castStr(  arg_str, __blank   ),
       do_exclude_amp = castBool( arg_do_exclude_amp ),
 
-      match_rx, lookup_map
-      ;
+      match_rx, lookup_map;
 
     function matchFn ( key ) {
       return lookup_map[ key ] /* istanbul ignore next */ || __blank;
@@ -1425,8 +1412,7 @@ var xuu = (function () {
       rx_obj      = context_str === '_base_'
         ? makeRxObj( '([^'  + delim_str + ']*)$' )
         : makeRxObj( '^(.*' + delim_str + ')[^' + delim_str + ']*$' ),
-      match_list
-    ;
+      match_list;
 
     if ( path_str === __blank ) { return path_str; }
 
@@ -1458,8 +1444,7 @@ var xuu = (function () {
       map_count = map_list[ __length ],
       found_idx = __n1,
 
-      idx, row_map, row_key_list
-    ;
+      idx, row_map, row_key_list;
 
     for ( idx = __0; idx < map_count; idx++ ) {
       row_map = map_list[ idx ];
@@ -1558,8 +1543,7 @@ var xuu = (function () {
     var
       first_list  = castList( arg0_list, [] ),
       second_list = castList( arg1_list, [] ),
-      list_1, list_2
-    ;
+      list_1, list_2;
 
     list_1 = first_list[ vMap._filter_ ](
       function ( data ) {
@@ -1627,8 +1611,7 @@ var xuu = (function () {
       is_good     = __true,
       key_count   = path_list[ __length ],
 
-      idx, raw_key, struct_type, key
-    ;
+      idx, raw_key, struct_type, key;
 
     if ( key_count > __100 ) {
       logFn( '_error_', '_exceeded_max_depth_' );
@@ -1675,8 +1658,8 @@ var xuu = (function () {
     var
       date_obj = getTzDateObj(),
       date_str = date_obj[ __toString ](),
-      match_list = date_str[ __match ]( configMap._tzcode_rx_ )
-      ;
+      match_list = date_str[ __match ]( configMap._tzcode_rx_ );
+
     return ( match_list && match_list[ __1 ] )
       ? match_list[ __1 ] : __blank;
   }
@@ -1731,8 +1714,7 @@ var xuu = (function () {
       time_list   = [],
       suffix_str  = __blank,
 
-      scratch_str
-      ;
+      scratch_str;
 
     if ( abs_idx === __0 || abs_idx > __3 ) { return __blank; }
 
@@ -1787,8 +1769,8 @@ var xuu = (function () {
   //                         a unit. Default is __3, e.g. 1,000's.
   //   + _round_dec_count_ - Number of decimal places to keep
   //                         in the mantisa when rounding to units
-  //   + _nrnd_dec_count_  - Number of decimal places to keep when
-  //                           NOT rounded to units
+  //   + _nornd_dec_count_ - Number of decimal places to keep when
+  //                         NOT rounded to units
   // Returns   :
   //   + Success - Returns formated string
   //   + Failure - Blank string
@@ -1803,34 +1785,27 @@ var xuu = (function () {
       round_unit_exp  = castInt( map._round_unit_exp_,  __3 ),
       round_unit_str  = castStr( map._round_unit_str_,  'k' ),
       round_dec_count = castInt( map._round_dec_count_, __1 ),
-      nornd_dec_count = castInt( map._nornd_dec_count_, __0 ),
-
+      nornd_dec_count = castInt( map._nornd_dec_count_, __0,
+        { _do_autobound_ : true, _min_num_ : __0 }          ),
       round_limit_num = __Math.pow( __10, round_limit_exp   ),
       round_unit_num  = __Math.pow( __10, round_unit_exp    ),
 
       floor_num  = makeFloorNumFn( input_num ),
-      dec_num    = ( input_num - floor_num ).toFixed( nornd_dec_count ),
-      do_units   = ( makeAbsNumFn( floor_num ) >= round_limit_num ),
 
-      dec_str    = __blank,
+      do_units   = ( makeAbsNumFn( floor_num ) >= round_limit_num ),
       suffix_str = __blank,
 
       iterm_num, iterm_str,
       join_list, join_str,
-      list_count, idx
-      ;
+      list_count, idx;
 
     if ( do_units ) {
-      iterm_num   = floor_num / round_unit_num;
+      iterm_num   = input_num / round_unit_num;
       suffix_str  = round_unit_str;
-      iterm_str   = iterm_num[ vMap._toFixed_]( round_dec_count );
+      iterm_str   = iterm_num[ vMap._toFixed_ ]( round_dec_count );
     }
     else {
-      iterm_str = __Str( floor_num );
-      if ( nornd_dec_count > 0 ) {
-        dec_str   = __Str( dec_num )[ __split]( '.' )[ __1 ] || '';
-        dec_str   = '.' + dec_str[ __substr ]( __0, nornd_dec_count );
-      }
+      iterm_str = input_num[ vMap._toFixed_ ]( nornd_dec_count );
     }
 
     join_list  = iterm_str[ __split ]( '.' );
@@ -1841,7 +1816,7 @@ var xuu = (function () {
     }
 
     join_str = join_list[ __join ]( '.' );
-    return do_units ? join_str + suffix_str : join_str + dec_str;
+    return do_units ? join_str + suffix_str : join_str;
   }
   // . END Public method /makeCommaNumStr/
 
@@ -1890,8 +1865,7 @@ var xuu = (function () {
 
       yrs_int,   mon_int,   day_int,
       date_list, date_str,  time_ms,
-      time_str
-      ;
+      time_str;
 
     if ( ! date_obj ) {
       date_obj = new __Date();
@@ -1928,8 +1902,7 @@ var xuu = (function () {
     // Process time time requested
     time_ms = __Num( date_obj.getHours()   ) * configMap._hrs_ms_
       + __Num( date_obj.getMinutes() ) * configMap._min_ms_
-      + __Num( date_obj.getSeconds() ) * configMap._sec_ms_
-    ;
+      + __Num( date_obj.getSeconds() ) * configMap._sec_ms_;
 
     time_str = makeClockStr( time_ms, time_idx );
 
@@ -1939,110 +1912,148 @@ var xuu = (function () {
 
   // BEGIN Public method /makeDebounceFn/
   // Summary   : makeDebounceFn( <arg_map> );
-  // Purpose   : Create a function that will execute only after
-  //   <_delay_ms_> of inactivity.
-  // Example   : makeDebounceFn({ _fn_ : myRoutineFn, _delay_ms_: 2500 });
-  //             // Returns the debounced function
+  // Purpose   : Create a function which will call a provided method a
+  //             specified time period after it was last called. Any
+  //             call that occurs within the time period resets the clock.
+  //
+  // Example   : dbFn = makeDebounceFn({ _fn_ : myMethodFn, _delay_ms_: 250 });
+  //             dbFn( 'method argument' ); // Executes in 250ms
+  //
   // Arguments : <arg_map> with the following keys
-  //   + _fn_       - The function to execute.     Required.
-  //   + _delay_ms_ - Inactivity time.             Default is __0.
-  //   + _ctx_data_ - Function context.            Default is __undef.
-  //   + _do_asap_  - Fire function at first call. Default is __false.
+  //   + _fn_       - The method to execute           Required.
+  //   + _delay_ms_ - The time of inactivity          Default is __0.
+  //   + _ctx_data_ - Method context                  Default is __undef.
+  //   + _do_asap_  - Fire method on first call       Default is __false.
+  //
   // Returns   :
-  //   + Success - A function which will execute when called only after
-  //     <_delay_ms_> has elapsed since the last time it was called.
+  //   + Success - The debounce function as described above.
   //   + Failure - undef
+  //
   // Throws    : None
-  // Note      : The returned function will process arguments just like the
-  //             provided function.
+  //
+  // Note      : The method, myMethodFn, is always invoked with the latest
+  //             arguments provided. Consider this example:
+  //
+  //             dbFn( 'myArgs' ); dbFn( 'Hello World' );
+  //
+  //             The argument 'myArgs' will likely be discarded and
+  //             myMethodnFn( 'Hello World' ) will likely be invoked.
+  //
+  // Todo      : Provide a means to reset _do_asap_ with either a timeout
+  //             or other mechanism.
   //
   function makeDebounceFn ( arg_map ) {
     var
       map      = castMap(  arg_map,             {} ),
-      fn       = castFn(   map._fn_                ),
+
       delay_ms = castInt(  map._delay_ms_,     __0 ),
       do_asap  = castBool( map._do_asap_,  __false ),
+      fn       = castFn(   map._fn_                ),
       ctx_data = map._ctx_data_,
-      delay_toid
-    ;
+
+      arg_list, delay_toid;
 
     if ( ! fn ) {
-      logFn( '_error_', '_debounce_bad_argument_', fn );
+      logFn( '_error_', '_bad_debounce_arguments_', arg_map );
       return __undef;
     }
 
-    return function () {
-      var arg_list = makeArgList( arguments );
-      if ( do_asap && ! delay_toid ) {
-        fn[ __apply ]( ctx_data, arg_list );
-      }
-      clearToFn( delay_toid );
+    function debounceFn () {
+      var inner_ms = do_asap ? 0 : delay_ms;
+
+      // Due to closure arg_list is always updated to lastest call
+      arg_list = makeArgList( arguments );
+      if ( delay_toid ) { clearToFn( delay_toid ); }
+
       delay_toid = setToFn( function() {
-        if ( ! do_asap ) {
-          fn[ __apply]( ctx_data, arg_list );
-        }
+        fn[ __apply]( ctx_data, arg_list );
         delay_toid = __undef;
-      }, delay_ms );
-    };
+      }, inner_ms );
+      do_asap = false;
+    }
+
+    return debounceFn;
   }
   // . END Public method /makeDebounceFn/
 
   // BEGIN Public method /makeThrottleFn/
   // Summary   : makeThrottleFn( <arg_map> );
-  // Purpose   : Create a function which will only execute when called
-  //   if <_delay_ms_> has elapsed since its last invocation.
-  // Example   : makeThrottleFn({ _fn_ : myRoutineFn, _delay_ms_: 2500 });
-  //             // Returns the throttled function
+  // Purpose   : Create a function which will call a provided method only
+  //             once per time period.
+  //
+  // Example   : thFn = makeThrottleFn({ _fn_ : myMethodFn, _delay_ms_: 250 });
+  //             thFn( 'method argument' ); // Executes in 250ms
+  //
   // Arguments : <arg_map> with the following keys
-  //   + _fn_       - The function to execute         Required.
-  //   + _delay_ms_ - The minimum time between calls. Default is __0.
-  //   + _ctx_data_ - Function context.               Default is __undef.
+  //   + _fn_       - The method to execute           Required.
+  //   + _delay_ms_ - The minimum time between calls  Default is __0.
+  //   + _ctx_data_ - Method context                  Default is __undef.
+  //   + _do_asap_  - Fire method on first call       Default is __false.
+  //
   // Returns   :
-  //   + Success - A function which will execute when called only if
-  //     <_delay_ms_> has elapsed since its last invocation.
+  //   + Success - The throttle function as described above.
   //   + Failure - undef
+  //
   // Throws    : None
-  // Note      : The returned function will process arguments just like the
-  //             provided function.
+  //
+  // Note      : The method, myMethodFn, is always invoked with the latest
+  //             arguments provided. Consider this example:
+  //
+  //             thFn( 'myArgs' ); thFn( 'Hello World' );
+  //
+  //             The argument 'myArgs' will likely be discarded and
+  //             myMethodnFn( 'Hello World' ) will likely be invoked.
+  //
+  // Todo      : Provide a means to reset _do_asap_ with either a timeout
+  //             or other mechanism.
   //
   function makeThrottleFn ( arg_map ) {
     var
       map      = castMap(  arg_map, {} ),
-      fn       = castFn(   map._fn_ ),
-      delay_ms = castInt(  map._delay_ms_, __0 ),
-      ctx_data = map._ctx_data_,
-      last_ms  = __0,
-      delay_toid;
 
-    if ( ! ( fn && delay_ms ) ) { return; }
+      delay_ms = castInt(  map._delay_ms_,     __0 ),
+      do_asap  = castBool( map._do_asap_,  __false ),
+      fn       = castFn(   map._fn_                ),
+      ctx_data = map._ctx_data_,
+
+      last_ms, arg_list, delay_toid;
+
+    if ( ! fn ) {
+      logFn( '_error_', '_bad_throttle_arguments_', fn );
+      return __undef;
+    }
 
     function throttleFn () {
-      var
-        arg_list = makeArgList( arguments ),
-        now_ms   = getNowMs(),
-        delta_ms = delay_ms - ( now_ms - last_ms )
-      ;
+      var now_ms = getNowMs(), delta_ms, is_locked;
+      if ( ! last_ms ) { last_ms = now_ms; }
+      delta_ms = delay_ms - ( now_ms - last_ms );
 
-      if ( delta_ms <= __0 ) {
-        // A timeout id should never be defined except in race conditions
-        /* istanbul ignore next */
+      // Due to closure arg_list is always updated to lastest call
+      arg_list = makeArgList( arguments );
+
+      // Clear delay_toid if timeout. This should only happend in edge cases.
+      if ( delta_ms < __0 || do_asap ) {
         if ( delay_toid ) { clearToFn( delay_toid ); }
-        delay_toid = __undef;
-        last_ms    = now_ms;
+        delay_toid  = __undef;
+        last_ms     = __undef;
+        do_asap     = false;
         return fn[ __apply ]( ctx_data, arg_list );
       }
 
+      // Discard this call if we already have a timeout id
       if ( delay_toid ) { return; }
+
+      do_asap = false;
       delay_toid = setToFn(
         function () {
+          if ( is_locked ) { return; }
+          delay_toid  = __undef;
+          last_ms     = __undef;
           fn[ __apply ]( ctx_data, arg_list );
-          delay_toid = __undef;
-          last_ms    = now_ms;
         },
         delta_ms
       );
     }
-
     return throttleFn;
   }
   // . END Public method /makeThrottleFn/
@@ -2075,8 +2086,7 @@ var xuu = (function () {
 
       word_list,   word_count,
       solve_count, solve_list,
-      idx,         solve_word
-    ;
+      idx,         solve_word;
 
     if ( ! ( limit_int && limit_int > __3 ) ) { return __blank; }
 
@@ -2143,8 +2153,7 @@ var xuu = (function () {
       + '-' + makePart()
       + '-' + makePart()
       + '-' + makePart()
-      + '-' + makePart() + makePart() + makePart()
-      ;
+      + '-' + makePart() + makePart() + makePart();
   }
   // . END Public method /makeGuidStr/
 
@@ -2240,8 +2249,7 @@ var xuu = (function () {
       enum_count = enum_table[ __length ],
       solve_html = __blank,
 
-      idx, row_map, val_str, val_html, label_str, label_html
-      ;
+      idx, row_map, val_str, val_html, label_str, label_html;
 
     _OPTION_: for ( idx = __0; idx < enum_count; idx++ ) {
       row_map = enum_table[ idx ];
@@ -2276,8 +2284,7 @@ var xuu = (function () {
   function makePctStr ( arg_ratio, arg_count ) {
     var
       ratio = castNum( arg_ratio, __0 ),
-      count = castNum( arg_count, __0 )
-    ;
+      count = castNum( arg_count, __0 );
 
     count = count < __0 ? __0 : makeFloorNumFn( count );
     return ( ratio * __100 )[ vMap._toFixed_ ]( count ) + '%';
@@ -2298,8 +2305,7 @@ var xuu = (function () {
       enum_count = enum_table[ __length ],
       solve_html = __blank,
 
-      idx, row_map, val_str, val_html, label_str, label_html
-      ;
+      idx, row_map, val_str, val_html, label_str, label_html;
 
     _RADIO_: for ( idx = __0; idx < enum_count; idx++ ) {
       row_map    = castMap( enum_table[ idx ], {} );
@@ -2312,8 +2318,8 @@ var xuu = (function () {
       solve_html
         += '<label>'
         +  '<input type="radio" name="' + group_html
-        +  '" value="' + val_html + '"'
-        ;
+        +  '" value="' + val_html + '"';
+
       if ( val_str === match_str ) { solve_html += ' checked="checked"'; }
       solve_html += '>' + label_html + '</label>';
     }
@@ -2341,8 +2347,7 @@ var xuu = (function () {
       search_str = castStr( arg_search_str, __blank ),
       value_str  = castStr( arg_value_str,  __blank ),
       escape_str = makeEscRxStr( '{' + search_str + '}' ),
-      search_rx  = makeRxObj( escape_str, 'g' )
-      ;
+      search_rx  = makeRxObj( escape_str, 'g' );
 
     return function ( arg_tmplt ) {
       var tmplt = castStr( arg_tmplt, __blank );
@@ -2381,8 +2386,7 @@ var xuu = (function () {
     var
       key_list     = makeKeyListFn( arg_struct ),
       key_count    = key_list[ __length ],
-      solve_struct = __Array.isArray( arg_struct ) ? [] : {}
-      ;
+      solve_struct = __Array.isArray( arg_struct ) ? [] : {};
 
     return key_count > __0 ? {
       _source_struct_ : arg_struct,
@@ -2406,8 +2410,7 @@ var xuu = (function () {
       key_count, key_list, key_idx,
       source_struct, solve_struct,
       key, data, replace_data,
-      check_obj, pop_solve_struct, idx
-      ;
+      check_obj, pop_solve_struct, idx;
 
     if ( ! context_obj ) { return arg_struct; }
 
@@ -2482,8 +2485,7 @@ var xuu = (function () {
 
       solve_data = arg_seen_data === __undef ? __true : arg_seen_data,
       solve_map = {},
-      key, idx
-    ;
+      key, idx;
 
     for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
@@ -2511,8 +2513,7 @@ var xuu = (function () {
       key_count  = key_list[ __length ],
       solve_list = [],
 
-      idx, prop_key, prop_str, label_str
-    ;
+      idx, prop_key, prop_str, label_str;
 
     for ( idx = __0; idx < key_count; idx++ ) {
       prop_key  = key_list[ idx ];
@@ -2604,8 +2605,7 @@ var xuu = (function () {
       date_ms,         date_offset,
 
       solve_map,       solve_ms,        time_ms,
-      solve_str,       solve_time_list, solve_date_list
-    ;
+      solve_str,       solve_time_list, solve_date_list;
 
     // Get the time span and a list of available units
     span_ms      = max_ms - min_ms;
@@ -2701,8 +2701,7 @@ var xuu = (function () {
       date_obj.setTime( solve_ms );
       time_ms = __Num( date_obj.getHours()   ) * configMap._hrs_ms_
         +       __Num( date_obj.getMinutes() ) * configMap._min_ms_
-        +       __Num( date_obj.getSeconds() ) * configMap._sec_ms_
-      ;
+        +       __Num( date_obj.getSeconds() ) * configMap._sec_ms_;
 
       solve_str = makeClockStr( time_ms, solve_map._time_idx_ );
       solve_time_list[ __push ]( solve_str );
@@ -2748,8 +2747,7 @@ var xuu = (function () {
       lookup_map     = castMap(  map._lookup_map_,                 {} ),
       tmplt_rx       = castRx(   map._tmplt_rx_, configMap._tmplt_rx_ ),
 
-      bound_fn
-      ;
+      bound_fn;
 
     function lookupFn ( ignore_match_str, lookup_name ) {
       var
@@ -2757,8 +2755,7 @@ var xuu = (function () {
         path_list  = lookup_name[ __split ]( '.' ),
         path_count = path_list[ __length ],
 
-        idx, key_name, solve_str
-        ;
+        idx, key_name, solve_str;
 
       for ( idx = __0; idx < path_count; idx++ ) {
         key_name   = path_list[ idx ];
@@ -2790,8 +2787,7 @@ var xuu = (function () {
       key_list   = makeKeyListFn( extend_map ),
       key_count  = key_list[ __length ],
 
-      idx, key
-    ;
+      idx, key;
 
     _KEY_: for ( idx = __0; idx < key_count; idx++ ) {
       key = key_list[ idx ];
@@ -2824,8 +2820,7 @@ var xuu = (function () {
       ms        = castInt( arg_ms,           __0 ),
       count     = castInt( arg_count,     __null ),
       finish_fn = castFn(  arg_finish_fn, __null ),
-      idx     = __0
-      ;
+      idx     = __0;
 
     if ( ! poll_fn ) { return __false; }
 
@@ -2963,8 +2958,7 @@ var xuu = (function () {
       idx        = __0,
 
       loop_key,     loop_data, loop_type,
-      ctx_key_list, stack_map
-      ;
+      ctx_key_list, stack_map;
 
     _OUTER_: while ( walk_obj ) {
       while ( idx < key_count ) {
@@ -3050,8 +3044,7 @@ var xuu = (function () {
 
       struct_type, idx,          raw_key,
       solve_key,   raw_next_key, int_key,
-      int_next_key
-    ;
+      int_next_key;
 
     _SET_KEY_: for ( idx = __0; idx < path_count; idx++ ) {
       raw_key      = path_list[ idx ];
