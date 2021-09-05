@@ -8,7 +8,7 @@
 // == BEGIN MODULE SCOPE VARIABLES  ===================================
 'use strict';
 var
-  utilObj = require('./m2'),
+  utilObj = require('./xuu-min.js'),
   vMap   = {
     _apply_  : 'apply',
     _concat_ : 'concat',
@@ -2469,6 +2469,7 @@ function makeTmpltStr ( test_obj ) {
     t3_str  = 'I wonder about {_thing_}s',
     t4_str  = '{_thing_} and {_thing_._name_} and {_thing_._part_} '
       + 'and {_thing_._foo_} and {_foo_} and {_foo_._bar_}.',
+
     assert_table  = [
       // [ arg_map, expect_str ]
       [ [],        __blank ],
@@ -2510,8 +2511,9 @@ function makeTmpltStr ( test_obj ) {
         _part_ : 'part' }, _foo_ : 'Bobby' } },
         ' and testy and part and  and Bobby and .' ],
       [ { _input_str_ : t4_str, _lookup_map_ : { _thing_ : { _name_ : 'testy',
-        _part_ : 'part' }, _foo_ : { _bar_: 'Bat' } } },
-        ' and testy and part and  and  and Bat.' ]
+        _part_ : 'part' }, _foo_ : { _bar_: 'Bat' } }, _return_map_ : {} },
+        ' and testy and part and  and  and Bat.', { '_thing_._name_': true,
+        '_thing_._part_': true, '_foo_._bar_' : true } ]
     ],
 
     assert_count = assert_table.length,
@@ -2520,14 +2522,20 @@ function makeTmpltStr ( test_obj ) {
     idx, expect_list, arg_map, expect_str, solve_str, msg_str
     ;
 
-  test_obj.expect( assert_count );
+  // Add 1 for key check
+  test_obj.expect( assert_count + 1 );
   for ( idx = __0; idx < assert_count; idx++ ) {
     expect_list = assert_table[ idx ];
     arg_map     = expect_list[ __0 ];
     expect_str  = expect_list[ __1 ];
-    solve_str = make_str_fn( arg_map );
-    msg_str    = __Str( idx ) + '. ' + solve_str + ' === ' + expect_str;
+    solve_str   = make_str_fn( arg_map );
+    msg_str     = __Str( idx ) + '. ' + solve_str + ' === ' + expect_str;
     test_obj.ok( solve_str === expect_str, msg_str );
+
+    // A hack to test key string returned
+    if ( arg_map && arg_map._return_map_ ) {
+      test_obj.deepEqual( arg_map._return_map_, expect_list[ __2 ] );
+    }
   }
   test_obj.done();
 }
