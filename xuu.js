@@ -30,7 +30,7 @@ var xuu = (function () {
     __Date    = Date,
     __Math    = Math,
     __Num     = Number,
-    __Object  = Object, 
+    __Object  = Object,
     __Str     = String,
 
     // Set function symbols
@@ -207,68 +207,10 @@ var xuu = (function () {
   // == . END MODULE SCOPE VARIABLES ==================================
 
   // == BEGIN PREREQ METHODS ==========================================
-  // BEGIN Public prereq method /getVarType/
-  // Summary   : getVarType( <data> );
-  // Purpose   : Determine the type of data provided.
-  // Example   : getVarType( [] ); // '_Array_'
-  // Arguments : ( positional )
-  //   <data> - value to examine
-  // Returns   : '_Function_', '_Object_', '_Array_', '_String_',
-  //             '_Number_', '_Null_', '_Boolean_', or '_Undefined_'
-  // Throws    : None
+  // ### First-Tier Methods
+  // These variable type and cast methods are reuired for almost all utility
+  // methods, and are therefore shown first in alphabetical order.
   //
-  function getVarType ( data ) {
-    var type_key, type_str;
-
-    if ( data === __null ) {  return '_Null_'; }
-    if ( data === __undef ) { return '_Undefined_'; }
-    if ( __Array.isArray( data ) ) { return '_Array_'; }
-
-    type_key = typeofFn( data );
-    type_str = typeofMap[ type_key ];
-
-    if ( type_str && type_str !== '_Object_' ) { return type_str; }
-
-    type_key = {}[ __toString ].call( data )[ __slice ]( __8, __n1 );
-
-    return typeofMap[ type_key ] || type_key;
-  }
-  // . END Public prereq method /getVarType/
-
-  // BEGIN Public prereq method /castBool/
-  // Summary   : castBool( <data>, <alt_data> );
-  // Purpose   : Cast a boolean value
-  // Example   : castBool( __true ); // returns __true
-  // Arguments : ( positional )
-  //   <data>     - data to cast as boolean
-  //   <alt_data> - alternate value to return
-  // Returns   :
-  //   <data> if it is a boolean, <alt_data> otherwise
-  // Throws    : None
-  //
-  function castBool ( data, alt_data ) {
-    if ( data === __true || data === __false ) { return data; }
-    return alt_data;
-  }
-  // . END Public prereq method /castBool/
-
-  // BEGIN Public prereq method /castFn/
-  // Summary   : castFn( <data>, <alt_data> );
-  // Purpose   : Cast a function
-  // Example   : castFn( function() {} ); // returns function
-  // Arguments : ( positional )
-  //   <data>     - data to cast as function
-  //   <alt_data> - alternate value to return
-  // Returns   :
-  //   <data> if it is a function, <alt_data> otherwise
-  // Throws    : None
-  //
-  function castFn ( data, alt_data ) {
-    var var_type = getVarType( data );
-    return ( var_type === '_Function_' ) ? data : alt_data;
-  }
-  // . END Public prereq method /castFn/
-
   // BEGIN Private prereq method /checkNumFn/
   // Summary   : checkNumFn( <num>, <alt_data>, <option_map> );
   // Purpose   : Adjust <num> per option_map
@@ -336,23 +278,91 @@ var xuu = (function () {
   }
   // . END Private prereq method /checkNumFn/
 
-  // BEGIN Public prereq method /castInt/
-  // Summary   : castInt( <data>, <alt_data>, <option_map> );
-  // Purpose   : Cast an integer
-  // Example   : castInt( '25.425' ); // returns 25
-  // Arguments : (positional)
-  //   <data>       - data to cast as int
-  //   <alt_data>   - alternate value to return
-  //   <option_map> - Optional constraint map
-  //     + _do_autobound_ - Auto bound input to min/max as appropriate
-  //     + _do_warn_      - Log warnings
-  //     + _max_num_      - Max allowed value
-  //     + _min_num_      - Min allowed value
-  // Returns   :
-  //   If a number, returns the number rounded to nearest int.
-  //   If a string, returns the number rep rounded to nearest int.
-  //   Otherwise <alt_data>.
-  // Throws    : None
+  // BEGIN Public prereq method /getVarType/
+  // #### `_getVarType_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getVarType( <data> );` |
+  // | Purpose   | `Determine the type of data provided.` |
+  // | Example   | `getVarType( [] ); // '_Array_'` |
+  // | Arguments | `<data> - value to examine` |
+  // | Returns   | `'_Function_', '_Object_', '_Array_', '_String_',` |
+  // | |`'_Number_', '_Null_', '_Boolean_', or '_Undefined_'` |
+  // | Throws    | `None` |
+  //
+  function getVarType ( data ) {
+    var type_key, type_str;
+
+    if ( data === __null ) {  return '_Null_'; }
+    if ( data === __undef ) { return '_Undefined_'; }
+    if ( __Array.isArray( data ) ) { return '_Array_'; }
+
+    type_key = typeofFn( data );
+    type_str = typeofMap[ type_key ];
+
+    if ( type_str && type_str !== '_Object_' ) { return type_str; }
+
+    type_key = {}[ __toString ].call( data )[ __slice ]( __8, __n1 );
+
+    return typeofMap[ type_key ] || type_key;
+  }
+  // . END Public prereq method /getVarType/
+
+  // #### `_castBool_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castBool( <data>, <alt_data> );` |
+  // | Purpose   | `Cast a boolean value.` |
+  // | Example   | `castBool( __true ); // returns __true`  |
+  // | Arguments | (positional) |
+  // | | `  <data>     - data to cast as boolean` |
+  // | | `  <alt_data> - alt value to return` |
+  // | Returns   | `<data> if it is a boolean, <alt_data> otherwise` |
+  // | Throws    | `None` |
+  //
+  function castBool ( data, alt_data ) {
+    if ( data === __true || data === __false ) { return data; }
+    return alt_data;
+  }
+  // . END Public prereq method /castBool/
+
+  // #### `_castFn_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castFn( <data>, <alt_data> );` |
+  // | Purpose   | `Cast a function.` |
+  // | Example   | `castFn( function() {} ); // returns function` |
+  // | Arguments | (positional) |
+  // | | `  <data>     - data to cast as function` |
+  // | | `  <alt_data> - alt value to return` |
+  // | Returns   | `<data> if it is a function, <alt_data> otherwise` |
+  // | Throws    | `None` |
+  //
+  function castFn ( data, alt_data ) {
+    var var_type = getVarType( data );
+    return ( var_type === '_Function_' ) ? data : alt_data;
+  }
+  // . END Public prereq method /castFn/
+
+  // #### `_castInt_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castInt( <data>, <alt_data>, <option_map> );` |
+  // | Purpose   | `Cast an integer.` |
+  // | Example   | `castInt( '25.425' ); // returns 25` |
+  // | Arguments | (positional) |
+  // | | `  <data>       - data to cast as int` |
+  // | | `  <alt_data>   - alt value to return` |
+  // | | `  <option_map> - Optional constraint map` |
+  // | | `    + _do_autobound_ - Auto bound input to min/max` |
+  // | | `    + _do_warn_      - Log warnings` |
+  // | | `    + _max_num_      - Max allowed value` |
+  // | | `    + _min_num_      - Min allowed value` |
+  // | Returns   |     |
+  // | |`If a number, returns the number rounded to nearest int.` |
+  // | |`If a string, returns the number rep rounded to nearest int.` |
+  // | |`Otherwise <alt_data>.` |
+  // | Throws    | `None` |
   //
   function castInt ( data, alt_data, option_map ) {
     var
@@ -374,16 +384,17 @@ var xuu = (function () {
   }
   // . END Public prereq method /castInt/
 
-  // BEGIN Public prereq method /castJQ/
-  // Summary   : castJQ( <data>, <alt_data> );
-  // Purpose   : Cast a jQuery (xhiJQ) object
-  // Example   : castJQ( $top_box ); // returns $top_box
-  // Arguments : (positional)
-  //   <data>     - Data to cast as jQuery object
-  //   <alt_data> - Alternate value to return
-  // Returns   :
-  //   <data> if it is a xhiJQ object, <alt_data> otherwise
-  // Throws    : None
+  // #### `_castJQ_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castJQ( <data>, <alt_data> );` |
+  // | Purpose   | `Cast a jQuery (xhiJQ) object.` |
+  // | Example   | `castJQ( $top_box ); // returns $top_box` |
+  // | Arguments | (positional) |
+  // | | `  <data>     - Data to cast as jQuery object` |
+  // | | `  <alt_data> - Alt value to return` |
+  // | Returns   | `<data> if it is a xhiJQ object, <alt_data> otherwise` |
+  // | Throws    | `None` |
   //
   function castJQ ( data, alt_data ) {
     if ( stateMap._has_jq_ ) {
@@ -394,22 +405,23 @@ var xuu = (function () {
   }
   // . END Public preq method /castJQ/
 
-  // BEGIN Public prereq method /castList/
-  // Summary   : castList( <data>, <alt_data>, <option_map> );
-  // Purpose   : Cast a list
-  // Example   : castList( [] ); // returns the array
-  // Arguments : (positional)
-  //   <data>       - Data to cast as list
-  //   <alt_data>   - Optional alternate value to return. Default is __undef.
-  //   <option_map> - Optional constraint map
-  //       + _do_warn_      - Log warnings.       Default is __true.
-  //       + _is_empty_ok_  - Allow empty list.   Default is __true.
-  //       + _max_length_   - Max allowed length. Default is __undef.
-  //       + _min_length_   - Min allowed length. Default is __undef.
-  // Returns   :
-  //   <data> if it is an array and passes optional constraints,
-  //   <alt_data> otherwise
-  // Throws    : None
+  // #### `_castList_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castList( <data>, <alt_data>, <option_map> );` |
+  // | Purpose   | `Cast a list.` |
+  // | Example   | `castList( [] ); // returns the array` |
+  // | Arguments | (positional) |
+  // | | `  <data>       - Data to cast as list` |
+  // | | `  <alt_data>   - Optional alt value to return. Default is __undef.` |
+  // | | `  <option_map> - Optional constraint map` |
+  // | | `    + _do_warn_      - Log warnings.       Default is __true.` |
+  // | | `    + _is_empty_ok_  - Allow empty list.   Default is __true.` |
+  // | | `    + _max_length_   - Max allowed length. Default is __undef.` |
+  // | | `    + _min_length_   - Min allowed length. Default is __undef.` |
+  // | Returns   | `<data> if it is an array and passes constraints,` |
+  // | | `<alt_data> otherwise` |
+  // | Throws    | `None` |
   //
   function castList ( data, alt_data, option_map ) {
     var
@@ -458,16 +470,18 @@ var xuu = (function () {
   }
   // . END Public prereq method /castList/
 
-  // BEGIN Public prereq method /castMap/
-  // Summary   : castMap( <data>, <alt_data> );
-  // Purpose   : Cast a map
-  // Example   : castMap( {} ); // returns the object
-  // Arguments : (positional)
-  //   <data>     - data to cast as map
-  //   <alt_data> - alternate value to return
-  // Returns   :
-  //   <data> if it is a map, <alt_data> otherwise
-  // Throws    : None
+  // #### `_castMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castMap( <data>, <alt_data> );` |
+  // | Purpose   | `Cast a map.` |
+  // | Example   | `castMap( {} ); // returns the object` |
+  // | Arguments | (positional) |
+  // | | `  <data>     - data to cast as map` |
+  // | | `  <alt_data> - alt value to return` |
+  // | Returns   | `<data> if it is a map, <alt_data> otherwise` |
+  // | Throws    | `None` |
+  //
   //
   function castMap ( data, alt_data ) {
     var var_type = getVarType( data );
@@ -475,24 +489,26 @@ var xuu = (function () {
   }
   // . END Public prereq method /castMap/
 
-  // BEGIN Public prereq method /castNum/
-  // Summary   : castNum( <data>, <alt_data>, <option_map> );
-  // Purpose   : Cast an integer
-  // Example   : castNum( '25.425' ); // returns 25
-  // Arguments : (positional)
-  //   <data>       - data to cast as int
-  //   <alt_data>   - alternate value to return. Default is __undef.
-  //   <option_map> - Optional constraint map
-  //     + _do_autobound_ - Auto bound input to min/max as appropriate.
-  //       Default is __false.
-  //     + _do_warn_      - Log warnings.      Default is __false.
-  //     + _max_num_      - Max allowed value. Default is __undef.
-  //     + _min_num_      - Min allowed value. Default is __undef.
-  // Returns   :
-  //   If a number, returns the number rounded to nearest int.
-  //   If a string, returns the number rep rounded to nearest int.
-  //   Otherwise <alt_data>.
-  // Throws    : None
+  // #### `_castNum_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castNum( <data>, <alt_data>, <option_map> );` |
+  // | Purpose   | `Cast an integer.` |
+  // | Example   | `castNum( '25.425' ); // returns 25` |
+  // | Arguments | (positional) |
+  // | | `  <data>       - data to cast as int` |
+  // | | `  <alt_data>   - alt value to return. Default is __undef.` |
+  // | | `  <option_map> - Optional constraint map` |
+  // | | `    + _do_autobound_ - Auto bound input to min/max as appropriate.` |
+  // | | `      Default is __false.` |
+  // | | `    + _do_warn_      - Log warnings.      Default is __false.` |
+  // | | `    + _max_num_      - Max allowed value. Default is __undef.` |
+  // | | `    + _min_num_      - Min allowed value. Default is __undef.` |
+  // | Returns   |     |
+  // | | `If a number, returns the number rounded to nearest int.` |
+  // | | `If a string, returns the number rep rounded to nearest int.` |
+  // | | `Otherwise <alt_data>.` |
+  // | Throws    | `None` |
   //
   function castNum ( data, alt_data, option_map ) {
     var
@@ -512,17 +528,18 @@ var xuu = (function () {
   }
   // . END Public prereq method /castNum/
 
-  // BEGIN Public prereq method /castObj/
-  // Summary   : castObj( <obj_type>, <data>, <alt_data> );
-  // Purpose   : Cast an object
-  // Example   : castObj( 'styleSheetList', document.styleSheets );
-  // Arguments : (positional)
-  //   <obj_type> - string of object type (see Example)
-  //   <data>     - data to cast as <obj_type> object
-  //   <alt_data> - alternate value to return
-  // Returns   :
-  //   <data> if an <obj_type> object, <alt_data> otherwise
-  // Throws    : None
+  // #### `_castObj_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castObj( <obj_type>, <data>, <alt_data> );` |
+  // | Purpose   | `Cast an object.` |
+  // | Example   | `castObj( 'styleSheetList', document.styleSheets );` |
+  // | Arguments | (positional) |
+  // | | `  <obj_type> - string of object type (see Example)` |
+  // | | `  <data>     - data to cast as <obj_type> object` |
+  // | | `  <alt_data> - alt value to return` |
+  // | Returns   | `<data> if an <obj_type> object, <alt_data> otherwise` |
+  // | Throws    | `None` |
   //
   function castObj ( obj_type, data, alt_data ) {
     var var_type = getVarType( data );
@@ -530,31 +547,36 @@ var xuu = (function () {
   }
   // . END Public prereq method /castObj/
 
-  // BEGIN Public prereq method /castRx/
-  // Purpose this is a simple wrapper around castObj for RegExp
+  // #### `_castRx_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `cast( <data>, <alt_data>, <option_map> );` |
+  // | Purpose   | `Cast a RegExp.` |
+  // | | ` This is a simple wrapper around castObj for RegExp`
   //
   function castRx ( data, alt_data ) {
     return castObj( 'RegExp', data, alt_data );
   }
   // . END Public prereq method /castObj/
 
-  // BEGIN Public prereq method /castStr/
-  // Summary   : castStr( <data>, <alt_data> );
-  // Purpose   : Cast a string
-  // Example   : castStr( 25.425 ); // returns '25.425'
-  // Arguments : (positional)
-  //   <data>       - Data to cast as string
-  //   <alt_data>   - Alternate value to return
-  //   <option_map> - Optional constraints
-  //     + _do_warn_      - Log warnings. Default is __false.
-  //     + _filter_rx_    - A regex filter that must be passed
-  //     + _is_empty_ok_  - Allow blank string. Default is yes (__undef).
-  //     + _max_length_   - Max allowed length. Default is __undef.
-  //     + _min_length_   - Min allowed length. Default is __undef.
-  // Returns   :
-  //   <data> if a string, or a number converted to a string,
-  //   <alt_data> otherwise
-  // Throws    : None
+  // #### `_castStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `castStr( <data>, <alt_data> );` |
+  // | Purpose   | `Cast a string.` |
+  // | Example   | `castStr( 25.425 ); // returns '25.425'` |
+  // | Arguments | (positional) |
+  // | | `  <data>       - Data to cast as string` |
+  // | | `  <alt_data>   - Alt value to return` |
+  // | | `  <option_map> - Optional constraints` |
+  // | | `    + _do_warn_      - Log warnings. Default is __false.` |
+  // | | `    + _filter_rx_    - A regex filter that must be passed` |
+  // | | `    + _is_empty_ok_  - Allow blank string. Default is __true.` |
+  // | | `    + _max_length_   - Max allowed length. Default is __undef.` |
+  // | | `    + _min_length_   - Min allowed length. Default is __undef.` |
+  // | Returns   | `<data> if a string, or a number converted to a string,` |
+  // | | `<alt_data> otherwise` |
+  // | Throws    | `None` |
   //
   function castStr ( data, alt_data, option_map ) {
     var
@@ -615,15 +637,17 @@ var xuu = (function () {
   }
   // . END Public prereq method /castStr/
 
-  // BEGIN Public prereq method /safeJsonParse/
-  // Summary   : safeJsonParse( <json_str>, <alt_data> );
-  // Purpose   : Parses JSON safely, using alt_data if it cannot
-  // Example   : my map = safeJsonParse( '{}', {} );
-  // Arguments : (positional)
-  //   <json_str> - JSON string to parse
-  //   <alt_data> - Alternate return if parsing fails
-  // Returns   : Parsed JSON or alt_data
-  // Throws    : None
+  // #### `_safeJsonParse_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `safeJsonParse( <json_str>, <alt_data> );` |
+  // | Purpose   | `Parse JSON safely.` |
+  // | Example   | `my map = safeJsonParse( '{}', {} );` |
+  // | Arguments | (positional) |
+  // | | `  <json_str> - JSON string to parse` |
+  // | | `  <alt_data> - Alt return if parsing fails` |
+  // | Returns   | `Parsed JSON or alt_data` |
+  // | Throws    | `None` |
   //
   function safeJsonParse ( json_str, alt_data ) {
     var solve_data;
@@ -637,15 +661,17 @@ var xuu = (function () {
   }
   // . END Public prereq method /safeJsonParse/
 
-  // BEGIN Public prereq method /safeJsonStringify/
-  // Summary   : safeJsonStringify( <data>, <alt_data> );
-  // Purpose   : Stringifies JSON safely
-  // Example   : my str = safeJsonStringify( {}, '{}' );
-  // Arguments : (positional)
-  //   <data>     - Data structure to stringify
-  //   <alt_data> - Alternate return if parsing fails
-  // Returns   : JSON string on success, alt_data on failure
-  // Throws    : None
+  // #### `_safeJsonStringify_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `safeJsonStringify( <data>, <alt_data> );` |
+  // | Purpose   | `Stringify JSON safely.` |
+  // | Example   | `my str = safeJsonStringify( {}, '{}' );` |
+  // | Arguments | (positional) |
+  // | | `  <data>     - Data structure to stringify` |
+  // | | `  <alt_data> - Alt return if parsing fails` |
+  // | Returns   | `JSON string on success, alt_data on failure` |
+  // | Throws    | `None` |
   //
   function safeJsonStringify ( arg_data, alt_data ) {
     var solve_str;
@@ -659,17 +685,21 @@ var xuu = (function () {
   }
   // . END Public prereq method /safeJsonStringify/
 
-  // BEGIN Public prereq method /cloneData/
-  // Summary   : cloneData( <data> );
-  // Purpose   : Deep clone non-recursive data structures fast
-  // Example   : cloneData( data, [] ); // return copy data or list on fail
-  // Arguments : (positional)
-  //   <arg_data> - data to clone
-  //   <alt_data> - alternate if clone fails
+  // ### Second-Tier Methods
+  // These are required for third-tier methods, and are shown in alphabetical order.
   //
-  // Returns   : Success: A deep copy.
-  //             Failure: alt_data (malformed, recursive structures)
-  // Throws    : None
+  // #### `_cloneData_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `cloneData( <data> );` |
+  // | Purpose   | `Deep clone non-recursive data structures fast.` |
+  // | Example   | `cloneData( data, [] ); // return copy data or list on fail` |
+  // | Arguments | (positional) |
+  // | | `  <arg_data> - data to clone` |
+  // | | `  <alt_data> - alt if clone fails` |
+  // | Returns   | `Success: A deep copy.` |
+  // | | `Failure: alt_data (malformed, recursive structures)` |
+  // | Throws    | `None` |
   //
   function cloneData ( arg_data, alt_data ) {
     var solve_data;
@@ -684,15 +714,17 @@ var xuu = (function () {
   }
   // . END Public prereq method /cloneData/
 
-  // BEGIN Public prereq method /extendList/
-  // Summary   : extendList( <base_list>, <extend_list> );
-  // Purpose   : Extend <base_list> with contents of <extend_list>
-  // Example   : extendList( [0], [1,2,3] ); // returns [0,1,2,3]
-  // Arguments : (positional)
-  //   <base_list>   - list to extend
-  //   <extend_list> - list to append to base_list
-  // Returns   : base_list after change
-  // Throws    : None
+  // #### `_extendList_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `extendList( <base_list>, <extend_list> );` |
+  // | Purpose   | `Extend <base_list> with contents of <extend_list>.` |
+  // | Example   | `extendList( [0], [1,2,3] ); // returns [0,1,2,3]` |
+  // | Arguments | (positional) |
+  // | | `  <base_list>   - list to extend` |
+  // | | `  <extend_list> - list to append to base_list` |
+  // | Returns   | `base_list after change` |
+  // | Throws    | `None` |
   //
   function extendList ( arg_base_list, arg_extend_list ) {
     var
@@ -704,19 +736,17 @@ var xuu = (function () {
   }
   // . END Public prereq method /extendList/
 
-  // BEGIN Public prereq method /getNowMs/
-  // Summary   : getNowMs( <do_local> );
-  // Purpose   : Get timestamp
-  // Example   : getNowMs(); // returns 1486283077968
-  // Arguments :
-  //   + <do_local> - Subtract local TZ offset if true
-  // Returns   : The current timestamp in milliseconds
-  // Throws    : None
   //
-  // Note      : The __Date.now() method is 3x faster than the
-  //   +new __Date() in NodeJS and provides almost the
-  //   the same performance in that env as a raw __Date.now() call.
-  //
+  // #### `_getNowMs_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getNowMs( <do_local> );` |
+  // | Purpose   | `Get timestamp.` |
+  // | Example   | `getNowMs(); // returns 1486283077968` |
+  // | Arguments | |
+  // | |`+ <do_local> - Subtract local TZ offset if true` |
+  // | Returns   | `The current timestamp in milliseconds` |
+  // | Throws    | `None` |
   function getNowMs ( do_local ) {
     var date_obj;
     if ( do_local ) {
@@ -730,32 +760,220 @@ var xuu = (function () {
   }
   // . END Public prereq method /getNowMs/
 
-  // BEGIN Public prereq method /getNumSign/
-  // Summary   : getNumSign( <data> );
-  // Purpose   : Convert number into -1 or 1
-  // Example   : getNumSign( '-25' ); // returns -1
-  // Arguments :
-  //   <data> - number or string to convert to -1 or 1
-  // Returns   : -1 if the processed number is less than 0,
-  //   otherwise 1.
-  // Throws    : None
   //
+  // #### `_getNumSign_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getNumSign( <data> );` |
+  // | Purpose   | `Convert number into -1 or 1.` |
+  // | Example   | `getNumSign( '-25' ); // returns -1` |
+  // | Arguments | |
+  // | |`<data> - number or string to convert to -1 or 1` |
+  // | Returns   | `-1 if the processed number is less than 0,` |
+  // | |`otherwise 1.` |
+  // | Throws    | `None` |
   function getNumSign ( n ) {
     var num = __Num( n );
     return ( ! isNaN( num ) && num < __0 ) ? __n1 : __1;
   }
   // . END Public prereq method /getNumSign/
 
-  // BEGIN Private method /getTzDateObj/
-  // Returns   : A date object singleton for use by Tz methods
+  // #### `_getLogObj_`
+  // Returns the log object singleton with these capabilities described there.
   //
-  function getTzDateObj () {
-    if ( ! stateMap._date_obj_ ) {
-      stateMap._date_obj_ = new __Date();
+  // BEGIN Public method /getLogObj/
+  // See logObj above for details
+  function getLogObj () { return logObj; }
+  // . END Public method /getlogObj/
+
+  // #### `_makeArgList_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeArgList( <arg_obj> );` |
+  // | Purpose   | `Make a real array from data in argument object.` |
+  // | Example   | `makeArgList( arguments ); // returns [ ... ]` |
+  // | Arguments | |
+  // | |`<arg_obj> - an argument object ('arguments' in functions)` |
+  // | Returns   | `An array of argument values` |
+  // | Throws    | `None` |
+  //
+  // The technique used is around 3x faster than
+  //   return Array.prototype[ __slice ].call( arg_obj );
+  // See https://github.com/petkaantonov/bluebird/wiki/\
+  //   Optimization-killers#3-managing-arguments
+  //
+  function makeArgList ( arg_obj ) {
+    var
+      src_obj    = castObj( 'Arguments', arg_obj, {} ),
+      arg_count  = src_obj[ __length ],
+      solve_list = [],
+      idx;
+
+    for ( idx = __0; idx < arg_count; idx++ ) {
+      solve_list[ idx ] = arg_obj[ idx ];
     }
-    return stateMap._date_obj_;
+    return solve_list;
   }
-  // . END Private method /getTzDateObj/
+  // . END Public prereq method /makeArgList/
+
+  // #### `_makePadStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makePadStr( <str>, <count>, [ <char>, <do_left> ] );` |
+  // | Purpose   | `Pad <str> with <char> for <count> digits.` |
+  // | Example   | `makePadStr( 25, 3 );      //  return ' 25'` |
+  // | | `makePadStr( 25, 3, '0' ); // returns '025'` |
+  // | Arguments | (positional) |
+  // | | `  <str>      - The string to pad` |
+  // | | `  <count>    - The desired length` |
+  // | | `  <char>     - The padding character (default is space)` |
+  // | | `  <do_left>  - Pad left (default is true), otherwise right` |
+  // | Returns   | `A trimmed and padded string` |
+  // | Throws    | `None` |
+  //
+  function makePadStr( arg_str, arg_count, arg_char, arg_do_left) {
+    var
+      str      = castStr(  arg_str   ),
+      count    = castInt(  arg_count ),
+      char_str = castStr(  arg_char  ,  __space ),
+      do_left  = castBool( arg_do_left , __true  ),
+      list     = [],
+
+      pad_str, pad_count;
+
+    if ( str === __undef ) { return __blank; }
+
+    str = str[ vMap._trim_ ]();
+    if ( ! ( count && count >= __0 ) ) { return str; }
+
+    // Consider: Preserve sign symbol (-/+)
+
+    pad_count = count - str[ __length ];
+    if ( pad_count < __0 ) { return str; }
+
+    // See repeat funciton in ES6
+    list[ __length ] = pad_count > __0 ? pad_count + __1 : __0;
+
+    pad_str =  list[ __join ]( char_str );
+
+    return do_left ?  pad_str + str : str + pad_str;
+  }
+  // . END Public prereq method /makePadStr/
+
+  // #### `_makeEscRxStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeEscRxStr( <str> );` |
+  // | Purpose   | `Escape a regular expression string.` |
+  // | Example   | `makeEscRxStr( '[]' ) // returns '\[\]\'` |
+  // | Arguments | `<str> to escape` |
+  // | Returns   | `Escaped regular expression string` |
+  // | Throws    | `None` |
+  // | Other     | `See http://stackoverflow.com/questions/3115150` |
+  //
+  function makeEscRxStr( arg_str ) {
+    var str = castStr( arg_str, __blank );
+    return str[ __replace ]( /[-[\]{}()*+?.,\\^$|#]/gm, "\\$&");
+  }
+  // . END Public prereq method /makeEscRxStr/
+
+  // #### `_makeExtractMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeExtractMap( <base_map>, <key_list> );` |
+  // | Purpose   | `Make a new map using <key_list>.` |
+  // | Example   | `makeExtractMap( { a:1, b:2 }, ['a'] ); // returns { a:1 }` |
+  // | Arguments | (positional) |
+  // | | `  <base_map> - Map to extract values from` |
+  // | | `  <key_list> - List of keys to copy (shallow)` |
+  // | | `    Default: all keys` |
+  // | Returns   | `Newly created map` |
+  // | Throws    | `None` |
+  //
+  function makeExtractMap ( arg_base_map, arg_key_list ) {
+    var
+      base_map  = castMap(  arg_base_map, {} ),
+      key_list  = castList( arg_key_list, makeKeyListFn( base_map ) ),
+      key_count = key_list[ __length ],
+      solve_map = {},
+      idx, key;
+
+    for ( idx = __0; idx < key_count; idx++ ) {
+      key = key_list[ idx ];
+      solve_map[ key ] = base_map[ key ];
+    }
+
+    return solve_map;
+  }
+  // . END Public prereq method /makeExtractMap/
+
+  // #### `_makeRxObj_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeRxObj( <pattern>, <options> );` |
+  // | Purpose   | `Make a regular expression object.` |
+  // | Example   | `makeRxObj( '\\s*hello\\s*', 'i' );` |
+  // | Arguments | (positional) |
+  // | | `  <pattern> - a string to convert into a regexp` |
+  // | | `  <options> - an option string` |
+  // | Returns   | `A regular expression object` |
+  // | Throws    | `None` |
+  //
+  function makeRxObj ( arg_pattern_str, arg_option_str ) {
+    var
+      pattern_str = castStr( arg_pattern_str, __blank ),
+      option_str  = castStr( arg_option_str );
+
+    if ( option_str ) {
+      return new RegExp( pattern_str, option_str );
+    }
+    return new RegExp( pattern_str );
+  }
+  // . END Public prereq method /makeRxObj/
+
+  // #### `_makeScrubStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeScrubStr( <str>, <do_space> );` |
+  // | Purpose   | `Remove HTML tags and trim string.` |
+  // | Example   | `makeScrubStr( '<h1>Hello</h1><p>Hi</p>', __true );` |
+  // | | `// returns 'Hello Hi'` |
+  // | Arguments | (positional) |
+  // | | `  <str>      - A string to scrub` |
+  // | | `  <do_space> - Add a space between groups` |
+  // | Returns   | `The scrubbed string` |
+  // | Throws    | `None` |
+  //
+  function makeScrubStr ( arg_str, arg_do_space ) {
+    var
+      raw_str    = castStr(  arg_str, __blank ),
+      do_space   = castBool( arg_do_space ),
+      interm_str = do_space
+        ? raw_str[ __replace ]( configMap._tag_end_rx_, __space )
+        : raw_str;
+
+    interm_str = interm_str[ vMap._trim_ ]();
+    return interm_str[ __replace ]( configMap._tag_rx_, __blank );
+  }
+  // . END Public prereq method /makeScrubStr/
+
+  // #### `_makeUcFirstStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeUcFirstStr( <str> );` |
+  // | Purpose   | `Capitalize the first letter of a string.` |
+  // | Example   | `makeUcFirstStr( 'hello' ); // returns 'Hello'` |
+  // | Arguments | `<str> - A string to process` |
+  // | Returns   | `The string with the first character capitalized` |
+  // | Throws    | `None` |
+  //
+  function makeUcFirstStr ( arg_str ) {
+    var
+      str    = castStr( arg_str, __blank ),
+      uc_str = str.charAt( __0 ).toUpperCase();
+    return uc_str + str[ __substr ]( __1 );
+  }
+  // . END Public prereq method /makeUcFirstStr/
 
   // TODO 2017-09-28 mmikowski info: Create checkArgMap from argc.js
   // This should wrap around castXX utilities.
@@ -890,208 +1108,43 @@ var xuu = (function () {
   //   IN 'off' MODE , the utility is a no-op and simply returns.
   // Returns   : None
   // Throws    : an error object if validation fails
-
-  // BEGIN Public prereq method /makeArgList/
-  // Summary   : makeArgList( <arg_obj> );
-  // Purpose   : Make a real array from data in argument object
-  // Example   : makeArgList( arguments ); // returns [ ... ]
-  // Arguments :
-  //   <arg_obj> - an argument object ('arguments' in functions)
-  // Returns   : An array of argument values
-  // Throws    : None
-  //
-  // The technique used is around 3x faster than
-  //   return Array.prototype[ __slice ].call( arg_obj );
-  // See https://github.com/petkaantonov/bluebird/wiki/\
-  //   Optimization-killers#3-managing-arguments
-  //
-  function makeArgList ( arg_obj ) {
-    var
-      src_obj    = castObj( 'Arguments', arg_obj, {} ),
-      arg_count  = src_obj[ __length ],
-      solve_list = [],
-      idx;
-
-    for ( idx = __0; idx < arg_count; idx++ ) {
-      solve_list[ idx ] = arg_obj[ idx ];
-    }
-    return solve_list;
-  }
-  // . END Public prereq method /makeArgList/
-
-  // BEGIN Public prereq method /makePadStr/
-  // Summary   : makePadStr( <str>, <count>, [ <char>, <do_left> ] );
-  // Purpose   : Pad an <str> with <char> for <count> digits
-  // Example   : makePadStr( 25, 3 );      //  return ' 25'
-  //           : makePadStr( 25, 3, '0' ); // returns '025'
-  // Arguments :
-  //   <str>      - The string to pad
-  //   <count>    - The desired length
-  //   <char>     - The padding character (default is space)
-  //   <do_left>  - Pad left (default is true), otherwise right
-  // Returns   : A trimmed and padded string
-  // Throws    : None
-  //
-  function makePadStr( arg_str, arg_count, arg_char, arg_do_left) {
-    var
-      str      = castStr(  arg_str   ),
-      count    = castInt(  arg_count ),
-      char_str = castStr(  arg_char  ,  __space ),
-      do_left  = castBool( arg_do_left , __true  ),
-      list     = [],
-
-      pad_str, pad_count;
-
-    if ( str === __undef ) { return __blank; }
-
-    str = str[ vMap._trim_ ]();
-    if ( ! ( count && count >= __0 ) ) { return str; }
-
-    // Consider: Preserve sign symbol (-/+)
-
-    pad_count = count - str[ __length ];
-    if ( pad_count < __0 ) { return str; }
-
-    // See repeat funciton in ES6
-    list[ __length ] = pad_count > __0 ? pad_count + __1 : __0;
-
-    pad_str =  list[ __join ]( char_str );
-
-    return do_left ?  pad_str + str : str + pad_str;
-  }
-  // . END Public prereq method /makePadStr/
-
-  // BEGIN Public prereq method /makeEscRxStr/
-  // Summary   : makeEscRxStr( <string> );
-  // Purpose   : Escapes a regular expression string
-  // Example   : makeEscRxStr( '[]' ) // returns '\[\]\'
-  // Arguments : <string> to escape
-  // Returns   : Escaped regular expression string
-  // Throws    : None
-  // Other     : See http://stackoverflow.com/questions/3115150
-  //
-  function makeEscRxStr( arg_str ) {
-    var str = castStr( arg_str, __blank );
-    return str[ __replace ]( /[-[\]{}()*+?.,\\^$|#]/gm, "\\$&");
-  }
-  // . END Public prereq method /makeEscRxStr/
-
-  // BEGIN Public prereq method /makeExtractMap/
-  // Summary   : makeExtractMap( <base_map>, <key_list> );
-  // Purpose   : Makes and returns a new map using <key_list>
-  // Example   : makeExtractMap( { a:1, b:2 }, ['a'] ); // returns { a:1 }
-  // Arguments : (positional)
-  //   <base_map> - Map to extract values from
-  //   <key_list> - List of keys to copy (shallow)
-  //                Default: all keys
-  // Returns   : Newly created map
-  // Throws    : None
-  //
-  function makeExtractMap ( arg_base_map, arg_key_list ) {
-    var
-      base_map  = castMap(  arg_base_map, {} ),
-      key_list  = castList( arg_key_list, makeKeyListFn( base_map ) ),
-      key_count = key_list[ __length ],
-      solve_map = {},
-      idx, key;
-
-    for ( idx = __0; idx < key_count; idx++ ) {
-      key = key_list[ idx ];
-      solve_map[ key ] = base_map[ key ];
-    }
-
-    return solve_map;
-  }
-  // . END Public prereq method /makeExtractMap/
-
-  // BEGIN Public prereq method /makeRxObj/
-  // Summary   : makeRxObj( <pattern>, <options> );
-  // Purpose   : Create a regular expression object
-  // Example   : makeRxObj( '\s*hello\s*', 'i' );
-  // Arguments :
-  //   <pattern> - a string to convert into a regexp
-  //   <options> - an option string
-  // Returns   : A regular expression object
-  // Throws    : None
-  //
-  function makeRxObj ( arg_pattern_str, arg_option_str ) {
-    var
-      pattern_str = castStr( arg_pattern_str, __blank ),
-      option_str  = castStr( arg_option_str );
-
-    if ( option_str ) {
-      return new RegExp( pattern_str, option_str );
-    }
-    return new RegExp( pattern_str );
-  }
-  // . END Public prereq method /makeRxObj/
-
-  // BEGIN Public prereq method /makeScrubStr/
-  // Summary   : makeScrubStr( <string>, <do_space> );
-  // Purpose   : Remove HTML tags and trim string
-  // Example   : makeScrubStr( '<h1>Hello</h1><p>Hi</p>', __true );
-  //             // returns 'Hello Hi'
-  // Arguments :
-  //   <string>   - A string to scrub
-  //   <do_space> - Add a space between groups
-  // Returns   : The scrubbed string
-  // Throws    : None
-  //
-  function makeScrubStr ( arg_str, arg_do_space ) {
-    var
-      raw_str    = castStr(  arg_str, __blank ),
-      do_space   = castBool( arg_do_space ),
-      interm_str = do_space
-        ? raw_str[ __replace ]( configMap._tag_end_rx_, __space )
-        : raw_str;
-
-    interm_str = interm_str[ vMap._trim_ ]();
-    return interm_str[ __replace ]( configMap._tag_rx_, __blank );
-  }
-  // . END Public prereq method /makeScrubStr/
-
-  // BEGIN Public prereq method /makeUcFirstStr/
-  // Summary   : makeUcFirstStr( <string> );
-  // Purpose   : Capitalize the first letter of a string
-  // Example   : makeUcFirstStr( 'hello' );
-  //             // returns 'Hello'
-  // Arguments :
-  //   <string> - A string to process
-  // Returns   : The string with the first character capitalized
-  // Throws    : None
-  //
-  function makeUcFirstStr ( arg_str ) {
-    var
-      str    = castStr( arg_str, __blank ),
-      uc_str = str.charAt( __0 ).toUpperCase();
-    return uc_str + str[ __substr ]( __1 );
-  }
-  // . END Public prereq method /makeUcFirstStr/
   // == . END PREREQ METHODS ==========================================
 
   // == BEGIN UTILITY OBJECTS =========================================
-  // BEGIN define logObj singleton
-  // Summary   : logObj._setLogLevel_( <log_level> );
-  // Purpose   : Provide a log4j-style logging singleton
-  // Example   :
-  //   logObj._setLogLevel_('_warn_');
-  //   logObj._logMsg_('_warn_', 'This will show');
-  //   logObj._logMsg_('_info_', 'This will not');
-  //   logObj._getLevelName_();  // '_warn_'
-  //   logObj._getLevelIdx_();   // 4
-  // Methods   :
-  //   Log level is based on syslog values and is one of the following:
-  //   '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'
-  //     + _getLevelName_() - Return log level, e.g. '_warn_'.
-  //     + _getLevelIdx_()  - Return log level index. 0=emerg,4=warn,7=debug
-  //     + _logMsg_( <log_level>, <message_str> ) - Log message string with
-  //       <log_level> urgency. Messages with urgency below the threshold
-  //       are not presented to the log. This is provided so developers
-  //       can see if log level is more permissive than a threshold:
-  //       if ( logObj._getLevelIdx_() > 3 ) { ... }
-  //     + _setLoglLevel_(<log_level>) - Set threshold urgency.
-  // Returns   : Differs per method
-  // Throws    : None
+  // BEGIN Private method /getTzDateObj/
+  // Returns   : A date object singleton for use by Tz methods
+  //
+  function getTzDateObj () {
+    if ( ! stateMap._date_obj_ ) {
+      stateMap._date_obj_ = new __Date();
+    }
+    return stateMap._date_obj_;
+  }
+  // . END Private method /getTzDateObj/
+
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `logObj._setLogLevel_( <log_level> );` |
+  // | Purpose   | `Return log4j-style log object singleton.` |
+  // | Example   | |
+  // | |`  logObj._setLogLevel_('_warn_');` |
+  // | |`  logObj._logMsg_('_warn_', 'This will show');` |
+  // | |`  logObj._logMsg_('_info_', 'This will not');` |
+  // | |`  logObj._getLevelName_();  // '_warn_'` |
+  // | |`  logObj._getLevelIdx_();   // 4` |
+  // | Methods   |     |
+  // | |`  Log level is based on syslog values and is one of the following:` |
+  // | |`  '[_emerg_|_alert_|_crit_|_error_|_warn_|_notice_|_info_|_debug_]'` |
+  // | |`    + _getLevelName_() - Return log level, e.g. '_warn_'.` |
+  // | |`    + _getLevelIdx_()  - Return log level index. 0=emerg,4=warn,7=debug` |
+  // | |`    + _logMsg_( <log_level>, <message_str> ) - Log message string with` |
+  // | |`      <log_level> urgency. Messages with urgency below the threshold` |
+  // | |`      are not presented to the log. This is provided so developers` |
+  // | |`      can see if log level is more permissive than a threshold:` |
+  // | |`      if ( logObj._getLevelIdx_() > 3 ) { ... }` |
+  // | |`    + _setLoglLevel_(<log_level>) - Set threshold urgency.` |
+  // | Returns   | `Differs per method` |
+  // | Throws    | `None` |
   //
   logObj = (function () {
     var
@@ -1218,22 +1271,27 @@ var xuu = (function () {
   }());
   // . END define logObj singleton
   logFn = logObj._logMsg_;
-  // == . END UTILITY METHODS =========================================
+  // == . END UTILITY OBJECTS =========================================
 
   // == BEGIN PUBLIC METHODS ==========================================
-  // BEGIN Public method /checkDateStr/
-  // Summary   : checkDateStr( <arg_map> );
-  // Purpose   : Check validity of a date string
-  // Example   : checkDateStr( { _date_str_: '2017-02-29' } ); // __false
-  //             checkDateStr( { _date_str_: '2016-02-29' } ); // __true
-  // Argument  : <arg_map>
-  //   + _date_str_  - The date string to consider
-  //   + _order_str_ - The date form to check ('_us_' or ISO)
-  // Returns   : boolean
-  // Throws    : None
-  //
-  // Note      : This method works only of strings in the formats
-  //             yyyy-mm-dd or yyyy/mm/dd and does not validate the time.
+  // ### Third-Tier Public Methods
+  // These are the remaining methods, and are shown in alphabetical order.
+
+  // #### `_checkDateStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `checkDateStr( <arg_map> );` |
+  // | Purpose   | `Check validity of a date string.` |
+  // | Example   | `checkDateStr( { _date_str_: '2017-02-29' } ); // __false` |
+  // | | `checkDateStr( { _date_str_: '2016-02-29' } ); // __true` |
+  // | | |
+  // | | `// This method works only of strings in the formats` |
+  // | | `// yyyy-mm-dd or yyyy/mm/dd and does not validate the time.` |
+  // | Arguments | `<arg_map>` |
+  // | | `  + _date_str_  - The date string to consider` |
+  // | | `  + _order_str_ - The date form to check ('_us_' or ISO)` |
+  // | Returns   | `boolean` |
+  // | Throws    | `None` |
   //
   function checkDateStr ( arg_map ) {
     var
@@ -1268,20 +1326,22 @@ var xuu = (function () {
   }
   // . END Public method /checkDateStr/
 
-  // BEGIN Public method /makeMetricStr/
-  // Summary   : makeMetricStr( <number> );
-  // Purpose   : Convert number to a 3 digit string with suffix
-  // Example   : makeMetricStr( 968125965968 ); // '968G'
-  //             makeMetricStr(    125965968 ); // '126M'
-  //             makeMetricStr(       965968 ); // '966K'
-  //             makeMetricStr(          968 ); //  '968'
-  //   configMap._metric_table_ can be expanded as needed.
-  //   Place largest numbers first.
-  // Arguments :
-  //   + <number> - The number to process
-  // Settings  : Uses configMap._metric_table_
-  // Returns   : String
-  // Throws    : None
+  // #### `_makeMetricStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeMetricStr( <number> );` |
+  // | Purpose   | `Convert number to a 3 digit string with suffix.` |
+  // | Example   | `makeMetricStr( 968125965968 ); // '968G'` |
+  // | | `makeMetricStr(    125965968 ); // '126M'` |
+  // | | `makeMetricStr(       965968 ); // '966K'` |
+  // | | `makeMetricStr(          968 ); //  '968'` |
+  // | | `configMap._metric_table_ can be expanded as needed.` |
+  // | | `Place largest numbers first.` |
+  // | Arguments | |
+  // | |`+ <number> - The number to process` |
+  // | |`Settings  : Uses configMap._metric_table_` |
+  // | Returns   | `String` |
+  // | Throws    | `None` |
   //
   function makeMetricStr( arg_num ) {
     var
@@ -1309,22 +1369,24 @@ var xuu = (function () {
   }
   // . END public method /makeMetricStr/
 
-  // BEGIN Public method /clearMap/
-  // Summary   : clearMap( <data_map>, <key_list>, <do_undef> );
-  // Purpose   : Process some or all map key values
-  // Example   :
-  //   clearMap( my_map ); // Delete all keys
-  //   clearMap( my_map, [ 'name', 'serial_number' ] ); // Delete 2 keys
-  //   clearMap( my_map, __undef, __true );  // Set all values to __undef
-  // Arguments :
-  //   + <data_map> - Map to modify. Required.
-  //   + <key_list> - List of keys to process. Default is all keys.
-  //     Provide any non-list value (like 0) to use default.
-  //   + <do_undef> - If __true, will set the value of all processed keys to
-  //       __undef. Otherwise, all processed keys will be deleted from
-  //       the map. Default is __false.
-  // Returns   : The modified map
-  // Throws    : None
+  // #### `_clearMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `clearMap( <data_map>, <key_list>, <do_undef> );` |
+  // | Purpose   | `Process some or all map key values.` |
+  // | Example   |     |
+  // | |`clearMap( my_map ); // Delete all keys` |
+  // | |`clearMap( my_map, [ 'name', 'serial_number' ] ); // Delete 2 keys` |
+  // | |`clearMap( my_map, __undef, __true );  // Set all values to __undef` |
+  // | Arguments | (positional) |
+  // | |`  <data_map> - Map to modify. Required.` |
+  // | |`  <key_list> - List of keys to process. Default is all keys.` |
+  // | |`    Provide any non-list value (like 0) to use default.` |
+  // | |`  <do_undef> - If __true, will set the value of all processed keys to` |
+  // | |`    __undef. Otherwise, all processed keys will be deleted from` |
+  // | |`    the map. Default is __false.` |
+  // | Returns   | `The modified map` |
+  // | Throws | `None` |
   //
   function clearMap ( arg_map, arg_key_list, do_undef ) {
     var
@@ -1347,28 +1409,31 @@ var xuu = (function () {
   }
   // . END Public method /clearMap/
 
-  // BEGIN Public method /encodeHtml/
-  // Summary   : encodeHtml( <string>, <do_exclude_amp> );
-  // Purpose   : Single-pass encode HTML entities from string
-  // Example   :
-  //   | str = encodeHtml( "<h1>'Help me!'</h1> she said" );
-  //   | __logMsg( 'info', str );
-  //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; she said.'
-  //
-  //   | str = encodeHtml( "<h1>'Help me!'</h1> & fast!", __false );
-  //   | __logMsg( 'info', str );
-  //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; &amp; fast!'
-  //
-  //   | str = encodeHtml( "<h1>'Help me!'</h1> & fast!", __true );
-  //   | __logMsg( 'info', str );
-  //   > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; & fast!'
-  //
-  // Arguments
-  //   + <string>         - The HTML string to encode
-  //   + <do_exclude_amp> - Exclude ampersand from encoding.
-  //      Default is __false.
-  // Returns   : Modified string
-  // Throws    : None
+
+
+  // #### `_encodeHtml_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `encodeHtml( <str>, <do_exclude_amp> );` |
+  // | Purpose   | `Single-pass encode HTML entities from string.` |
+  // | Example   | |
+  // | | `str = encodeHtml( "<h1>'Help me!'</h1> she said" );` |
+  // | | `__logMsg( 'info', str );` |
+  // | | `// > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; she said.'` |
+  // | | |
+  // | | `str = encodeHtml( "<h1>'Help me!'</h1> & fast!", __false );` |
+  // | | `__logMsg( 'info', str );` |
+  // | | `// > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; &amp; fast!'` |
+  // | |
+  // | | `str = encodeHtml( "<h1>'Help me!'</h1> & fast!", __true );` |
+  // | | `__logMsg( 'info', str );` |
+  // | | `// > &lt;h1&ht;&quot;Help me!&quot;&lt;/h1&gt; & fast!'` |
+  // | Arguments | (positional) |
+  // | | `  <str>            - The HTML string to encode` |
+  // | | `  <do_exclude_amp> - Exclude ampersand from encoding.` |
+  // | | `    Default is __false.` |
+  // | Returns   | `Modified string` |
+  // | Throws    | `None` |
   //
   function encodeHtml ( arg_str, arg_do_exclude_amp ) {
     var
@@ -1389,20 +1454,24 @@ var xuu = (function () {
   }
   // . END Public method /encodeHtml/
 
-  // BEGIN utility /getBaseDirname/
-  // Summary   : getBaseDirname.call( <path_str>, <delim_str> );
-  // Purpose   : Returns the last filename of a path or the dirname.
-  // Examples  : getBaseDirname.call( '_base_', /var/log/demo.log')
-  //           :   returns 'demo.log'
-  //           : getBaseDirname.call( null, '/var/log/demo.log' )
-  //           :   returns '/var/log'
-  // Arguments :
-  //   <path_str>  - Path string.      Default is __blank.
-  //   <delim_str> - Delimeter string. Default is '/'.
-  // Settings  : If context_str is '_base_' returns basename, otherwise
-  //           : provides dirname.
-  // Returns   : Modified string
-  // Throws    : None
+  //
+  // #### `_getBaseDirname_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getBaseDirname.call( <path_str>, <delim_str> );` |
+  // | | `getBasename( <path_str> ); getDirname( <path_str> );`      |
+  // | Purpose   | `Returns the last filename of a path or the dirname.` |
+  // | Examples  | `getBaseDirname.call( '_base_', /var/log/demo.log')` |
+  // | | `// returns 'demo.log'` |
+  // | | `getBaseDirname.call( null, '/var/log/demo.log' )` |
+  // | | `//  returns '/var/log'` |
+  // | Arguments | (positional) |
+  // | | `  <path_str>  - Path string.      Default is __blank.` |
+  // | | `  <delim_str> - Delimeter string. Default is '/'.` |
+  // | | `  If context_str === '_base_' returns basename, otherwise` |
+  // | | `    provides dirname.` |
+  // | Returns   | `Modified string` |
+  // | Throws    | `None` |
   //
   function getBaseDirname( arg_path_str, arg_delim_str ) {
     var
@@ -1423,19 +1492,21 @@ var xuu = (function () {
   getDirname  = getBaseDirname[ __bind ]( '_dir_'  );
   // . END utilities /getBasename/ and /getDirname/
 
-  // BEGIN Public method /getListAttrIdx/
-  // Summary   : getListAttrIdx( <list>, <key>, <data> );
-  // Purpose   : Find the first map in <list> where the value of
-  //             <key> is <data>.
-  // Examples  : getListAttrIdx( [ { a: 1 } ], 'a', 1 ); // returns 0
-  //             getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns -1
-  //             getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns -1
-  // Arguments :
-  //   + <list> - List of maps.              Default is [].
-  //   + <key>  - The key to match.          Default is __blank.
-  //   + <data> - The data expected for key. Default is __undef.
-  // Returns   : Returns integer index or -1 if not found
-  // Throws    : None
+  // #### `_getListAttrIdx_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getListAttrIdx( <list>, <key>, <data> );` |
+  // | Purpose   | `Find the first map in <list> where the value of.` |
+  // | | `<key> is <data>.` |
+  // | | `Examples  : getListAttrIdx( [ { a: 1 } ], 'a', 1 ); // returns 0` |
+  // | | `getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns -1` |
+  // | | `getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns -1` |
+  // | Arguments | (positional) |
+  // | | `  <list> - List of maps.              Default is [].` |
+  // | | `  <key>  - The key to match.          Default is __blank.` |
+  // | | `  <data> - The data expected for key. Default is __undef.` |
+  // | Returns   | `Returns integer index or -1 if not found` |
+  // | Throws    | `None` |
   //
   function getListAttrIdx ( arg_map_list, arg_key, data ) {
     var
@@ -1465,19 +1536,21 @@ var xuu = (function () {
   }
   // . END Public method /getListAttrIdx/
 
-  // BEGIN Public method /getListAttrMap/
-  // Summary   : getListAttrMap( <list>, <key>, <data> );
-  // Purpose   : Find the first map in <list> where the value of
-  //             <key> is <data>.
-  // Examples  : getListAttrIdx( [ { a: 1 } ], 'a', 1 ); // returns map
-  //             getListAttrIdx( [ { a: 1 } ], 'b', 1 ); // returns undef
-  //             getListAttrIdx( [ { a: 1 } ], 'a', 9 ); // returns undef
-  // Arguments :
-  //   + <list> - List of maps.              Default is [].
-  //   + <key>  - The key to match.          Default is __blank.
-  //   + <data> - The data expected for key. Default is __undef.
-  // Returns   : Returns found map or undef if not found
-  // Throws    : None
+  // #### `_getListAttrMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getListAttrMap( <list>, <key>, <data> );` |
+  // | Purpose   | `Find the first map in <list> where the value of.` |
+  // | | `<key> is <data>.` |
+  // | Examples  | `getListAttrMap( [ { a: 1 } ], 'a', 1 ); // returns map` |
+  // | | `getListAttrMap( [ { a: 1 } ], 'b', 1 ); // returns undef` |
+  // | | `getListAttrMap( [ { a: 1 } ], 'a', 9 ); // returns undef` |
+  // | Arguments | (positional) |
+  // | | `  <list> - List of maps.              Default is [].` |
+  // | | `  <key>  - The key to match.          Default is __blank.` |
+  // | | `  <data> - The data expected for key. Default is __undef.` |
+  // | Returns   | `Returns found map or undef if not found` |
+  // | Throws    | `None` |
   //
   function getListAttrMap ( arg_list, key_name, key_val ) {
     var
@@ -1487,19 +1560,21 @@ var xuu = (function () {
   }
   // . END Public method /getListAttrMap/
 
-  // BEGIN Public method /makeColumnList/
-  // Summary   : makeColumnList( <list>, <col_id>, [ filter_fn ] );
-  // Purpose   : Extract a column from a list-of-lists or list-of-maps table.
-  // Examples  : list = makeColumnList( enum_table, 'value' );
-  //             list = makeColumnList( grid_table, 5 );
-  //             list = makeColumnList( enum_table, 5, function ( row ) {...} )
-  // Arguments :
-  //   + <list>      - List of maps or lists. Required.
-  //   + <col_id>    - The key or index of the column. Required.
-  //   + <filter_fn> - Optional filter. Recieves the table row as argument.
-  //       If it returns a non-true value the row is discarded.
-  // Returns   : Returns found map or undef if not found
-  // Throws    : None
+  // #### `_makeColumnList_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeColumnList( <list>, <col_id>, [ filter_fn ] );` |
+  // | Purpose   | `Extract a column from a list-of-lists or list-of-maps table.` |
+  // | | `Examples  : list = makeColumnList( enum_table, 'value' );` |
+  // | | `list = makeColumnList( grid_table, 5 );` |
+  // | | `list = makeColumnList( enum_table, 5, function ( row ) {...} )` |
+  // | Arguments | (positional) |
+  // | | `  <list>      - List of maps or lists. Required.` |
+  // | | `  <col_id>    - The key or index of the column. Required.` |
+  // | | `  <filter_fn> - Optional filter. Recieves the table row as argument.` |
+  // | | `    If it returns a non-true value the row is discarded.` |
+  // | Returns   | `Returns found map or undef if not found` |
+  // | Throws    | `None` |
   //
   function makeColumnList ( arg_list, arg_key, arg_filter_fn ) {
     var
@@ -1524,20 +1599,22 @@ var xuu = (function () {
   }
   // . END Public method /getListAttrMap/
 
-  // BEGIN Public method /getListDiff/
-  // Summary   : getListDiff( <list1>, <list2> );
-  // Purpose   : Find all elements common between two lists.
-  //   This is _not_ a deep comparison; two similar lists or maps
-  //   will be reported as different unless they point the the same
-  //   data structure.
-  // Example   : getListDiff( [ 'a','b' ], [ 'b','c','d' ] );
-  //             // Returns [ 'a', 'c', 'd' ]
-  // Arguments :
-  //   + <list1> - The first list
-  //   + <list2> - The second list
-  // Returns   : A list of unique elements found in first list
-  //   followed by unique elements found in the second.
-  // Throws    : None
+  // #### `_getListDiff_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getListDiff( <list1>, <list2> );` |
+  // | Purpose   | `Find all elements common between two lists.` |
+  // | | `This is _not_ a deep comparison; two similar lists or maps` |
+  // | | `will be reported as different unless they point the the same` |
+  // | | `data structure.` |
+  // | Example   | `getListDiff( [ 'a','b' ], [ 'b','c','d' ] );` |
+  // | | `// Returns [ 'a', 'c', 'd' ]` |
+  // | Arguments | (positional) |
+  // | | `  <list1> - The first list`  |
+  // | | `  <list2> - The second list` |
+  // | Returns   | `A list of unique elements found in first list` |
+  // | | `followed by unique elements found in the second.` |
+  // | Throws    | `None` |
   //
   function getListDiff ( arg0_list, arg1_list ) {
     var
@@ -1559,15 +1636,17 @@ var xuu = (function () {
   }
   // . END Public method /getListDiff/
 
-  // BEGIN Public method /getListValCount/
-  // Summary   : getListValCount( <list>, <data> );
-  // Purpose   : Count the number of elements in <list> that === <data>
-  // Example   : getListValCount( [ 'a','b','a' ], 'a' ); // Returns 2
-  // Arguments :
-  //   + <list> - The list to examine.     Default is [].
-  //   + <data> - The data value to match. Default is __undef.
-  // Returns   : Match count
-  // Throws    : None
+  // #### `_getListValCount_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getListValCount( <list>, <data> );` |
+  // | Purpose   | `Count the number of elements in <list> that === <data>.` |
+  // | Example   | `getListValCount( [ 'a','b','a' ], 'a' ); // Returns 2` |
+  // | Arguments | (positional) |
+  // | | `  <list> - The list to examine.     Default is [].` |
+  // | | `  <data> - The data value to match. Default is __undef.` |
+  // | Returns   | `Match count` |
+  // | Throws    | `None` |
   //
   function getListValCount ( arg_list, arg_data ) {
     var
@@ -1584,25 +1663,22 @@ var xuu = (function () {
   }
   // . END Public method /getListValCount/
 
-  // BEGIN Public method /getLogObj/
-  // See logObj above for details
-  function getLogObj () { return logObj; }
-  // . END Public method /getlogObj/
-
-  // BEGIN Public method /getStructData/
-  // Summary   : getStructData( <data>, <path_list> );
-  // Purpose   : Extract a value from <data> by <path_list>
-  // Example   : _getStructData_({ foo : { bar : 'hi!' }}, ['foo','bar']);
-  //             // Returns 'hi!'
-  // Arguments :
-  //   + <data>      - An array or map
-  //   + <path_list> - A list of map or array keys in order of depth
-  // Returns   :
-  //   + Success - Requested value
-  //   + Failure - undefined
-  // Throws    : None
-  // Note      : The key list limit is set to 100. If this
-  //   is met, a warning is logged and undef returned.
+  // #### `_getStructData_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `getStructData( <data>, <path_list> );` |
+  // | Purpose   | `Extract a value from <data> by <path_list>.` |
+  // | Example   | `_getStructData_({ foo : { bar : 'hi!' }}, ['foo','bar']);` |
+  // | | `// Returns 'hi!'` |
+  // | | |
+  // | | `// The key depth limit is set to 100. If this` |
+  // | | `// is met, a warning is logged and undef returned.` |
+  // | Arguments | (positional) |
+  // | | `  <data>      - An array or map` |
+  // | | `  <path_list> - A list of map or array keys in order of depth` |
+  // | Returns   | `Success - Requested value` |
+  // | | `  Failure - undefined` |
+  // | Throws    | `None` |
   //
   function getStructData ( base_struct, arg_path_list ) {
     var
@@ -1650,9 +1726,11 @@ var xuu = (function () {
   }
   // . END Public method /getStructData/
 
-  // BEGIN Public method /getTzCode/
-  // Summary: getTzCode();
-  // Purpose: Return the local timezone code
+  // #### `_getTzCode_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary | `getTzCode();` |
+  // | Purpose | `Return the local timezone code.` |
   //
   function getTzCode () {
     var
@@ -1665,27 +1743,29 @@ var xuu = (function () {
   }
   // . END Public method /getTzCode/
 
-  // BEGIN Public method /makeClockStr/
-  // Summary   : makeClockStr( <time_ms>, <time_idx>, <do_am>, <do_local> );
-  // Purpose   : Create HH:MM:SS time string from UTC time integer in ms
-  // Example   : clock_str = makeClockStr( 1465621376000 ); // '05:02:56'
-  // Arguments :
-  //   <time_ms>  - UTC time in milliseconds
-  //   <time_idx> - Date precision. Default is __3.
-  //     -3 === [DDd:]HHh:MMm:SSs
-  //     -2 === [DDd:]HHh:MMm
-  //     -1 === [DDd:]HHh
-  //      0 === ''
-  //      1 === HH
-  //      2 === HH:MM
-  //      3 === HH:MM:SS
-  //   <do_ampm>  - Do am/pm flag.  Default is __false.
-  //   <do_local> - Use local time. Default is __false.
-  // Returns   : String
-  // Note      :
-  //   Remember to use your local timezone offset if you want to
-  //   show local time. Example:
-  //     local_ms = getNowMs( __true )
+  // #### `_makeClockStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary | `makeClockStr( <time_ms>, <time_idx>, <do_am>, <do_local> );` |
+  // | Purpose | `Create HH:MM:SS time string from UTC time integer in ms.` |
+  // | Example | `clock_str = makeClockStr( 1465621376000 ); // '05:02:56'` |
+  // | | `// Remember to use your local timezone offset if you want to` |
+  // | | `// show local time. Example:` |
+  // | | `// local_ms = getNowMs( __true )` |
+  // | Arguments | (positional) |
+  // | | `  <time_ms>  - UTC time in milliseconds` |
+  // | | `  <time_idx> - Date precision. Default is __3.` |
+  // | | `    -3 === [DDd:]HHh:MMm:SSs` |
+  // | | `    -2 === [DDd:]HHh:MMm` |
+  // | | `    -1 === [DDd:]HHh` |
+  // | | `    0 === ''` |
+  // | | `    1 === HH` |
+  // | | `    2 === HH:MM` |
+  // | | `    3 === HH:MM:SS` |
+  // | | `  <do_ampm>  - Do am/pm flag.  Default is __false.` |
+  // | | `  <do_local> - Use local time. Default is __false.` |
+  // | Returns | `String` |
+  // | Throws  | `None`   |
   //
   function makeClockStr ( arg_time_ms, arg_time_idx, arg_do_ampm, arg_do_local ) {
     var
@@ -1755,26 +1835,28 @@ var xuu = (function () {
   }
   // . END Public method /makeClockStr/
 
-  // BEGIN Public method /makeCommaNumStr/
-  // Summary   : makeCommaNumStr( <arg_map> );
-  // Purpose   : Convert a number into a string optimized for readability
-  // Example   : makeCommaNumStr({ _input_num_ : 1999 })
-  //             Returns '2.0k'
-  // Arguments : <arg_map> with the following keys
-  //   + _input_num_       - The number to format, e.g. 123598
-  //   + _round_limit_exp_ - The size (10^exp) of number after which
-  //                         a rounded value is returned. Default is __3.
-  //   + _round_limit_str  - The limit name. Default is 'k'.
-  //   + _round_unit_exp_  - The size (10^exp) of number to group as
-  //                         a unit. Default is __3, e.g. 1,000's.
-  //   + _round_dec_count_ - Number of decimal places to keep
-  //                         in the mantisa when rounding to units
-  //   + _nornd_dec_count_ - Number of decimal places to keep when
-  //                         NOT rounded to units
-  // Returns   :
-  //   + Success - Returns formated string
-  //   + Failure - Blank string
-  // Throws    : None
+  // #### `_makeCommaNumStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeCommaNumStr( <arg_map> );` |
+  // | Purpose   | `Convert a number into a string optimized for readability.` |
+  // | Example   | `makeCommaNumStr({ _input_num_ : 1999 })` |
+  // | | `// Returns '2.0k'` |
+  // | Arguments | `<arg_map> with the following keys` |
+  // | | `+ _input_num_       - The number to format, e.g. 123598` |
+  // | | `+ _round_limit_exp_ - The size (10^exp) of number after which` |
+  // | | `   a rounded value is returned. Default is __3.` |
+  // | | `+ _round_limit_str  - The limit name. Default is 'k'.` |
+  // | | `+ _round_unit_exp_  - The size (10^exp) of number to group as` |
+  // | | `   a unit. Default is __3, e.g. 1,000's.` |
+  // | | `+ _round_dec_count_ - Number of decimal places to keep` |
+  // | | `   in the mantisa when rounding to units` |
+  // | | `+ _nornd_dec_count_ - Number of decimal places to keep when` |
+  // | | `   NOT rounded to units` |
+  // | Returns   | |
+  // | | `Success - Returns formated string` |
+  // | | `Failure - Blank string` |
+  // | Throws    | `None` |
   //
   function makeCommaNumStr ( arg_map ) {
     var
@@ -1820,40 +1902,42 @@ var xuu = (function () {
   }
   // . END Public method /makeCommaNumStr/
 
-  // BEGIN Public method /makeDateStr/
-  // Summary   : makeDateStr( <arg_map> );
-  // Purpose   : Create a string from a date object
-  //   or a UTC time number (in milliseconds).
-  // Example   :
-  //   makeDateStr({ _date_obj_ : new __Date() });
-  //   // Returns a string like '2016-09-18'
   //
-  //   makeDateStr({ _date_obj_ : new __Date(), _time_idx_ : 3 });
-  //   // Returns a string like '2016-09-18 12:45:52'
-  //
-  //   makeDateStr({ _date_ms_ : 1474311626050 })
-  //   // Returns '2016-09-19'
-  // Arguments : <arg_map> with these keys
-  //   + _date_obj_ : A valid date object.
-  //   + _date_ms_  : A date time in ms.
-  //     If neither date_obj or date_ms is provided, will use the
-  //       current date.
-  //     If BOTH are provided, _date_ms_ will be used in
-  //       preference to date_obj.
-  //   + _time_idx_ : See _makeClockStr_ to determine
-  //       the clock string format. Default is __0.
-  //   + _order_str_ :
-  //       Request '_us_' results in stupid-format: mm/dd/yyyy hh:mm:ss.
-  //       Default is __blank.
-  // Returns   :
-  //   + Success - Returns formated string
-  //   + Failure - Blank string
-  // Throws    : None
-  // Note      :
-  //   Remember to use your local timezone offset if you want to
-  //   show local time. Example:
-  //       tz_offset_ms = date_obj.geteTimezoneOffset() * 60000;
-  //       local_ms     = raw_utc_ms - tz_offset_ms;
+  // #### `_makeDateStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeDateStr( <arg_map> );` |
+  // | Purpose   | `Create a string from a date object.` |
+  // | | `or a UTC time number (in milliseconds).` |
+  // | Example | |
+  // | | `makeDateStr({ _date_obj_ : new __Date() });` |
+  // | | `// Returns a string like '2016-09-18'` |
+  // | | |
+  // | | `makeDateStr({ _date_obj_ : new __Date(), _time_idx_ : 3 });` |
+  // | | `// Returns a string like '2016-09-18 12:45:52'` |
+  // | | |
+  // | | `makeDateStr({ _date_ms_ : 1474311626050 })` |
+  // | | `// Returns '2016-09-19'` |
+  // | | |
+  // | | `// Remember to use your local timezone offset if you want to` |
+  // | | `// show local time. Example:` |
+  // | | `// tz_offset_ms = date_obj.geteTimezoneOffset() * 60000;` |
+  // | | `// local_ms     = raw_utc_ms - tz_offset_ms;` |
+  // | Arguments | `<arg_map> with these keys` |
+  // | | `+ _date_obj_ : A valid date object.` |
+  // | | `+ _date_ms_  : A date time in ms.` |
+  // | | `  If neither date_obj or date_ms is provided, will use the` |
+  // | | `  current date. If BOTH are provided, _date_ms_ will be used in` |
+  // | | `  preference to date_obj.` |
+  // | | `+ _time_idx_ : See _makeClockStr_ to determine` |
+  // | | `  the clock string format. Default is __0.` |
+  // | | `+ _order_str_ :` |
+  // | | `  Request '_us_' results in stupid-format: mm/dd/yyyy hh:mm:ss.` |
+  // | | `  Default is __blank.` |
+  // | Returns | |
+  // | | `Success - Formated string` |
+  // | | `Failure - Blank string` |
+  // | Throws | `None` |
   //
   function makeDateStr ( arg_map ) {
     var
@@ -1910,37 +1994,35 @@ var xuu = (function () {
   }
   // . END Public method /makeDateStr/
 
-  // BEGIN Public method /makeDebounceFn/
-  // Summary   : makeDebounceFn( <arg_map> );
-  // Purpose   : Create a function which will call a provided method a
-  //             specified time period after it was last called. Any
-  //             call that occurs within the time period resets the clock.
-  //
-  // Example   : dbFn = makeDebounceFn({ _fn_ : myMethodFn, _delay_ms_: 250 });
-  //             dbFn( 'method argument' ); // Executes in 250ms
-  //
-  // Arguments : <arg_map> with the following keys
-  //   + _fn_       - The method to execute           Required.
-  //   + _delay_ms_ - The time of inactivity          Default is __0.
-  //   + _ctx_data_ - Method context                  Default is __undef.
-  //   + _do_asap_  - Fire method on first call       Default is __false.
-  //
-  // Returns   :
-  //   + Success - The debounce function as described above.
-  //   + Failure - undef
-  //
-  // Throws    : None
-  //
-  // Note      : The method, myMethodFn, is always invoked with the latest
-  //             arguments provided. Consider this example:
-  //
-  //             dbFn( 'myArgs' ); dbFn( 'Hello World' );
-  //
-  //             The argument 'myArgs' will likely be discarded and
-  //             myMethodnFn( 'Hello World' ) will likely be invoked.
-  //
-  // Todo      : Provide a means to reset _do_asap_ with either a timeout
-  //             or other mechanism.
+  // #### `_makeDebounceFn_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeDebounceFn( <arg_map> );` |
+  // | Purpose   | `Create a function which will call a provided method a.` |
+  // | | `specified time period after it was last called. Any` |
+  // | | `call that occurs within the time period resets the clock.` |
+  // | Example   | `dbFn = makeDebounceFn({ _fn_ : myMethodFn, _delay_ms_: 250 });` |
+  // | | `dbFn( 'method argument' ); // Executes in 250ms` |
+  // | | |
+  // | | `// The method, myMethodFn, is always invoked with the latest` |
+  // | | `// arguments provided. Consider this example:` |
+  // | | `dbFn( 'myArgs' ); dbFn( 'Hello World' );` |
+  // | | |
+  // | | `// The argument 'myArgs' will likely be discarded and` |
+  // | | `// myMethodnFn( 'Hello World' ) will likely be invoked.` |
+  // | | |
+  // | TODO      | `Provide a means to reset _do_asap_ with either ` |
+  // | | ` a timeout or other mechanism.` |
+  // | | |
+  // | Arguments | `<arg_map> with the following keys`               |
+  // | | `+ _fn_       - The method to execute           Required.`  |
+  // | | `+ _delay_ms_ - The time of inactivity          Default is __0.` |
+  // | | `+ _ctx_data_ - Method context                  Default is __undef.` |
+  // | | `+ _do_asap_  - Fire method on first call       Default is __false.` |
+  // | Returns   | |
+  // |     | `Success - The debounce function as described above.` |
+  // |     | `Failure - undef` |
+  // | Throws    | `None` |
   //
   function makeDebounceFn ( arg_map ) {
     var
@@ -1976,105 +2058,106 @@ var xuu = (function () {
   }
   // . END Public method /makeDebounceFn/
 
-  // BEGIN Public method /makeThrottleFn/
-  // Summary   : makeThrottleFn( <arg_map> );
-  // Purpose   : Create a function which will call a provided method only
-  //             once per time period.
+  // #### `_makeDeepData_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose   | `Get all unique keys in a data structure as list or map.` |
+  // | Example   | `_makeDeepData_({ foo:{ bar:1 }, bar:2});` |
+  // | | `// Returns [ 'foo', 'bar' ]` |
+  // | | `_makeDeepData_({ foo:{ bar:1 }, bar:2}, '_map_');` |
+  // | | `// Returns { bar: 2 } // flattens map` |
+  // | | |
+  // | | `// The key depth limit is set to __100. If this` |
+  // | | `// is met, a warning is logged and __undef returned` |
+  // | Arguments | (positional) |
+  // | | `  <base_struct> - An array or map` |
+  // | | `  <mode_str>    - _list_ or _map_. Default is _list_` |
+  // | Returns | |
+  // | | `Success - A list of a unique keys sorted` |
+  // | | `Failure - An empty list` |
   //
-  // Example   : thFn = makeThrottleFn({ _fn_ : myMethodFn, _delay_ms_: 250 });
-  //             thFn( 'method argument' ); // Executes in 250ms
-  //
-  // Arguments : <arg_map> with the following keys
-  //   + _fn_       - The method to execute           Required.
-  //   + _delay_ms_ - The minimum time between calls  Default is __0.
-  //   + _ctx_data_ - Method context                  Default is __undef.
-  //   + _do_asap_  - Fire method on first call       Default is __false.
-  //
-  // Returns   :
-  //   + Success - The throttle function as described above.
-  //   + Failure - undef
-  //
-  // Throws    : None
-  //
-  // Note      : The method, myMethodFn, is always invoked with the latest
-  //             arguments provided. Consider this example:
-  //
-  //             thFn( 'myArgs' ); thFn( 'Hello World' );
-  //
-  //             The argument 'myArgs' will likely be discarded and
-  //             myMethodnFn( 'Hello World' ) will likely be invoked.
-  //
-  // Todo      : Provide a means to reset _do_asap_ with either a timeout
-  //             or other mechanism.
-  //
-  function makeThrottleFn ( arg_map ) {
+  function makeDeepData ( arg_base_data, arg_mode_str ) {
     var
-      map      = castMap(  arg_map, {} ),
+      base_data  = castList( arg_base_data ) || castMap( arg_base_data, {} ),
+      mode_str   = castStr(
+        arg_mode_str, '_list_', { _filter_rx_ : /^(_list_|_map_)$/ }
+      ),
+      walk_obj   = base_data,
+      solve_data = mode_str === '_list_' ? [] : {},
+      stack_list = [],
+      key_list   = makeKeyListFn( walk_obj ),
+      key_count  = key_list[ __length ],
+      idx        = __0,
 
-      delay_ms = castInt(  map._delay_ms_,     __0 ),
-      do_asap  = castBool( map._do_asap_,  __false ),
-      fn       = castFn(   map._fn_                ),
-      ctx_data = map._ctx_data_,
+      loop_key,     loop_data, loop_type,
+      ctx_key_list, stack_map;
 
-      last_ms, arg_list, delay_toid;
+    _OUTER_: while ( walk_obj ) {
+      while ( idx < key_count ) {
+        loop_key  = key_list[ idx ];
+        loop_data = walk_obj[ loop_key ];
+        loop_type = getVarType( loop_data );
 
-    if ( ! fn ) {
-      logFn( '_error_', '_bad_throttle_arguments_', fn );
-      return __undef;
-    }
+        if ( mode_str === '_list_' ) {
+          if ( solve_data[ __indexOf ]( loop_key ) === __n1 ) {
+            solve_data[ __push ]( loop_key );
+          }
+        }
 
-    function throttleFn () {
-      var now_ms = getNowMs(), delta_ms, is_locked;
-      if ( ! last_ms ) { last_ms = now_ms; }
-      delta_ms = delay_ms - ( now_ms - last_ms );
+        if ( loop_type === '_Object_' || loop_type === '_Array_' ) {
+          ctx_key_list = makeKeyListFn( loop_data );
+          if ( ctx_key_list[ __length ] > __0 ) {
+            stack_list[ __push ]( {
+              _idx_       : idx,
+              _key_count_ : key_count,
+              _key_list_  : key_list,
+              _walk_obj_  : walk_obj
+            } );
 
-      // Due to closure arg_list is always updated to lastest call
-      arg_list = makeArgList( arguments );
-
-      // Clear delay_toid if timeout. This should only happend in edge cases.
-      if ( delta_ms < __0 || do_asap ) {
-        if ( delay_toid ) { clearToFn( delay_toid ); }
-        delay_toid  = __undef;
-        last_ms     = __undef;
-        do_asap     = false;
-        return fn[ __apply ]( ctx_data, arg_list );
+            idx       = __n1;
+            walk_obj  = loop_data;
+            key_list  = makeKeyListFn( walk_obj );
+            key_count = key_list[ __length ];
+          }
+        }
+        else if ( mode_str === '_map_' ) {
+          solve_data[ loop_key ] = loop_data;
+        }
+        idx++;
       }
 
-      // Discard this call if we already have a timeout id
-      if ( delay_toid ) { return; }
+      stack_map = stack_list[ __pop ]();
+      if ( ! stack_map ) { break _OUTER_; }
 
-      do_asap = false;
-      delay_toid = setToFn(
-        function () {
-          if ( is_locked ) { return; }
-          delay_toid  = __undef;
-          last_ms     = __undef;
-          fn[ __apply ]( ctx_data, arg_list );
-        },
-        delta_ms
-      );
+      walk_obj  = stack_map._walk_obj_;
+      key_count = stack_map._key_count_;
+      key_list  = stack_map._key_list_;
+      idx       = stack_map._idx_ + __1;
     }
-    return throttleFn;
+    return solve_data;
   }
-  // . END Public method /makeThrottleFn/
+  // . END Public method /makeDeepData/
 
-  // BEGIN Public method /makeEllipsisStr/
-  // Summary   : makeEllipsisStr( <arg_map> );
-  // Purpose   : Shorten a string to a maximum length and append ellipsis
-  //   if it is exceeded.
-  // Example   :
-  //   makeEllipsisStr({
-  //     _input_str_      : 'hee haw and the boys',
-  //     _char_limit_int_ : 10,
-  //     _do_word_break_  : __true
-  //   });
-  //   // returns 'hee haw ...'
-  // Arguments :
-  //   + _char_limit_int_ : Maxiumum allowed chars.  Default is __0.
-  //   + _do_word_break_  : Break at word boundries. Default is __true.
-  //   + _input_str_      : The string to shorten
-  // Returns   : A string
-  // Throws    : None
+
+  // #### `_makeEllipsisStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeEllipsisStr( <arg_map> );` |
+  // | Purpose   | `Shorten a string to a maximum length and append ellipsis.` |
+  // | | `if it is exceeded.` |
+  // | Example   | |
+  // | | `makeEllipsisStr({` |
+  // | | `  _input_str_      : 'hee haw and the boys',` |
+  // | | `  _char_limit_int_ : 10,` |
+  // | | `  _do_word_break_  : __true` |
+  // | | `});` |
+  // | | `// returns 'hee haw ...'` |
+  // | Arguments | `<arg_map> with the following keys` |
+  // | | `+ _char_limit_int_ : Maxiumum allowed chars.  Default is __0.` |
+  // | | `+ _do_word_break_  : Break at word boundries. Default is __true.` |
+  // | | `+ _input_str_      : The string to shorten` |
+  // | Returns   | `String` |
+  // | Throws    | `None` |
   //
   function makeEllipsisStr( arg_map ) {
     var
@@ -2114,15 +2197,17 @@ var xuu = (function () {
   }
   // . END Public method /makeEllipsisStr/
 
-  // BEGIN Public method /makeErrorObj/
-  // Summary   : makeErrorObj( <name>, <msg> );
-  // Purpose   : A convenient method to create an error object
-  // Example   : makeErrorObj( 'notCool', 'This is not cool' );
-  // Arguments :
-  //   + <name> - Error name.    Default is 'error'.
-  //   + <msg>  - Error message. Default is __blank.
-  // Returns   : A newly constructed error object
-  // Throws    : None
+  // #### `_makeErrorObj_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeErrorObj( <name>, <msg> );` |
+  // | Purpose   | `A convenient method to create an error object.` |
+  // | Example   | `makeErrorObj( 'notCool', 'This is not cool' );` |
+  // | Arguments | (positional) |
+  // |     | `  <name> - Error name.    Default is 'error'.` |
+  // |     | `  <msg>  - Error message. Default is __blank.` |
+  // | Returns   | `A newly constructed error object` |
+  // | Throws    | `None` |
   //
   function makeErrorObj ( arg_name, arg_msg ) {
     var error_obj = new Error();
@@ -2134,13 +2219,15 @@ var xuu = (function () {
   }
   // . END Public method /makeErrorObj/
 
-  // BEGIN Public method /makeGuidStr/
-  // Summary   : makeGuidStr()
-  // Purpose   : Return a standard GUID
-  // Example   : makeGuidStr();
-  // Arguments : None
-  // Returns   : A GUID
-  // Throws    : None
+  // #### `_makeGuidStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeGuidStr()` |
+  // | Purpose   | `Return a standard GUID.` |
+  // | Example   | `makeGuidStr();` |
+  // | Arguments | `None` |
+  // | Returns   | `A GUID` |
+  // | Throws    | `None` |
   //
   function makeGuidStr () {
     function makePart () {
@@ -2157,43 +2244,50 @@ var xuu = (function () {
   }
   // . END Public method /makeGuidStr/
 
-  // BEGIN Public method /makeMapUtilObj/
-  // Summary  : makeMapUtilObj()
-  // Purpose  : Creates a map utility object used to streamlining
-  //   list.map() functions and avoid nesting.
-  // Example  :
-  // 1. Create a map_util object:
-  //    | var map_util_obj = makeMapUtilObj();
-  // 2. (optional) Set any data your map function will use.
-  //    | map_util_obj._setArgList_ = [ name_list ];
-  // 3. Create a function that for element of the array.
-  //    The arg_list provided is set in step 2:
-  //    | function mapUtil_renameFn ( field_data, idx, list, arg_list ) {
-  //    |   var
-  //    |     name_list  = arg_list[ __0 ],
-  //    |     field_key  = name_list[ idx ],
-  //    |     field_str  = __Str( field_data )
-  //    |     ;
-  //    |
-  //    |   // Return [ key, value ] to add to map.
-  //    |   // Return undef to not add anything.
-  //    |   return [ field_key, field_str ];
-  //    | }
-  // 4. Set the function in the utility
-  //    | map_util_obj._setMapFn_( mapUtil_renameFn );
-  // 5. Initialize the result map. You need this pointer.
-  //    | result_map = {};
-  //    | map_util_obj._setResultMap_( result_map );
-  // 6. Invoke the map function:
-  //    | my_list.map( map_util_obj._invokeFn_ );
-  // 7. result_map will now contain the key value pairs return by
-  //    mapUtil_renameFn for the provided list.
-  //
-  // Returns  : A mapUtil object
-  // Throws   : None
-  // Note     : A closure creates unique private variables in each
-  //   instance returned. Examples include argList, resultMap, and mapFn.
-  //
+  // #### `_makeMapUtilObj_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary | `makeMapUtilObj()` |
+  // | Purpose | `Creates a map utility object used to streamlining.` |
+  // | | `list.map() functions and avoid nesting.` |
+  // | Example | |
+  // | | `// 1. Create a map_util object:` |
+  // | | `var map_util_obj = makeMapUtilObj();` |
+  // | | |
+  // | | `// 2. (optional) Set any data your map function will use.` |
+  // | | `map_util_obj._setArgList_ = [ name_list ];` |
+  // | | |
+  // | | `// 3. Create a function that for element of the array.` |
+  // | | `// The arg_list provided is set in step 2:` |
+  // | | `function mapUtil_renameFn ( field_data, idx, list, arg_list ) {` |
+  // | | ` var` |
+  // | | `   name_list  = arg_list[ __0 ],` |
+  // | | `   field_key  = name_list[ idx ],` |
+  // | | `   field_str  = __Str( field_data )` |
+  // | | `   ;` |
+  // | | |
+  // | | ` // Return [ key, value ] to add to map.` |
+  // | | ` // Return undef to not add anything.` |
+  // | | ` return [ field_key, field_str ];` |
+  // | | `}` |
+  // | | |
+  // | | `// 4. Set the function in the utility` |
+  // | | `map_util_obj._setMapFn_( mapUtil_renameFn );` |
+  // | | |
+  // | | `// 5. Initialize the result map. You need this pointer.` |
+  // | | `result_map = {};` |
+  // | | `map_util_obj._setResultMap_( result_map );` |
+  // | | |
+  // | | `// 6. Invoke the map function:` |
+  // | | `my_list.map( map_util_obj._invokeFn_ );` |
+  // | | |
+  // | | `// 7. result_map will now contain the key value pairs return by` |
+  // | | `mapUtil_renameFn for the provided list.` |
+  // | | |
+  // | | `// A closure creates unique private variables in each` |
+  // | | `// instance returned. Examples include argList, resultMap, and mapFn.` |
+  // | | |
+  // | Returns | `A mapUtil object` |
   //
   function makeMapUtilObj () {
     var resultMap, argList, mapFn;
@@ -2229,16 +2323,18 @@ var xuu = (function () {
   }
   // . END Public method /makeMapUtilObj/
 
-  // BEGIN Public method /makeOptionHtml/
-  // Summary   : makeOptionHtml( <arg_map> );
-  // Purpose   : Create an HTML string with option tags
-  // Example   : makeOptionHtml({ _val_list_ : [1,2,3,4] });
-  // Arguments : <arg_map> with the following keys
-  //    + _enum_table_  : A table of _name_ and _value_. Default is [].
-  //    + _match_list_ : List of values to be selected.  Default is [].
-  //      This is useful for multi-select fields.
-  // Returns   : An HTML option select string
-  // Throws    : None
+  // #### `_makeOptionHtml_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeOptionHtml( <arg_map> );` |
+  // | Purpose   | `Create an HTML string with option tags.` |
+  // | Example   | `makeOptionHtml({ _val_list_ : [1,2,3,4] });` |
+  // | Arguments | `<arg_map> with the following keys` |
+  // | | `+ _enum_table_  : A table of _name_ and _value_. Default is [].` |
+  // | | `+ _match_list_ : List of values to be selected.  Default is [].` |
+  // | | `This is useful for multi-select fields.` |
+  // | Returns | `An HTML option select string` |
+  // | Throws | `None` |
   //
   function makeOptionHtml ( arg_map ) {
     var
@@ -2271,15 +2367,17 @@ var xuu = (function () {
   }
   // . END Public method /makeOptionHtml/
 
-  // BEGIN Public method /makePctStr/
-  // Summary   : makePctStr( <ratio>, <precition_int> );
-  // Purpose   : Convert a decimal ratio into a readable % string
-  // Example   : makePctStr( 0.529863, 1 );
-  // Arguments :
-  //   <ratio>         - Ratio to convert. 1 = 100%.    Default is __0.
-  //   <precision_int> - Count of digits after decimal. Default is __0.
-  // Returns   : A percentage string
-  // Throws    : None
+  // #### `_makePctStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary | `makePctStr( <ratio>, <precition_int> );` |
+  // | Purpose | `Convert a decimal ratio into a readable % string.` |
+  // | Example | `makePctStr( 0.529863, 1 );` |
+  // | Arguments | (positional) |
+  // | | `  <ratio>         - Ratio to convert. 1 = 100%.    Default is __0.` |
+  // | | `  <precision_int> - Count of digits after decimal. Default is __0.` |
+  // | Returns | `A percentage string` |
+  // | Throws | `None` |
   //
   function makePctStr ( arg_ratio, arg_count ) {
     var
@@ -2291,8 +2389,10 @@ var xuu = (function () {
   }
   // . END Public method /makePctStr/
 
-  // BEGIN Public method /makeRadioHtml/
-  // Purpose : Make an array of checkboxes from a list
+  // #### `_makeRadioHtml_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose | `Make an array of checkboxes from a list.` |
   //
   function makeRadioHtml ( arg_map ) {
     var
@@ -2327,20 +2427,22 @@ var xuu = (function () {
   }
   // . END Public method /makeRadioHtml/
 
-  // BEGIN Public method /makeReplaceFn/
-  // Summary   : makeReplaceFn( <search_str>, <replace_str> );
-  // Purpose   : Return a high-performance function that
-  //   replaces <search_str> with <value_str>.
-  // Example   :
-  //   fn = makeReplaceFn( '_x_', 'fred' );
-  //   __logMsg( 'info', fn('you do not know {_x_}.') );
-  //   // Prints 'you do not know fred.'
-  // Arguments : ( positional )
-  //   + <search_str>  - The symbol to replace.
-  //     It is be wrapped in braces.
-  //   + <replace_str> - The replacement string.
-  // Returns   : A replacement function
-  // Throws    : None
+  // #### `_makeReplaceFn_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary | `makeReplaceFn( <search_str>, <replace_str> );` |
+  // | Purpose | `Return a high-performance function that.` |
+  // | | `replaces <search_str> with <value_str>.` |
+  // | Example | |
+  // | | `fn = makeReplaceFn( '_x_', 'fred' );` |
+  // | | `__logMsg( 'info', fn('you do not know {_x_}.') );` |
+  // | | `// Prints 'you do not know fred.'` |
+  // | Arguments | (positional) |
+  // | | `  <search_str>  - The symbol to replace.` |
+  // | | `    It must be wrapped in braces in template string.` |
+  // | | `  <replace_str> - The replacement string.` |
+  // | Returns   | `A replacement function` |
+  // | Throws    | `None` |
   //
   function makeReplaceFn ( arg_search_str, arg_value_str ) {
     var
@@ -2356,31 +2458,32 @@ var xuu = (function () {
   }
   // . END Public method /makeReplaceFn/
 
-  // BEGIN Public method /makeRekeyMap/
-  // Summary   : makeRekeyMap( <struct_data>, <key_map>, <mode_str> );
-  // Purpose   : Change all keys or values in a map to the new values provided
-  // Arguments : <arg_map> with the following keys:
-  //   + <struct_data> - A complex structure to rekey or revalue
-  //   + <key_map>     - A key map pointing to values
-  //   + <mode_str>    - '_rekey_' or '_reval_'
-  // Examples  :
-  //   makeRekeyMap(
-  //     { a : 1, b : 2, c : [] },
-  //     { a : '_x_', b : '_y_', c : '_z_' },
-  //     '_rekey_'
-  //   );
-  //   // Returns { _x_:1, _y_:2, _z_:[] }
-  //
-  //   makeRekeyMap(
-  //     { a : 1, b : 2, list : [ { c : [] } ] },
-  //     { a : '_x_', b: '_y_', c : 22 },
-  //     '_reval_'
-  //   );
-  //   // Returns { a : '_x_', b : '_y_', list : [ { c : 22 } ] }
-  // Returns   : A new map or list or other data
-  // Throws    : None
-  // Note      : A hard limit of 100 000 iterations are supported.
-  //   Executes deep renaming through arrays and objects.
+  // #### `_makeRekeyMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeRekeyMap( <struct_data>, <key_map>, <mode_str> );` |
+  // | Purpose   | `Change all keys or values in a map to the new values.` |
+  // | | `Executes deep renaming through arrays and objects.` |
+  // | | `A hard limit of 100 000 iterations is supported.` |
+  // | Examples  | |
+  // | | `makeRekeyMap(` |
+  // | | `  { a : 1, b : 2, c : [] },` |
+  // | | `  { a : '_x_', b : '_y_', c : '_z_' },` |
+  // | | `  '_rekey_'` |
+  // | | `);` |
+  // | | `// Returns { _x_:1, _y_:2, _z_:[] }` |
+  // | | |
+  // | | `makeRekeyMap(` |
+  // | | `  { a : 1, b : 2, list : [ { c : [] } ] },` |
+  // | | `  { a : '_x_', b: '_y_', c : 22 },` |
+  // | | `  '_reval_'` |
+  // | | `);` |
+  // | | `// Returns { a : '_x_', b : '_y_', list : [ { c : 22 } ] }` |
+  // | Arguments | (positional) |
+  // | | `  <struct_data> - A complex structure to rekey or revalue` |
+  // | | `  <key_map>     - A key map pointing to values` |
+  // | | `  <mode_str>    - '_rekey_' or '_reval_'` |
+  // | Returns   | `A new map, list, or other data` |
   //
   function makeContextObj ( arg_struct ) {
     var
@@ -2474,9 +2577,12 @@ var xuu = (function () {
   }
   // . END Public method /makeRekeyMap/
 
-  // BEGIN Public method /makeSeenMap/
-  // Purpose : Convert arg_key_list into a map with each key assigned
-  // the value of arg_seen_data. Default is __true.
+  //
+  // #### `_makeSeenMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose   | `Convert arg_key_list into a map with each key assigned.` |
+  // | | `the value of arg_seen_data. Default is __true.` |
   //
   function makeSeenMap ( arg_key_list, arg_seen_data ) {
     var
@@ -2494,96 +2600,60 @@ var xuu = (function () {
     return solve_map;
   }
   // . END Public method /makeSeenMap/
-
-  // BEGIN Public method /makeStrFromMap/
-  // Purpose : Concatenate a number of key-values
-  // into a single string
-  function makeStrFromMap ( arg_map ) {
-    // noinspection JSMismatchedCollectionQueryUpdate
-    var
-      map       = castMap(  arg_map         ,      {} ),
-      prop_map  = castMap(  map._prop_map_  ,      {} ),
-      key_list  = castList( map._key_list_  ,      [] ),
-      delim_str = castStr(  map._delim_str_ , __space ),
-
-      label_delim_str = castStr( map._label_delim_str_, ': ' ),
-      label_map       = castMap( map._label_map_,    __undef ),
-
-      do_label   = !! ( label_map || map._do_label_ ),
-      key_count  = key_list[ __length ],
-      solve_list = [],
-
-      idx, prop_key, prop_str, label_str;
-
-    for ( idx = __0; idx < key_count; idx++ ) {
-      prop_key  = key_list[ idx ];
-      prop_str  = castStr( prop_map[ prop_key ], __blank );
-      if ( prop_str !== __blank ) {
-        if ( do_label ) {
-          if ( label_map ) {
-            label_str = castStr( label_map[ prop_key ], __blank );
-            prop_str  = label_str + label_delim_str + prop_str;
-          }
-          else {
-            prop_str = prop_key + label_delim_str + prop_str;
-          }
-        }
-        solve_list[ __push ]( prop_str );
-      }
-    }
-    return solve_list[ __join ]( delim_str ) + __blank;
-  }
-  // . END Public method /makeStrFromMap/
-
-  // BEGIN Public method /makeSeriesMap/
-  // Purpose   : Create a list of time labels quantitized to match
-  //   standard time intervals
-  // Example   :
-  //   series_map = makeSeriesMap({
-  //     _max_ms_       : 1465459980000,
-  //     _min_ms_       : 1465452840000,
-  //     _tgt_count_    : 12
-  //   });
-  // Arguments :
-  //   _max_ms_       : Start local-time milliseconds
-  //   _min_ms_       : End local-time in milliseconds
-  //   _tgt_count_    : Desired number of divisions (+/- 50%)
   //
-  //  Returns
-  //   A map useful for plotting a quantized time series like so:
-  //   -+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
-  //    |     |     |     |     |     |     |     |     |     |     |     |
-  //  23:20 23:30 23:40 23:50 00:00 00:10 00:20 00:30 00:40 00:50 01:00 01:10
-  //           2016-06-07       |                    2016-06-08
-  //  xxxxxxxxxxxxxxxxxxxxxxxxxx+
-  //    { _date_list_  : [
-  //        { _date_str_ : '2016-06-07', _width_ratio_ : 0.38655462184873 },
-  //        { _date_str_ : '2016-06-08', _width_ratio_ : 0.61344537815126 }
-  //      ],
-  //      _left_ratio_ : 0.050420168067226,
-  //      _time_list_ : [
-  //        '23:20', '23:30', '23:40', '23:50', '00:00', '00:10',
-  //        '00:20', '00:30', '00:40', '00:50', '01:00', '01:10'
-  //      ]
-  //      _time_idx_   : 1,
-  //      _unit_count_ : 12,
-  //      _unit_ms_    : 600000,
-  //      _unit_name_  : '10m',
-  //      _unit_ratio_ : 0.084033613445378,
-  //    }
-  //
-  //    _date_list_  = list of dates and position of date labels
-  //    _left_ratio_ = starting postion of time stamps
-  //    _time_idx_   = precision of time to show 0 = '', 1=HH, 2=HH:MM, 3=HH:MM:SS
-  //    _time_list_  = list of time labels
-  //    _unit_count_ = number of time labels units returned
-  //    _unit_ms_    = number of ms in
-  //    _unit_ratio_ = ratio per time unit for plotting center of time
-  //
-  // Throws    :
-  // Cautions  :
-  //   Remember to use your local timezone offset if you want to
-  //   show local time. See example on makeClockStr, above.
+  // #### `_makeSeriesMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose   | `Create a list of time labels quantitized to match.` |
+  // | | `standard time intervals` |
+  // | Example | |
+  // | | `series_map = makeSeriesMap({` |
+  // | | `  _max_ms_       : 1465459980000,` |
+  // | | `  _min_ms_       : 1465452840000,` |
+  // | | `  _tgt_count_    : 12` |
+  // | | `});` |
+  // | Arguments | `<arg_map> with the following keys:` |
+  // | | `+ _max_ms_       : Start local-time milliseconds` |
+  // | | `+ _min_ms_       : End local-time in milliseconds` |
+  // | | `+ _tgt_count_    : Desired number of divisions (+/- 50%)` |
+  // | | |
+  // | Returns | |
+  // | | `A map useful for plotting a quantized time series like so:` |
+  // | | `-+-----+-----+-----+-----+-----+-----+-----+-----+-----+` |
+  // | | `23:20 23:30 23:40 23:50 00:00 00:10 00:20 00:30 00:40 00:50` |
+  // | | `2016-06-07               \|    2016-06-08` |
+  // | | `Example output:`
+  // | | `{ _date_list_  : [` |
+  // | | `    { _date_str_ : '2016-06-07',` |
+  // | | `      _width_ratio_ : 0.38655462184873` |
+  // | | `    },` |
+  // | | `    { _date_str_ : '2016-06-08',` |
+  // | | `      _width_ratio_ : 0.61344537815126` |
+  // | | `    }` |
+  // | | `  ],` |
+  // | | `  _left_ratio_ : 0.050420168067226,` |
+  // | | `  _time_list_ : [` |
+  // | | `    '23:20', '23:30', '23:40', '23:50', '00:00', '00:10',` |
+  // | | `    '00:20', '00:30', '00:40', '00:50', '01:00', '01:10'` |
+  // | | `  ],` |
+  // | | `  _time_idx_   : 1,` |
+  // | | `  _unit_count_ : 12,` |
+  // | | `  _unit_ms_    : 600000,` |
+  // | | `  _unit_name_  : '10m',` |
+  // | | `  _unit_ratio_ : 0.084033613445378,` |
+  // | | `}` |
+  // | | |
+  // | | `// _date_list_  = list of dates and position of date labels` |
+  // | | `// _left_ratio_ = starting postion of time stamps` |
+  // | | `// _time_idx_   = precision to show 0 = '', 1=HH, 2=HH:MM, 3=HH:MM:SS` |
+  // | | `// _time_list_  = list of time labels` |
+  // | | `// _unit_count_ = number of time labels units returned` |
+  // | | `// _unit_ms_    = number of ms in` |
+  // | | `// _unit_ratio_ = ratio per time unit for plotting center of time` |
+  // | | |
+  // | | `// Remember to use your local timezone offset if you want to` |
+  // | | `// show local time. See example on makeClockStr, above.` |
+  // | Throws | `None` |
   //
   function makeSeriesMap( arg_map ) {
     var
@@ -2713,35 +2783,160 @@ var xuu = (function () {
   }
   // . END Public function /makeSeriesMap/
 
-  // BEGIN Public method /makeTmpltStr/
-  // Purpose   : Replace symbols in a template surrounded by braces
-  //   '{}' with the symbol provided in the lookup map.
-  // Example   :
-  //   makeTmpltStr({
-  //     _do_encode_html_ : __true,
-  //     _input_str_      : '{_name_} says "{_saying_}"',
-  //     _lookup_map_     : { _name_ : 'Fred', _saying_ : 'hello!' }
-  //   });
-  //   // Returns 'Fred says hello!'
+  // #### `_makeStrFromMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose   | `Concatenate a number of key-values.` |
+  // | | `into a single string` |
   //
-  // Arguments : ( named )
-  //   _do_encode_html_ : When __true replaced values will be html encoded.
-  //     Default is __false.
-  //   _input_str_  : A string template like so:
-  //      'This person name {_p1_} said to the other person {_p2_}'.
-  //      Default is __blank.
-  //   _lookup_map_ : A map of values to replace, like so:
-  //      { _p1_ : 'fred', _p2_ : 'barney' }. Default is {}.
-  //      Keys in a lookup map can be split be to look up nested values.
-  //      For example, the key '_p1_._p2_' will look up the value
-  //        found at { _p1_: { _p2_ : value } } in the lookup_map.
-  //   _tmplt_rx_   : A regular expression object to define replace patterns.
-  //      Default is configMap._tmplt_rx_
-  //   _return_map_ : The routine will append found keys to this map if provided.
-  //      Default is __undef
-  // Throws    : None
-  // Returns
-  //   The filled-out template string
+  function makeStrFromMap ( arg_map ) {
+    // noinspection JSMismatchedCollectionQueryUpdate
+    var
+      map       = castMap(  arg_map         ,      {} ),
+      prop_map  = castMap(  map._prop_map_  ,      {} ),
+      key_list  = castList( map._key_list_  ,      [] ),
+      delim_str = castStr(  map._delim_str_ , __space ),
+
+      label_delim_str = castStr( map._label_delim_str_, ': ' ),
+      label_map       = castMap( map._label_map_,    __undef ),
+
+      do_label   = !! ( label_map || map._do_label_ ),
+      key_count  = key_list[ __length ],
+      solve_list = [],
+
+      idx, prop_key, prop_str, label_str;
+
+    for ( idx = __0; idx < key_count; idx++ ) {
+      prop_key  = key_list[ idx ];
+      prop_str  = castStr( prop_map[ prop_key ], __blank );
+      if ( prop_str !== __blank ) {
+        if ( do_label ) {
+          if ( label_map ) {
+            label_str = castStr( label_map[ prop_key ], __blank );
+            prop_str  = label_str + label_delim_str + prop_str;
+          }
+          else {
+            prop_str = prop_key + label_delim_str + prop_str;
+          }
+        }
+        solve_list[ __push ]( prop_str );
+      }
+    }
+    return solve_list[ __join ]( delim_str ) + __blank;
+  }
+  // . END Public method /makeStrFromMap/
+
+  // #### `_makeThrottleFn_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `makeThrottleFn( <arg_map> );` |
+  // | Purpose   | `Create a function which will call a provided method only.` |
+  // |           | `once per time period.` |
+  // | Example   | `thFn = makeThrottleFn({ _fn_ : myMethodFn, _delay_ms_: 250 });` |
+  // | | `thFn( 'method argument' ); // Executes in 250ms` |
+  // | | |
+  // | | `// The method, myMethodFn, is always invoked with the latest` |
+  // | | `// arguments provided. Consider this example:` |
+  // | | `thFn( 'myArgs' ); thFn( 'Hello World' );` |
+  // | | |
+  // | | `// The argument 'myArgs' will likely be discarded and` |
+  // | | `// myMethodnFn( 'Hello World' ) will likely be invoked.` |
+  // | | |
+  // | TODO      | `Provide a means to reset _do_asap_ with either ` |
+  // | | ` a timeout or other mechanism.`                  |
+  // | | |
+  // | Arguments | `<arg_map> with the following keys` |
+  // | | `+ _fn_       - The method to execute           Required.` |
+  // | | `+ _delay_ms_ - The minimum time between calls  Default is __0.` |
+  // | | `+ _ctx_data_ - Method context                  Default is __undef.` |
+  // | | `+ _do_asap_  - Fire method on first call       Default is __false.` |
+  // | Returns   | |
+  // | | `Success - The throttle function as described above.` |
+  // | | `Failure - undef` |
+  // | Throws | `None` |
+  //
+  //
+  function makeThrottleFn ( arg_map ) {
+    var
+      map      = castMap(  arg_map, {} ),
+
+      delay_ms = castInt(  map._delay_ms_,     __0 ),
+      do_asap  = castBool( map._do_asap_,  __false ),
+      fn       = castFn(   map._fn_                ),
+      ctx_data = map._ctx_data_,
+
+      last_ms, arg_list, delay_toid;
+
+    if ( ! fn ) {
+      logFn( '_error_', '_bad_throttle_arguments_', fn );
+      return __undef;
+    }
+
+    function throttleFn () {
+      var now_ms = getNowMs(), delta_ms, is_locked;
+      if ( ! last_ms ) { last_ms = now_ms; }
+      delta_ms = delay_ms - ( now_ms - last_ms );
+
+      // Due to closure arg_list is always updated to lastest call
+      arg_list = makeArgList( arguments );
+
+      // Clear delay_toid if timeout. This should only happend in edge cases.
+      if ( delta_ms < __0 || do_asap ) {
+        if ( delay_toid ) { clearToFn( delay_toid ); }
+        delay_toid  = __undef;
+        last_ms     = __undef;
+        do_asap     = false;
+        return fn[ __apply ]( ctx_data, arg_list );
+      }
+
+      // Discard this call if we already have a timeout id
+      if ( delay_toid ) { return; }
+
+      do_asap = false;
+      delay_toid = setToFn(
+        function () {
+          if ( is_locked ) { return; }
+          delay_toid  = __undef;
+          last_ms     = __undef;
+          fn[ __apply ]( ctx_data, arg_list );
+        },
+        delta_ms
+      );
+    }
+    return throttleFn;
+  }
+  // . END Public method /makeThrottleFn/
+
+  // #### `_makeTmpltStr_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose   | `Replace symbols in a template surrounded by braces.` |
+  // | | `'{}' with the symbol provided in the lookup map.` |
+  // | Example | |
+  // | | `makeTmpltStr({` |
+  // | | `  _do_encode_html_ : __true,` |
+  // | | `  _input_str_      : '{_name_} says "{_saying_}"',` |
+  // | | `  _lookup_map_     : { _name_ : 'Fred', _saying_ : 'hello!' }` |
+  // | | `});` |
+  // | | `// Returns 'Fred says hello!'` |
+  // | | |
+  // | Arguments | `<arg_map> with the following keys:` |
+  // | | `+ _do_encode_html_ : When __true replaced values will be html encoded.` |
+  // | | `  Default is __false.` |
+  // | | `+ _input_str_  : A string template like so:` |
+  // | | `  'This person name {_p1_} said to the other person {_p2_}'.` |
+  // | | `  Default is __blank.` |
+  // | | `+ _lookup_map_ : A map of values to replace, like so:` |
+  // | | `  { _p1_ : 'fred', _p2_ : 'barney' }. Default is {}.` |
+  // | | `  Keys in a lookup map can be split be to look up nested values.` |
+  // | | `  For example, the key '_p1_._p2_' will look up the value` |
+  // | | `  found at { _p1_: { _p2_ : value } } in the lookup_map.` |
+  // | | `+ _tmplt_rx_   : A regular expression object to define replace patterns.` |
+  // | | `  Default is configMap._tmplt_rx_` |
+  // | | `+ _return_map_ : Append found keys to this map if provided.` |
+  // | | `  Default is __undef` |
+  // | Returns   |  `Filled-out template string` |
+  // | Throws    | `None` |
   //
   function makeTmpltStr ( arg_map ) {
     var
@@ -2780,13 +2975,14 @@ var xuu = (function () {
   }
   // . END Public method /makeTmpltStr/
 
-  // BEGIN Public method /mergeMaps/
-  // Purpose : Merge properties of extend_map into base_map
-  //
-  // Warning : This does not deep copy the extend map.
-  // This often provides the desired results.
-  //   deep_map  = cloneData( extend_map );
-  //   merge_map = mergeMaps( base_map, deep_map );
+  // #### `_mergeMaps_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose | `Merge properties of extend_map into base_map.` |
+  // | | `// Warning : This does not deep copy the extend map.` |
+  // | | `// This often provides the desired results.` |
+  // | | `deep_map  = cloneData( extend_map );` |
+  // | | `merge_map = mergeMaps( base_map, deep_map );` |
   //
   function mergeMaps( arg_base_map, arg_extend_map, arg_attr_list ) {
     var
@@ -2811,18 +3007,20 @@ var xuu = (function () {
   }
   // . END Public method /mergeMaps/
 
-  // BEGIN Public method /pollFunction/
-  // Purpose : Run the <arg_fn> function every <arg_ms> milliseconds
-  //   either <arg_count> number of times or until the function
-  //   returns __false, whichever comes first.
-  // Arguments ( positional )
-  //   0 : fn        : Fn to poll. Return __false to stop. Required.
-  //   1 : ms        : Milliseconds between calls. Default is __0.
-  //   2 : count     : Maximum count.              Default is __null.
-  //   3 : finish_fn : Fn to run on completion.    Default is __null.
-  // Returns
-  //   __true  : polling started
-  //   __false : polling declined
+  // #### `_pollFunction_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose   | `Run the <arg_fn> function every <arg_ms> milliseconds.` |
+  // | | `either <arg_count> number of times or until the function` |
+  // | | `returns __false, whichever comes first.` |
+  // | Arguments | (positional) |
+  // | | `  <fn>    - Fn to poll. Return __false to stop. Required.` |
+  // | | `  <ms>    - Milliseconds between calls. Default is __0.` |
+  // | | `  <count> - Maximum count.              Default is __null.` |
+  // | | `  <finish_fn> - Fn to run on completion.    Default is __null.` |
+  // | Returns  |
+  // | | `__true  : polling started` |
+  // | | `__false : polling declined` |
   //
   function pollFunction ( arg_fn, arg_ms, arg_count, arg_finish_fn ) {
     var
@@ -2851,7 +3049,12 @@ var xuu = (function () {
   }
   // . END Public method /pollFunction/
 
-  // BEGIN Public method /pushUniqListVal/
+  // #### `_pushUniqListVal_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `pushUniqListVal( <arg_list>, <data> );` |
+  // | Purpose   | `Push val into list IFF not already present` |
+  //
   function pushUniqListVal ( arg_list, data ) {
     var input_list = castList( arg_list, [] );
     if ( input_list[ __indexOf ]( data ) === __n1 ) {
@@ -2860,16 +3063,18 @@ var xuu = (function () {
   }
   // . END Public method /pushUniqListVal/
 
-  // BEGIN Public method /rmListVal/
-  // Summary    : rmListVal( <base_list>, <val1>, ... <valN> );
-  // Purpose    : Remove one or more values from a base_list in-place
-  // Example    : rmListVal( base_list, 'a', 1, null );
-  //
-  // Arguments  : (positional)
-  //   0   - base_list
-  //   1-n - values to remove
-  // Returns    : Count of removed values
-  // Throws     : None
+  // #### `_rmListVal_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `rmListVal( <base_list>, <val1>, ... <valN> );` |
+  // | Purpose   | `Remove one or more values from a base_list in-place.` |
+  // | Example   | `rmListVal( base_list, 'a', 1, null );` |
+  // | | |
+  // | Arguments | (positional) |
+  // |     | `  <base_list> - list to operate on.` |
+  // |     | `  <val1..n>   - values to remove` |
+  // | Returns   | `Count of removed values. base_list is changed.` |
+  // | Throws    | `None` |
   //
   function rmListVal () {
     var
@@ -2897,21 +3102,23 @@ var xuu = (function () {
   }
   // . END Public method /rmListVal/
 
-  // BEGIN Public method /setConfigMap/
-  // Summary    : setConfigMap( <input_map>, <settable_map>, <config_map> );
-  // Purpose    : Set configMap in consistent way across modules
-  // Example    : Used in modules as below:
-  //   function setConfigMap ( arg_input_map ) {
-  //     setConfigMap( input_map, settableMap, configMap );
-  //   }
-  //   Where  settableMap shows allowable keys and types
-  // Arguments  : (named)
-  //   _input_map_    - Map of key-values to set in config
-  //   _settable_map_ - Map of allowable keys with future plans to support
-  //      types and ranges (see agrc)
-  //   _config_map_   - Resulting config map
-  // Returns    : Modified config_map
-  // Throws     : None
+  // #### `_setConfigMap_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `setConfigMap( <input_map>, <settable_map>, <config_map> );` |
+  // | Purpose   | `Set configMap in consistent way across modules.` |
+  // | Example   | `// Use in modules as below:` |
+  // | | `function setConfigMap ( arg_input_map ) {` |
+  // | | `  setConfigMap( input_map, settableMap, configMap );` |
+  // | | `}` |
+  // | | `// Where  settableMap shows allowable keys and types` |
+  // | Arguments | `<arg_map> with the following keys:` |
+  // | | `+ _input_map_    - Map of key-values to set in config` |
+  // | | `+ _settable_map_ - Map of allowable keys with future plans`
+  // | | `    to support types and ranges (see agrc)` |
+  // | | `+ _config_map_   - Resulting config map` |
+  // | Returns   | `Modified config_map` |
+  // | Throws    | `None` |
   //
   function setConfigMap ( arg_map ) {
     var
@@ -2939,110 +3146,36 @@ var xuu = (function () {
   }
   // . END Public method /setConfigMap/
 
-  // BEGIN Public method /makeDeepData/
-  // Purpose   : Get all unique keys in a data structure as list or map
-  // Example   : _makeDeepData_({ foo:{ bar:1 }, bar:2});
-  //             Returns [ 'foo', 'bar' ]
-  //             _makeDeepData_({ foo:{ bar:1 }, bar:2}, '_map_');
-  //               Returns { bar: 2 } // flattens map
-  // Arguments : ( positional )
-  //   0 : base_struct - An array or map
-  //   1 : mode_str - _list_ or _map_. Default is _list_
-  // Returns   :
-  //   * Success - A list of a unique keys sorted
-  //   * Failure - An empty list
-  // Cautions  : The key list limit is set to __100. If this
-  //   is met, a warning is logged and __undef returned
+  // #### `_setStructData_`
+  // |     |     |
+  // | --: | --- |
+  // | Purpose | `Set a deep structure attribute value.` |
+  // | Example | `_setStructData_({ foo:{ bar:1 }}, [ 'foo','bar' ], 99 );` |
+  // | | `// Returns __true and set the and adjusts the structure:` |
+  // | | `// { foo : { bar : 99 } }` |
+  // | Example | `_setStructData_( [ { car : [ 'seats', 'tyres' ] } ],` |
+  // | | `[ 0, 'car', 1 ], 'Meyers!' ] );` |
+  // | | `// Returns __true and set the and adjusts the structure:` |
+  // | | `// [ { car : [ 'seats', 'Meyers!' ] } ]` |
+  // | Example | `_setStructData_( [],  [ null, 'car', null ], 'Meyers!' );` |
+  // | | `// Returns __true and adjust the structure:` |
+  // | | `// [ { car : [ 'Meyers!' ] } ]` |
+  // | Example | `_setStructData_( [], [ 'car', null ], 'Meyers!'  );` |
+  // | | `// Returns __false, as 'car' cannot be a property of the` |
+  // | | `// base structure. It must be null which means "next` |
+  // | | `// available array item" or an integer.` |
+  // | | |
+  // | | `// The key depth limit is set to __100. If this` |
+  // | | `// is met, a warning is logged and __undef returned` |
+  // | Arguments | (positional) |
+  // | | `  <base_struct> - An array or map to add a value` |
+  // | | `  <path_list>   - A list of map or array keys in order of depth` |
+  // | | `  <val_data>    - A data value to set` |
+  // | Returns   | |
+  // | | `Success - __true`  |
+  // | | `Failure - __false` |
+  // | Throws    | `none`    |
   //
-  function makeDeepData ( arg_base_data, arg_mode_str ) {
-    var
-      base_data  = castList( arg_base_data ) || castMap( arg_base_data, {} ),
-      mode_str   = castStr(
-        arg_mode_str, '_list_', { _filter_rx_ : /^(_list_|_map_)$/ }
-      ),
-      walk_obj   = base_data,
-      solve_data = mode_str === '_list_' ? [] : {},
-      stack_list = [],
-      key_list   = makeKeyListFn( walk_obj ),
-      key_count  = key_list[ __length ],
-      idx        = __0,
-
-      loop_key,     loop_data, loop_type,
-      ctx_key_list, stack_map;
-
-    _OUTER_: while ( walk_obj ) {
-      while ( idx < key_count ) {
-        loop_key  = key_list[ idx ];
-        loop_data = walk_obj[ loop_key ];
-        loop_type = getVarType( loop_data );
-
-        if ( mode_str === '_list_' ) {
-          if ( solve_data[ __indexOf ]( loop_key ) === __n1 ) {
-            solve_data[ __push ]( loop_key );
-          }
-        }
-
-        if ( loop_type === '_Object_' || loop_type === '_Array_' ) {
-          ctx_key_list = makeKeyListFn( loop_data );
-          if ( ctx_key_list[ __length ] > __0 ) {
-            stack_list[ __push ]( {
-              _idx_       : idx,
-              _key_count_ : key_count,
-              _key_list_  : key_list,
-              _walk_obj_  : walk_obj
-            } );
-
-            idx       = __n1;
-            walk_obj  = loop_data;
-            key_list  = makeKeyListFn( walk_obj );
-            key_count = key_list[ __length ];
-          }
-        }
-        else if ( mode_str === '_map_' ) {
-          solve_data[ loop_key ] = loop_data;
-        }
-        idx++;
-      }
-
-      stack_map = stack_list[ __pop ]();
-      if ( ! stack_map ) { break _OUTER_; }
-
-      walk_obj  = stack_map._walk_obj_;
-      key_count = stack_map._key_count_;
-      key_list  = stack_map._key_list_;
-      idx       = stack_map._idx_ + __1;
-    }
-    return solve_data;
-  }
-  // . END Public method /makeDeepData/
-
-  // BEGIN Public method /setStructData/
-  // Purpose   : Set a deep structure attribute value
-  // Example   : _setStructData_({ foo:{ bar:1 }}, [ 'foo','bar' ], 99 );
-  //             Returns __true and set the and adjusts the structure:
-  //             { foo : { bar : 99 } }
-  // Example   : _setStructData_( [ { car : [ 'seats', 'tyres' ] } ],
-  //             [ 0, 'car', 1 ], 'Meyers!' ] );
-  //             Returns __true and set the and adjusts the structure:
-  //             [ { car : [ 'seats', 'Meyers!' ] } ]
-  // Example   : _setStructData_( [],  [ null, 'car', null ], 'Meyers!' );
-  //             Returns __true and adjust the structure:
-  //             [ { car : [ 'Meyers!' ] } ]
-  // Example   : _setStructData_( [], [ 'car', null ], 'Meyers!'  );
-  //             Returns __false, as 'car' cannot be a property of the
-  //             base structure. It must be null which means "next
-  //             available array item" or an integer.
-  //
-  // Arguments : ( positional )
-  //   0 : base_struct - An array or map to add a value
-  //   1 : path_list   - A list of map or array keys in order of depth
-  //   2 : val_data    - A data value to set
-  // Returns   :
-  //   * Success - __true
-  //   * Failure - __false
-  // Cautions  : The key list limit is set to __100. If this
-  //   is met, a warning is logged and __undef returned
-  //a
   function setStructData ( arg_base_struct, arg_path_list, val_data ) {
     var
       base_struct = arg_base_struct,
@@ -3101,19 +3234,21 @@ var xuu = (function () {
   }
   // . END Public method /setStructData/
 
-  // BEGIN Public method /shuffleList/
-  // Summary   : ShuffleList( <list> )
-  // Purpose   : Shuffle elements in a list
-  // Example   : shuffleList( [1,2,3,4] ) returns [ 3,1,4,2 ]
-  // Arguments :
-  //   <list> - The list to shuffle
-  // Returns   : __true on success
-  // Throws    : None
-  // Technique :
-  //   1. Count down from end of array with last_idx
-  //   2. Randomly pick element from between 0 and last_idx
-  //   3. Swap pick element with last_idx element
   //
+  // #### `_shuffleList_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `ShuffleList( <list> )` |
+  // | Purpose   | `Shuffle a list in-place.` |
+  // | Example   | `shuffleList( [1,2,3,4] ) returns [ 3,1,4,2 ]` |
+  // | | `Technique :` |
+  // | | `1. Count down from end of array with last_idx` |
+  // | | `2. Randomly pick element from between 0 and last_idx` |
+  // | | `3. Swap pick element with last_idx element` |
+  // | Arguments | (positional) |
+  // | | `  <list> - The list to shuffle` |
+  // | Returns   | `__true on success` |
+  // | Throws    | `None` |
   function shuffleList ( arg_list ) {
     var
       list  = castList( arg_list ),
@@ -3133,14 +3268,16 @@ var xuu = (function () {
   }
   // . END public method /shuffleList/
 
-  // BEGIN Public method /trimStrList/
-  // Summary   : trimStrList( <list> )
-  // Purpose   : Trim all strings in a list
-  // Example   : shuffleList( [ '  padd string ', 'anudder '] );
-  // Arguments :
-  //   <list> - The list to trim leading and ending whitespace
-  // Returns   : A new list of trimmed strings
-  // Throws    : None
+  // #### `_trimStrList_`
+  // |     |     |
+  // | --: | --- |
+  // | Summary   | `trimStrList( <list> )` |
+  // | Purpose   | `Trim all strings in a list.` |
+  // | Example   | `trimStrList( [ '  padd string ', 'anudder '] );` |
+  // | Arguments | (positional) |
+  // | | `  <list> - The list to trim leading and ending whitespace` |
+  // | Returns   | `A new list of trimmed strings` |
+  // | Throws    | `None` |
   //
   function trimStrList ( arg_list ) {
     var list = castList( arg_list );
